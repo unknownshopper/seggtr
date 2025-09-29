@@ -1,0 +1,26 @@
+name: Preview to Firebase Hosting on PR
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  build_and_preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Si necesitas build (no en este proyecto estático), agrega pasos de build aquí
+
+      - name: Deploy Preview to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: seggtr-30d3a
+          channelId: pr-${{ github.event.number }}
+
+
+          

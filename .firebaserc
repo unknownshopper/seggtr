@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "seggtr-30d3a",
+    "seg": "seggtr-30d3a"
+  },
+  "targets": {},
+  "etags": {}
+}

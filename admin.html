@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEGGTR - Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="#" aria-current="page">Admin</a></li>
+      </ul>
+    </nav>
+    <h1>Panel de Administración</h1>
+  </header>
+  <main class="grid cols-2">
+    <section class="card">
+      <h2>Omobility - Parámetros</h2>
+      <p class="small muted">Configura empresa, encuestas, hits y valores.</p>
+      <form id="tenant-form" class="grid">
+        <label>
+          ID de Empresa
+          <input id="tenant-id" value="omobility" disabled>
+        </label>
+        <label>
+          Nombre público
+          <input id="tenant-name" placeholder="Omobility">
+        </label>
+        <label>
+          Límite de hits por día
+          <input id="tenant-hits" type="number" min="0" value="1000">
+        </label>
+        <button type="button" id="save-tenant">Guardar</button>
+        <div id="tenant-status" class="small muted"></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Encuestas</h2>
+      <p class="small muted">Diseña estructura de preguntas (MVP placeholder).</p>
+      <button id="new-survey">Nueva encuesta</button>
+      <ul id="survey-list" class="small"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Usuarios</h2>
+      <p class="small muted">Asignación de roles.</p>
+      <form id="role-form" class="grid">
+        <input id="user-email" placeholder="usuario@dominio.com">
+        <select id="user-role">
+          <option value="surveyor" selected>Encuestador</option>
+          <option value="admin">Admin</option>
+          <option value="viewer">Viewer</option>
+        </select>
+        <button type="button" id="assign-role">Asignar</button>
+        <div id="role-status" class="small muted"></div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p class="small muted"> 2025 SEGGTR</p>
+  </footer>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
+  <script defer src="/__/firebase/init.js"></script>
+  <script>
+    // En Firebase Hosting, /__/firebase/init.js inyecta la config automáticamente.
+    // Fallback local: si no hay app inicializada, cargamos /config/firebase.local.json (no commitear).
+    let auth, db;
+    window.addEventListener('load', async () => {
+      if (!firebase.apps.length) {
+        try {
+          const res = await fetch('/config/firebase.local.json', { cache: 'no-store' });
+          if (res.ok) {
+            const cfg = await res.json();
+            firebase.initializeApp(cfg);
+          }
+        } catch (e) { /* ignore */ }
+      }
+      if (!firebase.apps.length) {
+        console.error('Firebase no está inicializado. Usa Firebase Hosting o provee config/firebase.local.json.');
+        return;
+      }
+      auth = firebase.auth();
+      db = firebase.firestore();
+      // Continue boot once SDKs ready
+      bootstrap();
+    });
+
+    function requireAdmin(user) {
+      return db.collection('users').doc(user.uid).get().then(s => {
+        const role = (s.exists && s.data().role) || 'surveyor';
+        if (role !== 'admin') {
+          alert('Acceso restringido a administradores.');
+          window.location.href = 'index.html';
+          return false;
+        }
+        return true;
+      });
+    }
+
+    function bootstrap(){
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          window.location.href = 'index.html';
+          return;
+        }
+        const ok = await requireAdmin(user);
+        if (!ok) return;
+        // Load initial data
+        loadTenant();
+        loadSurveys();
+      });
+    }
+
+    const tenantId = 'omobility';
+
+    async function loadTenant(){
+      const elStatus = document.getElementById('tenant-status');
+      try{
+        const snap = await db.collection('tenants').doc(tenantId).get();
+        if (snap.exists){
+          const d = snap.data();
+          document.getElementById('tenant-name').value = d.name || 'Omobility';
+          document.getElementById('tenant-hits').value = d.dailyHits || 1000;
+        }
+        elStatus.textContent = 'Listo';
+      }catch(e){ elStatus.textContent = 'Error al cargar'; }
+    }
+
+    document.getElementById('save-tenant').addEventListener('click', async ()=>{
+      const elStatus = document.getElementById('tenant-status');
+      elStatus.textContent = 'Guardando...';
+      try{
+        await db.collection('tenants').doc(tenantId).set({
+          name: document.getElementById('tenant-name').value.trim() || 'Omobility',
+          dailyHits: Number(document.getElementById('tenant-hits').value) || 0,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        elStatus.textContent = 'Guardado';
+      }catch(e){ elStatus.textContent = 'Error: '+e.message; }
+    });
+
+    async function loadSurveys(){
+      const list = document.getElementById('survey-list');
+      list.innerHTML = 'Cargando...';
+      const qs = await db.collection('surveys').where('tenantId','==',tenantId).get();
+      list.innerHTML = '';
+      qs.forEach(doc=>{
+        const li = document.createElement('li');
+        li.textContent = `${doc.id} - ${doc.data().title || 'Encuesta'}`;
+        list.appendChild(li);
+      });
+      if (!list.childElementCount) list.innerHTML = '<li class="muted">Sin encuestas</li>'
+    }
+
+    document.getElementById('new-survey').addEventListener('click', async ()=>{
+      const ref = await db.collection('surveys').add({
+        tenantId,
+        title: 'Nueva encuesta',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        questions: [
+          { id:'q1', type:'text', label:'Comentario' }
+        ]
+      });
+      loadSurveys();
+      alert('Encuesta creada: '+ref.id);
+    });
+
+    document.getElementById('assign-role').addEventListener('click', async ()=>{
+      const email = document.getElementById('user-email').value.trim();
+      const role = document.getElementById('user-role').value;
+      const el = document.getElementById('role-status');
+      el.textContent = 'Asignando...';
+      if (!email){ el.textContent = 'Email requerido'; return; }
+      // Simple lookup by email (requires a mapping usersByEmail/{email}->uid maintained by backend or signup trigger)
+      try{
+        const map = await db.collection('usersByEmail').doc(email).get();
+        if (!map.exists){ el.textContent = 'Usuario no encontrado'; return; }
+        const uid = map.data().uid;
+        await db.collection('users').doc(uid).set({ role, tenantId }, { merge:true });
+        el.textContent = 'Rol asignado';
+      }catch(e){ el.textContent = 'Error: '+e.message; }
+    });
+  </script>
+</body>
+</html>

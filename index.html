@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEGGTR</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="about.html">Acerca de</a></li>
+                <li><a href="contact.html">Contacto</a></li>
+            </ul>
+        </nav>
+        <h1>SEGGTR</h1>
+    </header>
+    <main>
+        <section id="landing">
+            <h2>Inicio</h2>
+            <p>SEGGTR: Sistema de encuestas y gráficas con geolocalización en tiempo real.</p>
+
+            <div class="tenant">
+                <label for="tenant">Empresa:</label>
+                <select id="tenant">
+                    <option value="omobility" selected>Omobility</option>
+                </select>
+            </div>
+
+            <div id="auth">
+                <h3>Ingreso</h3>
+                <form id="login-form">
+                    <input type="email" id="email" placeholder="Email" required>
+                    <input type="password" id="password" placeholder="Contraseña" required>
+                    <button type="submit">Entrar</button>
+                </form>
+                <button id="google-signin" type="button">Continuar con Google</button>
+                <div id="auth-status" aria-live="polite"></div>
+            </div>
+        </section>
+    </main>    
+    <footer>
+        <p>Copyright &copy; 2025 SEGGTR</p>
+    </footer> 
+    
+    <!-- Firebase SDKs (use CDN for compatibility in local dev; config is injected by /__/firebase/init.js on Hosting) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
+    <!-- If served on Firebase Hosting, this injects firebaseConfig at runtime without exposing keys in repo -->
+    <script defer src="/__/firebase/init.js"></script>
+    <script>
+        // Configuración segura:
+        // - En Firebase Hosting, /__/firebase/init.js inyecta firebaseConfig automáticamente (no se comitea).
+        // - En desarrollo local NO alojado en Hosting, usamos /config/firebase.local.json (agregado al .gitignore).
+
+        let auth, db;
+        window.addEventListener('load', async () => {
+            if (!firebase.apps.length) {
+                // Si no hay app inicializada (p.ej. fuera de Hosting), intenta fallback local
+                try {
+                    const res = await fetch('/config/firebase.local.json', { cache: 'no-store' });
+                    if (res.ok) {
+                        const cfg = await res.json();
+                        firebase.initializeApp(cfg);
+                    }
+                } catch (e) { /* ignore */ }
+            }
+            // En Hosting, init.js ya habrá inicializado
+            if (!firebase.apps.length) {
+                console.error('Firebase no está inicializado. Usa Firebase Hosting o provee config/firebase.local.json.');
+                return;
+            }
+            auth = firebase.auth();
+            db = firebase.firestore();
+        });
+
+        const tenantSelect = document.getElementById('tenant');
+        const loginForm = document.getElementById('login-form');
+        const googleBtn = document.getElementById('google-signin');
+        const statusEl = document.getElementById('auth-status');
+
+        function setStatus(msg) { statusEl.textContent = msg; }
+
+        async function getUserRole(uid) {
+            try {
+                const snap = await db.collection('users').doc(uid).get();
+                if (snap.exists) {
+                    const data = snap.data();
+                    return { role: data.role || 'surveyor', tenantId: data.tenantId || tenantSelect.value };
+                }
+            } catch (e) { console.warn('getUserRole error', e); }
+            return { role: 'surveyor', tenantId: tenantSelect.value };
+        }
+
+        async function saveAuthEvent(user, role, tenantId) {
+            try {
+                const position = await new Promise((resolve) => {
+                    if (!navigator.geolocation) return resolve(null);
+                    navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { enableHighAccuracy: true, timeout: 8000 });
+                });
+                const geo = position ? {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                } : null;
+
+                await db.collection('authEvents').add({
+                    uid: user.uid,
+                    email: user.email || null,
+                    role,
+                    tenantId,
+                    userAgent: navigator.userAgent,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    localTime: new Date().toISOString(),
+                    geo
+                });
+            } catch (e) {
+                console.error('Error saving auth event', e);
+            }
+        }
+
+        // onAuthStateChanged requiere que auth esté listo; esperamos al load para asegurar init.js
+        window.addEventListener('load', () => auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const { role, tenantId } = await getUserRole(user.uid);
+                setStatus(`Autenticado: ${user.email || user.uid} (${role})`);
+                await saveAuthEvent(user, role, tenantId);
+                // Redirigir según rol
+                window.location.href = role === 'admin' ? 'admin.html' : 'surveyor.html';
+            } else {
+                setStatus('No autenticado');
+            }
+        }));
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (err) {
+                if (err.code === 'auth/user-not-found') {
+                    // Registro rápido para pruebas; en producción restringir
+                    await auth.createUserWithEmailAndPassword(email, password);
+                } else {
+                    setStatus('Error: ' + err.message);
+                }
+            }
+        });
+
+        googleBtn.addEventListener('click', async () => {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider);
+            } catch (err) {
+                setStatus('Error: ' + err.message);
+            }
+        });
+    </script>
+</body>
+</html>

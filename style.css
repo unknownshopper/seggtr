@@ -1,0 +1,39 @@
+/* SEGGTR base styles */
+:root{
+  --bg:#0f172a; /* slate-900 */
+  --card:#111827; /* gray-900 */
+  --text:#e5e7eb; /* gray-200 */
+  --muted:#9ca3af; /* gray-400 */
+  --primary:#16a34a; /* green-600 */
+  --primary-700:#15803d;
+  --danger:#ef4444;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif}
+a{color:#93c5fd;text-decoration:none}
+header{border-bottom:1px solid #1f2937;background:#0b1220;position:sticky;top:0;z-index:10}
+nav ul{list-style:none;display:flex;gap:1rem;margin:0;padding:1rem}
+nav a{padding:.5rem .75rem;border-radius:.5rem}
+nav a:hover{background:#0a0f1e}
+header h1{margin:0;padding:0 1rem 1rem;font-size:1.5rem;font-weight:700}
+main{max-width:960px;margin:1.25rem auto;padding:0 1rem}
+section#landing{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:1rem}
+.tenant{margin:.5rem 0 1rem;display:flex;gap:.5rem;align-items:center}
+select,input,button{font:inherit}
+input,select{width:100%;padding:.75rem;border-radius:.5rem;border:1px solid #374151;background:#0b1220;color:var(--text)}
+button{padding:.75rem 1rem;border:none;border-radius:.5rem;background:var(--primary);color:white;font-weight:600;cursor:pointer}
+button:hover{background:var(--primary-700)}
+#auth{display:grid;gap:.75rem}
+#login-form{display:grid;gap:.5rem}
+#auth-status{min-height:1.25rem;color:var(--muted)}
+footer{padding:2rem 1rem;color:var(--muted);text-align:center}
+
+/* Cards and grids */
+.card{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:1rem}
+.grid{display:grid;gap:1rem}
+@media(min-width:720px){.grid.cols-2{grid-template-columns:1fr 1fr}}
+
+/* Utility */
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.error{color:var(--danger)}
