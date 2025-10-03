@@ -2,8 +2,17 @@ const KEY='encuestas';
 function readAll(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ return []; } }
 function writeAll(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
 function toCSV(rows){ if(!rows.length) return ''; const headers=Object.keys(rows[0]); const escape=v=>`"${String(v??'').replace(/"/g,'""')}"`; return [headers.join(','),...rows.map(r=>headers.map(h=>escape(r[h])).join(','))].join('\n'); }
-function fromCSV(text){ const [head,...lines]=text.split(/\r?\n/).filter(Boolean); const headers=head.split(',').map(h=>h.replace(/^\"|\"$/g,'')); return lines.map(line=>{ const cols=line.match(/\"(?:[^\"]|\"\")*\"|[^,]+/g)||[]); const values=cols.map(c=>c.replace(/^\"|\"$/g,'').replace(/\"\"/g,'"')); const obj={}; headers.forEach((h,i)=>obj[h]=values[i]??''); return obj; }); }
-
+function fromCSV(text){ 
+  const [head,...lines]=text.split(/\r?\n/).filter(Boolean); 
+  const headers=head.split(',').map(h=>h.replace(/^\"|\"$/g,'')); 
+  return lines.map(line=>{ 
+    const cols=line.match(/\"(?:[^\"]|\"\")*\"|[^,]+/g)||[]; 
+    const values=cols.map(c=>c.replace(/^\"|\"$/g,'').replace(/\"\"/g,'"')); 
+    const obj={}; 
+    headers.forEach((h,i)=>obj[h]=values[i]??''); 
+    return obj; 
+  }); 
+}
 // Serialize any form into a flat object.
 function serializeForm(form){
   const data = {};

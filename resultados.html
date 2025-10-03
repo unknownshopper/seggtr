@@ -3,56 +3,534 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Anexo metodológico — Omomobility</title>
-  <meta name="description" content="Placeholder del anexo metodológico del estudio de mercado para Omomobility." />
+  <title>Dashboard de Resultados — Omomobility</title>
+  <meta name="description" content="Dashboard con análisis y gráficas de las encuestas de percepción para Omomobility." />
   <link rel="icon" href="logcho.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root { --bg:#f7f7f9; --paper:#ffffff; --ink:#121212; --muted:#5f6b7a; --primary:#1e88e5; --border:#e5e7eb; }
-    *{box-sizing:border-box}
-    body{ margin:0; background:var(--bg); color:var(--ink); font:400 16px/1.6 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif; }
-    .page{ max-width:960px; margin:32px auto; padding:0 16px }
-    .header{ background:linear-gradient(180deg,#ffffff 0%,#fafbff 100%); border:1px solid var(--border); border-radius:14px; padding:18px 20px; display:flex; align-items:center; gap:12px; box-shadow:0 8px 24px rgba(10,31,68,.08) }
-    .logo{ width:48px; height:48px; border-radius:8px; object-fit:contain }
-    h1{ margin:0; font:600 20px/1.25 "Inter",sans-serif }
-    .lead{ color:var(--muted); margin:6px 0 0; font-size:14px }
-    .block{ background:var(--paper); border:1px solid var(--border); border-radius:12px; padding:16px; margin:14px 0 }
-    h2{ font:600 16px/1.3 "Inter",sans-serif; color:var(--primary); margin:0 0 8px }
-    .back{ display:inline-block; margin-top:10px; text-decoration:none; color:var(--primary); font-weight:600 }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .chart-container {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 300px;
+    }
+    
+    .chart-title {
+      font: 600 16px/1.3 "Inter", sans-serif;
+      color: var(--primary);
+      margin: 0 0 16px;
+      text-align: center;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    
+    .stat-card {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font: 700 32px/1.2 "Inter", sans-serif;
+      color: var(--primary);
+      display: block;
+    }
+    
+    .stat-label {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    
+    .controls {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+    
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="page">
     <header class="header">
-      <img class="logo" src="logcho.png" alt="TUS" />
+      <img class="logo" src="logcho.png" alt="Omomobility" onerror="this.onerror=null; this.src='logch.png'" />
       <div>
-        <h1>Anexo metodológico (placeholder)</h1>
-        <p class="lead">Secciones para completar: fuentes, diseño muestral, instrumentos, control de calidad, definiciones y glosario.</p>
+        <h1>Dashboard de Resultados</h1>
+        <p class="lead">Análisis en tiempo real de las encuestas de percepción para motocicletas eléctricas</p>
       </div>
     </header>
 
-    <section class="block">
-      <h2>Fuentes y desk research</h2>
-      <p>INEGI, IMCO, CFE/CRE, Profeco, fuentes sectoriales y movilidad.</p>
-    </section>
+    <div class="controls">
+      <button id="refreshData" class="btn">🔄 Actualizar datos</button>
+      <button id="exportReport" class="btn outline">📊 Exportar reporte</button>
+      <button id="clearAllData" class="btn outline" style="color: #e53e3e; border-color: #e53e3e;">🗑️ Limpiar todos los datos</button>
+      <span id="lastUpdate" class="note" style="margin-left: auto;"></span>
+    </div>
 
-    <section class="block">
-      <h2>Trabajo de campo</h2>
-      <p>Entrevistas, visitas técnicas, y esquema opcional de mystery shopping.</p>
-    </section>
+    <!-- Estadísticas generales -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <span class="stat-number" id="totalResponses">0</span>
+        <div class="stat-label">Encuestas completadas</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="avgIntention">0</span>
+        <div class="stat-label">Intención promedio (0-10)</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="avgAge">0</span>
+        <div class="stat-label">Edad promedio</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="mobileUsers">0%</span>
+        <div class="stat-label">Usuarios de moto actuales</div>
+      </div>
+    </div>
 
-    <section class="block">
-      <h2>Encuestas de percepción</h2>
-      <p>Universo, muestreo por cuotas, n sugerido, canales, instrumento y plataforma.</p>
-    </section>
+    <!-- Gráficas -->
+    <div class="dashboard-grid">
+      <div class="chart-container">
+        <h3 class="chart-title">Distribución por Edad</h3>
+        <canvas id="ageChart"></canvas>
+      </div>
+      
+      <div class="chart-container">
+        <h3 class="chart-title">Intención de Compra</h3>
+        <canvas id="intentionChart"></canvas>
+      </div>
+      
+      <div class="chart-container">
+        <h3 class="chart-title">Distribución por Zona</h3>
+        <canvas id="zoneChart"></canvas>
+      </div>
+      
+      <div class="chart-container">
+        <h3 class="chart-title">Ocupación</h3>
+        <canvas id="occupationChart"></canvas>
+      </div>
+      
+      <div class="chart-container">
+        <h3 class="chart-title">Principales Barreras</h3>
+        <canvas id="barriersChart"></canvas>
+      </div>
+      
+      <div class="chart-container">
+        <h3 class="chart-title">Conocimiento de Omomobility</h3>
+        <canvas id="awarenessChart"></canvas>
+      </div>
+    </div>
 
-    <section class="block">
-      <h2>Definiciones y glosario</h2>
-      <p>TAM/SAM/SOM, TCO, NPS/CSAT, etc.</p>
-    </section>
+    <div id="noDataMessage" class="no-data" style="display: none;">
+      <h3>No hay datos disponibles</h3>
+      <p>Completa algunas encuestas para ver los resultados aquí.</p>
+      <a href="encuesta.html" class="btn">Ir a la encuesta</a>
+    </div>
 
-    <a class="back" href="index.html">← Volver al inicio</a>
+    <div class="foot">
+      <a href="index.html">← Volver al inicio</a>
+      <a href="encuesta.html">Hacer encuesta →</a>
+    </div>
   </div>
+
+  <script src="script.js"></script>
+  <script>
+    // Dashboard Manager
+    class DashboardManager {
+      constructor() {
+        this.data = [];
+        this.charts = {};
+        this.init();
+      }
+      
+      init() {
+        this.loadData();
+        this.setupEventListeners();
+        this.renderDashboard();
+        this.updateLastUpdateTime();
+      }
+      
+      loadData() {
+        try {
+          this.data = JSON.parse(localStorage.getItem('encuestas') || '[]');
+        } catch (e) {
+          this.data = [];
+        }
+      }
+      
+      setupEventListeners() {
+        document.getElementById('refreshData').addEventListener('click', () => {
+          this.loadData();
+          this.renderDashboard();
+          this.updateLastUpdateTime();
+          this.showToast('Datos actualizados', 'success');
+        });
+        
+        document.getElementById('exportReport').addEventListener('click', () => {
+          this.exportReport();
+        });
+        
+        document.getElementById('clearAllData').addEventListener('click', () => {
+          if (confirm('¿Estás seguro de que quieres eliminar todos los datos? Esta acción no se puede deshacer.')) {
+            localStorage.removeItem('encuestas');
+            this.data = [];
+            this.renderDashboard();
+            this.showToast('Todos los datos han sido eliminados', 'error');
+          }
+        });
+      }
+      
+      renderDashboard() {
+        if (this.data.length === 0) {
+          document.getElementById('noDataMessage').style.display = 'block';
+          document.querySelector('.stats-grid').style.display = 'none';
+          document.querySelector('.dashboard-grid').style.display = 'none';
+          return;
+        }
+        
+        document.getElementById('noDataMessage').style.display = 'none';
+        document.querySelector('.stats-grid').style.display = 'grid';
+        document.querySelector('.dashboard-grid').style.display = 'grid';
+        
+        this.renderStats();
+        this.renderCharts();
+      }
+      
+      renderStats() {
+        const total = this.data.length;
+        const avgIntention = this.data.reduce((sum, item) => sum + (parseFloat(item.intencion) || 0), 0) / total;
+        const avgAge = this.data.reduce((sum, item) => sum + (parseFloat(item.edad) || 0), 0) / total;
+        const mobileUsers = this.data.filter(item => item.usaMoto === 'Sí').length;
+        
+        document.getElementById('totalResponses').textContent = total;
+        document.getElementById('avgIntention').textContent = avgIntention.toFixed(1);
+        document.getElementById('avgAge').textContent = Math.round(avgAge);
+        document.getElementById('mobileUsers').textContent = `${Math.round((mobileUsers / total) * 100)}%`;
+      }
+      
+      renderCharts() {
+        this.renderAgeChart();
+        this.renderIntentionChart();
+        this.renderZoneChart();
+        this.renderOccupationChart();
+        this.renderBarriersChart();
+        this.renderAwarenessChart();
+      }
+      
+      renderAgeChart() {
+        const ctx = document.getElementById('ageChart').getContext('2d');
+        
+        // Agrupar por rangos de edad
+        const ageRanges = {
+          '15-25': 0, '26-35': 0, '36-45': 0, '46-55': 0, '56+': 0
+        };
+        
+        this.data.forEach(item => {
+          const age = parseInt(item.edad);
+          if (age <= 25) ageRanges['15-25']++;
+          else if (age <= 35) ageRanges['26-35']++;
+          else if (age <= 45) ageRanges['36-45']++;
+          else if (age <= 55) ageRanges['46-55']++;
+          else ageRanges['56+']++;
+        });
+        
+        if (this.charts.age) this.charts.age.destroy();
+        
+        this.charts.age = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: Object.keys(ageRanges),
+            datasets: [{
+              label: 'Número de encuestados',
+              data: Object.values(ageRanges),
+              backgroundColor: 'rgba(30, 136, 229, 0.8)',
+              borderColor: 'rgba(30, 136, 229, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+      
+      renderIntentionChart() {
+        const ctx = document.getElementById('intentionChart').getContext('2d');
+        
+        // Agrupar por rangos de intención
+        const intentionRanges = {
+          '0-2': 0, '3-4': 0, '5-6': 0, '7-8': 0, '9-10': 0
+        };
+        
+        this.data.forEach(item => {
+          const intention = parseInt(item.intencion);
+          if (intention <= 2) intentionRanges['0-2']++;
+          else if (intention <= 4) intentionRanges['3-4']++;
+          else if (intention <= 6) intentionRanges['5-6']++;
+          else if (intention <= 8) intentionRanges['7-8']++;
+          else intentionRanges['9-10']++;
+        });
+        
+        if (this.charts.intention) this.charts.intention.destroy();
+        
+        this.charts.intention = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(intentionRanges),
+            datasets: [{
+              data: Object.values(intentionRanges),
+              backgroundColor: [
+                '#e53e3e', '#fd7f28', '#fbbf24', '#34d399', '#10b981'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+      
+      renderZoneChart() {
+        const ctx = document.getElementById('zoneChart').getContext('2d');
+        
+        const zoneCounts = {};
+        this.data.forEach(item => {
+          const zone = item.zona || 'Sin especificar';
+          zoneCounts[zone] = (zoneCounts[zone] || 0) + 1;
+        });
+        
+        // Tomar solo las top 8 zonas
+        const sortedZones = Object.entries(zoneCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 8);
+        
+        if (this.charts.zone) this.charts.zone.destroy();
+        
+        this.charts.zone = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: sortedZones.map(([zone]) => zone),
+            datasets: [{
+              label: 'Encuestados por zona',
+              data: sortedZones.map(([,count]) => count),
+              backgroundColor: 'rgba(14, 165, 233, 0.8)',
+              borderColor: 'rgba(14, 165, 233, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                ticks: {
+                  maxRotation: 45
+                }
+              }
+            }
+          }
+        });
+      }
+      
+      renderOccupationChart() {
+        const ctx = document.getElementById('occupationChart').getContext('2d');
+        
+        const occupationCounts = {};
+        this.data.forEach(item => {
+          const occupation = item.ocupacion || 'Sin especificar';
+          occupationCounts[occupation] = (occupationCounts[occupation] || 0) + 1;
+        });
+        
+        if (this.charts.occupation) this.charts.occupation.destroy();
+        
+        this.charts.occupation = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: Object.keys(occupationCounts),
+            datasets: [{
+              data: Object.values(occupationCounts),
+              backgroundColor: [
+                '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+      
+      renderBarriersChart() {
+        const ctx = document.getElementById('barriersChart').getContext('2d');
+        
+        const barrierCounts = {};
+        this.data.forEach(item => {
+          const barriers = (item.barreras || '').split('|').filter(b => b.trim());
+          barriers.forEach(barrier => {
+            barrierCounts[barrier] = (barrierCounts[barrier] || 0) + 1;
+          });
+        });
+        
+        const sortedBarriers = Object.entries(barrierCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 6);
+        
+        if (this.charts.barriers) this.charts.barriers.destroy();
+        
+        this.charts.barriers = new Chart(ctx, {
+          type: 'horizontalBar',
+          data: {
+            labels: sortedBarriers.map(([barrier]) => barrier),
+            datasets: [{
+              label: 'Frecuencia',
+              data: sortedBarriers.map(([,count]) => count),
+              backgroundColor: 'rgba(239, 68, 68, 0.8)',
+              borderColor: 'rgba(239, 68, 68, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+      
+      renderAwarenessChart() {
+        const ctx = document.getElementById('awarenessChart').getContext('2d');
+        
+        const awarenessCounts = {};
+        this.data.forEach(item => {
+          const awareness = item.awareness_omo || 'Sin respuesta';
+          awarenessCounts[awareness] = (awarenessCounts[awareness] || 0) + 1;
+        });
+        
+        if (this.charts.awareness) this.charts.awareness.destroy();
+        
+        this.charts.awareness = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(awarenessCounts),
+            datasets: [{
+              data: Object.values(awarenessCounts),
+              backgroundColor: [
+                '#6366f1', '#8b5cf6', '#a855f7', '#c084fc', '#d8b4fe'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+      
+      exportReport() {
+        if (this.data.length === 0) {
+          this.showToast('No hay datos para exportar', 'error');
+          return;
+        }
+        
+        // Generar reporte CSV con estadísticas
+        const stats = this.generateStatsReport();
+        const blob = new Blob([stats], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `reporte_omomobility_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.showToast('Reporte exportado exitosamente', 'success');
+      }
+      
+      generateStatsReport() {
+        const total = this.data.length;
+        const avgIntention = this.data.reduce((sum, item) => sum + (parseFloat(item.intencion) || 0), 0) / total;
+        const avgAge = this.data.reduce((sum, item) => sum + (parseFloat(item.edad) || 0), 0) / total;
+        const mobileUsers = this.data.filter(item => item.usaMoto === 'Sí').length;
+        
+        return `Reporte Estadístico - Omomobility
+Fecha de generación: ${new Date().toLocaleString()}
+Total de encuestas: ${total}
+Intención promedio: ${avgIntention.toFixed(2)}
+Edad promedio: ${Math.round(avgAge)}
+Usuarios actuales de moto: ${mobileUsers} (${Math.round((mobileUsers / total) * 100)}%)
+
+Datos detallados disponibles en exportación CSV desde la encuesta.`;
+      }
+      
+      updateLastUpdateTime() {
+        document.getElementById('lastUpdate').textContent = 
+          `Última actualización: ${new Date().toLocaleTimeString()}`;
+      }
+      
+      showToast(message, type = 'info') {
+        // Reutilizar la función de toast del mobile script si está disponible
+        if (window.mobileSurvey) {
+          window.mobileSurvey.showToast(message, type);
+        } else {
+          alert(message); // Fallback simple
+        }
+      }
+    }
+    
+    // Inicializar dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+      window.dashboard = new DashboardManager();
+    });
+  </script>
 </body>
 </html>
