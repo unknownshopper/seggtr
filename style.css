@@ -1,39 +1,57 @@
-/* SEGGTR base styles */
-:root{
-  --bg:#0f172a; /* slate-900 */
-  --card:#111827; /* gray-900 */
-  --text:#e5e7eb; /* gray-200 */
-  --muted:#9ca3af; /* gray-400 */
-  --primary:#16a34a; /* green-600 */
-  --primary-700:#15803d;
-  --danger:#ef4444;
+:root { --bg:#f7f7f9; --paper:#ffffff; --ink:#121212; --muted:#5f6b7a; --primary:#1e88e5; --accent:#0ea5e9; --border:#e5e7eb; }
+*{ box-sizing:border-box }
+html,body{ height:100% }
+body{ margin:0; background:var(--bg); color:var(--ink); font:400 16px/1.6 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif }
+.shell{ max-width:1000px; margin:32px auto; padding:0 16px }
+.hero{ background:linear-gradient(180deg,#ffffff 0%,#fafbff 100%); border:1px solid var(--border); border-radius:16px; padding:24px 24px; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center; box-shadow:0 10px 30px rgba(10,31,68,.08) }
+.logo{ width:64px; height:64px; border-radius:10px; object-fit:contain; box-shadow:0 2px 8px rgba(10,31,68,.08); background:transparent }
+.titles h1{ margin:0; font:600 22px/1.2 "Inter",sans-serif }
+.titles p{ margin:6px 0 0; color:var(--muted); font-size:14px }
+.meta{ color:var(--muted); font-size:13px; text-align:right }
+.section-title{ font:600 16px/1.3 "Inter",sans-serif; letter-spacing:.3px; text-transform:uppercase; color:var(--primary); margin:24px 0 12px }
+.grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px }
+@media (max-width:900px){ .grid{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+@media (max-width:640px){ .grid{ grid-template-columns:1fr } .hero{ grid-template-columns:1fr; text-align:left } .meta{ text-align:left } }
+.card{ background:var(--paper); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; transition: box-shadow .2s ease, transform .05s ease }
+.card:hover{ box-shadow:0 8px 22px rgba(10,31,68,.10); transform: translateY(-1px) }
+.card h3{ margin:2px 0 0; font:600 16px/1.3 "Inter",sans-serif }
+.card p{ margin:0; color:var(--muted); font-size:14px }
+.tag{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#eef6ff; color:#0b62d6; border:1px solid #d7e8ff }
+.btn{ appearance:none; border:1px solid transparent; border-radius:10px; padding:10px 14px; font-weight:600; font-size:14px; cursor:pointer; background:linear-gradient(180deg,var(--primary),#1565c0); color:#fff; box-shadow:0 6px 14px rgba(21,101,192,.25) }
+.footer{ margin-top:22px; color:var(--muted); font-size:13px; display:flex; justify-content:space-between; align-items:center }
+a.cardlink{ text-decoration:none; color:inherit }
+
+/* Encuesta page layout */
+.page{ max-width:900px; margin:32px auto; padding:0 16px }
+.header{ display:flex; align-items:center; gap:16px; margin-bottom:16px }
+.header .logo{ width:56px; height:56px; border-radius:10px; object-fit:contain }
+.lead{ color:var(--muted); font-size:14px; margin:6px 0 0 }
+
+/* Form grid */
+.row{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:14px; margin-bottom:12px }
+@media (max-width:640px){ .row{ grid-template-columns: 1fr } }
+
+/* Controls */
+label{ display:block; font-weight:600; font-size:14px; margin:6px 0 6px }
+input[type="number"], input[type="text"], select, textarea{
+  width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; color:var(--ink);
+  font:400 14px/1.4 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif}
-a{color:#93c5fd;text-decoration:none}
-header{border-bottom:1px solid #1f2937;background:#0b1220;position:sticky;top:0;z-index:10}
-nav ul{list-style:none;display:flex;gap:1rem;margin:0;padding:1rem}
-nav a{padding:.5rem .75rem;border-radius:.5rem}
-nav a:hover{background:#0a0f1e}
-header h1{margin:0;padding:0 1rem 1rem;font-size:1.5rem;font-weight:700}
-main{max-width:960px;margin:1.25rem auto;padding:0 1rem}
-section#landing{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:1rem}
-.tenant{margin:.5rem 0 1rem;display:flex;gap:.5rem;align-items:center}
-select,input,button{font:inherit}
-input,select{width:100%;padding:.75rem;border-radius:.5rem;border:1px solid #374151;background:#0b1220;color:var(--text)}
-button{padding:.75rem 1rem;border:none;border-radius:.5rem;background:var(--primary);color:white;font-weight:600;cursor:pointer}
-button:hover{background:var(--primary-700)}
-#auth{display:grid;gap:.75rem}
-#login-form{display:grid;gap:.5rem}
-#auth-status{min-height:1.25rem;color:var(--muted)}
-footer{padding:2rem 1rem;color:var(--muted);text-align:center}
+input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(30,136,229,.12) }
 
-/* Cards and grids */
-.card{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:1rem}
-.grid{display:grid;gap:1rem}
-@media(min-width:720px){.grid.cols-2{grid-template-columns:1fr 1fr}}
+/* Checkbox group */
+.group{ display:flex; flex-wrap:wrap; gap:10px; margin-top:6px }
+.group label{ display:inline-flex; align-items:center; gap:8px; font-weight:500; margin:0 }
 
-/* Utility */
-.muted{color:var(--muted)}
-.small{font-size:.875rem}
-.error{color:var(--danger)}
+/* Actions */
+.actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:8px }
+.btn.outline{ background:transparent; color:var(--primary); border:1px solid var(--primary); box-shadow:none }
+.btn.outline:hover{ background:rgba(30,136,229,.06) }
+
+/* Helper text */
+.note{ margin-top:10px; color:var(--muted); font-size:13px }
+
+/* Footer links */
+.foot{ display:flex; justify-content:space-between; align-items:center; margin:22px 0 }
+.foot a{ color:var(--primary); text-decoration:none }
+.foot a:hover{ text-decoration:underline }

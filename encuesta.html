@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Encuesta de percepción — Omomobility</title>
+  <meta name="description" content="Formulario de encuesta para medir intención de compra, barreras y atributos de valor." />
+  <link rel="icon" href="logcho.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <img class="logo" src="logcho.png" alt="TUS" onerror="this.onerror=null; this.src='logch.png'" />
+      <div>
+        <h1>Encuesta de percepción</h1>
+        <p class="lead">Duración ~10 min. Datos anónimos. Campos marcados con * son obligatorios.</p>
+      </div>
+    </header>
+
+    <form id="formEncuesta">
+      <!-- Campos base originales -->
+      <div class="row">
+        <div>
+          <label for="edad">Edad *</label>
+          <input id="edad" name="edad" type="number" min="15" max="80" required />
+        </div>
+        <div>
+          <label for="zona">Zona *</label>
+          <select id="zona" name="zona" required>
+            <option value="">Selecciona…</option>
+            <option>Centro</option>
+            <option>Tabasco 2000</option>
+            <option>Tamaraindos</option>
+            <option>Gaviotas</option>
+            <option>Otra</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="ocupacion">Ocupación *</label>
+          <select id="ocupacion" name="ocupacion" required>
+            <option value="">Selecciona…</option>
+            <option>Estudiante</option>
+            <option>Empleado</option>
+            <option>Independiente</option>
+            <option>Repartidor</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div>
+          <label for="uso">Uso principal *</label>
+          <select id="uso" name="uso" required>
+            <option value="">Selecciona…</option>
+            <option>Personal</option>
+            <option>Reparto</option>
+            <option>Trabajo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="usaMoto">¿Usas moto actualmente? *</label>
+          <select id="usaMoto" name="usaMoto" required>
+            <option value="">Selecciona…</option>
+            <option>Sí</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div>
+          <label for="intencion">Intención de compra (0–10) *</label>
+          <input id="intencion" name="intencion" type="number" min="0" max="10" required />
+        </div>
+      </div>
+
+      <div>
+        <label>Barreras principales (selecciona todas las que apliquen)</label>
+        <div class="group">
+          <label><input type="checkbox" name="barreras" value="Precio" /> Precio</label>
+          <label><input type="checkbox" name="barreras" value="Autonomía" /> Autonomía</label>
+          <label><input type="checkbox" name="barreras" value="Carga/Infra" /> Carga/Infra</label>
+          <label><input type="checkbox" name="barreras" value="Rendimiento" /> Rendimiento</label>
+          <label><input type="checkbox" name="barreras" value="Garantía/Servicio" /> Garantía/Servicio</label>
+          <label><input type="checkbox" name="barreras" value="Financiamiento" /> Financiamiento</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="marca">Marca considerada</label>
+          <input id="marca" name="marca" type="text" placeholder="Omomobility / Italika / NIU / ..." />
+        </div>
+        <div>
+          <label for="pago">Disposición a pagar (MXN)</label>
+          <input id="pago" name="pago" type="number" min="0" step="500" placeholder="Ej. 25000" />
+        </div>
+      </div>
+
+      <div>
+        <label for="comentarios">Comentarios</label>
+        <textarea id="comentarios" name="comentarios" rows="3" placeholder="Comentarios u observaciones"></textarea>
+      </div>
+
+      <!-- Lote 1: Secciones ampliadas -->
+      <fieldset class="section">
+        <legend>Datos demográficos ampliados</legend>
+        <div class="row">
+          <div>
+            <label for="sexo">Sexo *</label>
+            <select id="sexo" name="sexo" required>
+              <option value="">Selecciona…</option>
+              <option>Femenino</option>
+              <option>Masculino</option>
+              <option>Otro / Prefiero no decir</option>
+            </select>
+          </div>
+          <div>
+            <label for="ingreso">Ingreso mensual (MXN)</label>
+            <select id="ingreso" name="ingreso">
+              <option value="">Selecciona…</option>
+              <option><$10k</option>
+              <option>$10k–$20k</option>
+              <option>$20k–$35k</option>
+              <option>$35k–$50k</option>
+              <option>>$50k</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="hogar">Personas en el hogar</label>
+            <input id="hogar" name="hogar" type="number" min="1" max="10" />
+          </div>
+          <div>
+            <label for="vehiculos">Vehículos en el hogar</label>
+            <input id="vehiculos" name="vehiculos" type="number" min="0" max="6" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="section">
+        <legend>Conocimiento y percepción de marca</legend>
+        <div>
+          <label for="marca_espontanea">¿Qué marcas de motos eléctricas conoces? (espontáneo)</label>
+          <input id="marca_espontanea" name="marca_espontanea" type="text" placeholder="Escribe marcas separadas por coma" />
+        </div>
+        <div class="group" style="margin-top:10px">
+          <label><input type="checkbox" name="marca_asistida" value="Omomobility" /> Omomobility</label>
+          <label><input type="checkbox" name="marca_asistida" value="Italika" /> Italika</label>
+          <label><input type="checkbox" name="marca_asistida" value="NIU" /> NIU</label>
+          <label><input type="checkbox" name="marca_asistida" value="SEV" /> SEV</label>
+          <label><input type="checkbox" name="marca_asistida" value="Otra" /> Otra</label>
+        </div>
+        <div style="margin-top:10px">
+          <label for="asociacion">¿Qué te imaginas al escuchar “moto eléctrica”?</label>
+          <textarea id="asociacion" name="asociacion" rows="2" placeholder="Primeras ideas, atributos o imágenes"></textarea>
+        </div>
+        <!-- Nuevas preguntas relevantes de marca -->
+<div class="row" style="margin-top:10px">
+  <div>
+    <label for="awareness_omo">¿Qué tanto conoces la marca Omomobility?</label>
+    <select id="awareness_omo" name="awareness_omo">
+      <option value="">Selecciona…</option>
+      <option>No la conozco</option>
+      <option>Me suena</option>
+      <option>La conozco</option>
+      <option>La he visto/probado</option>
+      <option>Cliente</option>
+    </select>
+  </div>
+  <div>
+    <label for="favorabilidad_omo">Favorabilidad hacia Omomobility (0–10)</label>
+    <input id="favorabilidad_omo" name="favorabilidad_omo" type="number" min="0" max="10" />
+  </div>
+</div>
+
+<div style="margin-top:10px">
+  <label>¿Dónde escuchaste de Omomobility? (puedes elegir varias)</label>
+  <div class="group">
+    <label><input type="checkbox" name="fuente_conocimiento" value="Redes sociales" /> Redes sociales</label>
+    <label><input type="checkbox" name="fuente_conocimiento" value="Amigos/Familia" /> Amigos/Familia</label>
+    <label><input type="checkbox" name="fuente_conocimiento" value="YouTube" /> YouTube</label>
+    <label><input type="checkbox" name="fuente_conocimiento" value="Publicidad" /> Publicidad</label>
+    <label><input type="checkbox" name="fuente_conocimiento" value="Tienda física" /> Tienda física</label>
+    <label><input type="checkbox" name="fuente_conocimiento" value="Eventos/Prensa" /> Eventos/Prensa</label>
+  </div>
+</div>
+      </fieldset>
+
+      <fieldset class="section">
+        <legend>Intención y uso</legend>
+        <div class="row">
+          <div>
+            <label for="horizonte">Horizonte de compra</label>
+            <select id="horizonte" name="horizonte">
+              <option value="">Selecciona…</option>
+              <option>0–3 meses</option>
+              <option>3–6 meses</option>
+              <option>6–12 meses</option>
+              <option>>12 meses</option>
+              <option>Sin planes</option>
+            </select>
+          </div>
+          <div>
+            <label for="frecuencia">Frecuencia de uso esperada</label>
+            <select id="frecuencia" name="frecuencia">
+              <option value="">Selecciona…</option>
+              <option>Diario</option>
+              <option>Semanal</option>
+              <option>Ocasional</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="km_dia">Trayecto típico (km por día)</label>
+            <input id="km_dia" name="km_dia" type="number" min="0" step="1" />
+          </div>
+          <div>
+            <label for="posee_cargador">¿Tienes acceso a enchufe donde estacionas?</label>
+            <select id="posee_cargador" name="posee_cargador">
+              <option value="">Selecciona…</option>
+              <option>Sí</option>
+              <option>No</option>
+              <option>En trámite</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="section">
+        <legend>Financiamiento y precio</legend>
+        <div class="row">
+          <div>
+            <label for="financia">¿Buscarías financiamiento?</label>
+            <select id="financia" name="financia">
+              <option value="">Selecciona…</option>
+              <option>Sí</option>
+              <option>No</option>
+              <option>Tal vez</option>
+            </select>
+          </div>
+          <div>
+            <label for="pago_mensual">Pago mensual máximo (MXN)</label>
+            <input id="pago_mensual" name="pago_mensual" type="number" min="0" step="100" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="enganche">Enganche disponible (MXN)</label>
+            <input id="enganche" name="enganche" type="number" min="0" step="500" />
+          </div>
+          <div>
+            <label for="plazo">Plazo preferido</label>
+            <select id="plazo" name="plazo">
+              <option value="">Selecciona…</option>
+              <option>6 meses</option>
+              <option>12 meses</option>
+              <option>18 meses</option>
+              <option>24 meses</option>
+              <option>36 meses</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="precio_objetivo">Precio objetivo (MXN) si fuera de contado</label>
+          <input id="precio_objetivo" name="precio_objetivo" type="number" min="0" step="500" />
+        </div>
+      </fieldset>
+      <!-- /Lote 1 -->
+
+      <!-- Lote 2: Atributos valorados, Barreras extendidas, Servicio/Postventa -->
+
+<fieldset class="section">
+  <legend>Atributos valorados (1 = Nada, 5 = Muy importante)</legend>
+  <div class="row">
+    <div>
+      <label for="atr_precio">Precio</label>
+      <select id="atr_precio" name="atr_precio"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+    <div>
+      <label for="atr_autonomia">Autonomía</label>
+      <select id="atr_autonomia" name="atr_autonomia"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label for="atr_desempeno">Desempeño</label>
+      <select id="atr_desempeno" name="atr_desempeno"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+    <div>
+      <label for="atr_diseno">Diseño</label>
+      <select id="atr_diseno" name="atr_diseno"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label for="atr_garantia">Garantía</label>
+      <select id="atr_garantia" name="atr_garantia"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+    <div>
+      <label for="atr_servicio">Servicio técnico</label>
+      <select id="atr_servicio" name="atr_servicio"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label for="atr_refacciones">Refacciones</label>
+      <select id="atr_refacciones" name="atr_refacciones"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+    <div>
+      <label for="atr_tiempo_carga">Tiempo de carga</label>
+      <select id="atr_tiempo_carga" name="atr_tiempo_carga"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label for="atr_conectividad">Conectividad/Apps</label>
+      <select id="atr_conectividad" name="atr_conectividad"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+    <div>
+      <label for="atr_seguridad">Seguridad (frenos, llantas, ABS)</label>
+      <select id="atr_seguridad" name="atr_seguridad"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+    </div>
+  </div>
+</fieldset>
+
+<fieldset class="section">
+  <legend>Barreras extendidas</legend>
+  <div class="group">
+    <label><input type="checkbox" name="barreras_ext" value="Costo inicial" /> Costo inicial</label>
+    <label><input type="checkbox" name="barreras_ext" value="Costo mantenimiento" /> Costo mantenimiento</label>
+    <label><input type="checkbox" name="barreras_ext" value="Refacciones disponibles" /> Refacciones disponibles</label>
+    <label><input type="checkbox" name="barreras_ext" value="Puntos de carga" /> Puntos de carga</label>
+    <label><input type="checkbox" name="barreras_ext" value="Autonomía" /> Autonomía</label>
+    <label><input type="checkbox" name="barreras_ext" value="Desempeño" /> Desempeño</label>
+    <label><input type="checkbox" name="barreras_ext" value="Garantía" /> Garantía</label>
+    <label><input type="checkbox" name="barreras_ext" value="Servicio técnico" /> Servicio técnico</label>
+    <label><input type="checkbox" name="barreras_ext" value="Disponibilidad inmediata" /> Disponibilidad inmediata</label>
+    <label><input type="checkbox" name="barreras_ext" value="Financiamiento" /> Financiamiento</label>
+    <label><input type="checkbox" name="barreras_ext" value="Desconocimiento" /> Desconocimiento</label>
+  </div>
+</fieldset>
+
+<fieldset class="section">
+  <legend>Servicio y postventa</legend>
+  <div class="row">
+    <div>
+      <label for="svc_tiempo_rep">Tiempo de reparación esperado</label>
+      <select id="svc_tiempo_rep" name="svc_tiempo_rep">
+        <option value="">Selecciona…</option>
+        <option>< 3 días</option>
+        <option>3–7 días</option>
+        <option>> 7 días</option>
+      </select>
+    </div>
+    <div>
+      <label for="svc_ext_garantia">¿Comprarías extensión de garantía?</label>
+      <select id="svc_ext_garantia" name="svc_ext_garantia">
+        <option value="">Selecciona…</option>
+        <option>Sí</option>
+        <option>No</option>
+        <option>Depende del costo</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label for="svc_red">Preferencia de red de servicio</label>
+      <select id="svc_red" name="svc_red">
+        <option value="">Selecciona…</option>
+        <option>Taller propio</option>
+        <option>Taller autorizado</option>
+        <option>Red mixta</option>
+      </select>
+    </div>
+    <div>
+      <label for="svc_coste">Sensibilidad al coste de servicio</label>
+      <select id="svc_coste" name="svc_coste"><option>Baja</option><option>Media</option><option>Alta</option></select>
+    </div>
+  </div>
+</fieldset>
+
+<!-- Lote 3: Ambiente/Percepción, Canales/Experiencia, Marcas, Abiertas -->
+
+<fieldset class="section">
+  <legend>Ambiente y percepción</legend>
+  <div class="row">
+    <div>
+      <label for="amb_motiva">¿Te motiva reducir emisiones?</label>
+      <select id="amb_motiva" name="amb_motiva">
+        <option value="">Selecciona…</option><option>Sí</option><option>No</option><option>Algo</option>
+      </select>
+    </div>
+    <div>
+      <label for="amb_ansiedad_autonomia">Preocupación por autonomía</label>
+      <select id="amb_ansiedad_autonomia" name="amb_ansiedad_autonomia">
+        <option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option>
+      </select>
+    </div>
+  </div>
+  <div>
+    <label for="amb_ruido">Valoras menor ruido/vibración</label>
+    <select id="amb_ruido" name="amb_ruido"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+  </div>
+</fieldset>
+
+<fieldset class="section">
+  <legend>Canales y experiencia</legend>
+  <div class="row">
+    <div>
+      <label for="can_test_ride">¿Te interesa test ride?</label>
+      <select id="can_test_ride" name="can_test_ride"><option value="">Selecciona…</option><option>Sí</option><option>No</option></select>
+    </div>
+    <div>
+      <label for="can_compra">Preferencia de compra</label>
+      <select id="can_compra" name="can_compra">
+        <option value="">Selecciona…</option>
+        <option>Tienda física</option>
+        <option>En línea</option>
+        <option>Híbrido</option>
+      </select>
+    </div>
+  </div>
+  <div>
+    <label>Canales de información usados</label>
+    <div class="group">
+      <label><input type="checkbox" name="canales_info" value="Tienda física" /> Tienda física</label>
+      <label><input type="checkbox" name="canales_info" value="Redes sociales" /> Redes sociales</label>
+      <label><input type="checkbox" name="canales_info" value="YouTube" /> YouTube</label>
+      <label><input type="checkbox" name="canales_info" value="Amigos/Familia" /> Amigos/Familia</label>
+      <label><input type="checkbox" name="canales_info" value="Publicidad" /> Publicidad</label>
+      <label><input type="checkbox" name="canales_info" value="Eventos/Prensa" /> Eventos/Prensa</label>
+    </div>
+  </div>
+</fieldset>
+
+<fieldset class="section">
+  <legend>Marcas consideradas (ampliado)</legend>
+  <div class="row">
+    <div>
+      <label for="marca_top">Marca preferida</label>
+      <input id="marca_top" name="marca_top" type="text" placeholder="Omomobility / Italika / NIU / ..." />
+    </div>
+    <div>
+      <label for="marca_alt">Segunda opción</label>
+      <input id="marca_alt" name="marca_alt" type="text" />
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label for="presupuesto_max">Presupuesto máximo (MXN)</label>
+      <input id="presupuesto_max" name="presupuesto_max" type="number" min="0" step="500" />
+    </div>
+    <div>
+      <label for="tiempo_decision">Tiempo esperado para decidir</label>
+      <select id="tiempo_decision" name="tiempo_decision">
+        <option value="">Selecciona…</option>
+        <option>Este mes</option><option>1–3 meses</option><option>3–6 meses</option><option>>6 meses</option>
+      </select>
+    </div>
+  </div>
+</fieldset>
+
+<fieldset class="section">
+  <legend>Preguntas abiertas adicionales</legend>
+  <div>
+    <label for="motivos_no_compra">Si no comprarías una moto eléctrica, ¿por qué?</label>
+    <textarea id="motivos_no_compra" name="motivos_no_compra" rows="3"></textarea>
+  </div>
+  <div>
+    <label for="mejoras_esperadas">¿Qué mejoras te harían decidirte por Omomobility?</label>
+    <textarea id="mejoras_esperadas" name="mejoras_esperadas" rows="3"></textarea>
+  </div>
+</fieldset>
+
+      <div class="actions">
+        <button type="submit" class="btn">Enviar respuesta</button>
+        <button type="button" id="btnExport" class="btn outline">Exportar CSV</button>
+        <label class="btn outline" for="fileImport" style="cursor:pointer">Importar CSV</label>
+        <input id="fileImport" type="file" accept=".csv" style="display:none" />
+        <button type="button" id="btnClear" class="btn outline">Limpiar datos</button>
+      </div>
+      <div class="note">Al enviar, la respuesta se guarda localmente en este dispositivo (localStorage). Puedes exportar/importar CSV para consolidar.</div>
+    </form>
+
+    <div class="foot">
+      <a href="index.html">← Volver al inicio</a>
+      <a href="resultados.html"><strong>Ver resultados →</strong></a>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carta Propuesta de Servicios — The Unknown Shopper</title>
+  <meta name="description" content="Propuesta de servicios para el Estudio de Mercado en Villahermosa, Tabasco: objetivos, alcance, metodología, entregables, cronograma e inversión para Omomobility." />
+  <link rel="icon" href="../logch.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f7f9;
+      --paper: #ffffff;
+      --ink: #121212;
+      --muted: #5f6b7a;
+      --primary: #1e88e5; /* azul moderno */
+      --accent: #0ea5e9;  /* azul cielo */
+      --border: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 16px/1.6 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 40px auto;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(10, 31, 68, 0.08);
+      overflow: clip;
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+    }
+    .brand {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .logo {
+      width: 56px; height: 56px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: transparent;
+      box-shadow: 0 2px 8px rgba(10, 31, 68, 0.08);
+    }
+    .brand h1 {
+      margin: 0;
+      font: 600 22px/1.2 "Inter", sans-serif;
+      letter-spacing: 0.2px;
+    }
+    .brand p {
+      margin: 2px 0 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .meta {
+      text-align: right;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .content { padding: 28px 32px 40px; }
+
+    h2.section-title {
+      font: 600 16px/1.3 "Inter", sans-serif;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin: 28px 0 12px;
+    }
+    h3 {
+      font: 600 17px/1.35 "Inter", sans-serif;
+      margin: 22px 0 8px;
+    }
+
+    .lead {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .block {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 18px;
+      margin: 14px 0 8px;
+    }
+
+    ul, ol { margin: 8px 0 8px 20px; }
+    li { margin: 6px 0; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #eef6ff;
+      color: #0b62d6;
+      border: 1px solid #d7e8ff;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    .table th, .table td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      vertical-align: top;
+    }
+    .table th {
+      background: #f6f8fb;
+      text-align: left;
+      font-weight: 600;
+      color: #2b3a4a;
+    }
+
+    .footer {
+      padding: 18px 32px 28px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .cta {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(180deg, var(--primary), #1565c0);
+      color: white;
+      box-shadow: 0 6px 14px rgba(21, 101, 192, .25);
+    }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border-color: #cfe1ff;
+    }
+
+    /* Footnotes */
+    .footnote {
+      margin-top: 8px;
+      padding-left: 10px;
+      border-left: 3px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .footnote dl { margin: 6px 0; }
+    .footnote dt { font-weight: 600; display: inline; }
+    .footnote dd { display: inline; margin: 0 0 0 6px; }
+
+    @media (max-width: 760px) {
+      .header { grid-template-columns: 1fr; gap: 10px; }
+      .meta { text-align: left; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .page { margin: 16px; }
+    }
+
+    /* Print-friendly A4 */
+    @page { size: A4; margin: 16mm 14mm; }
+    @media print {
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      html, body { background: white; font-size: 12pt; }
+      .page { box-shadow: none; border: none; margin: 0; }
+      .content { padding: 0 0 0; }
+      .header { border-bottom: 0; padding: 0 0 8pt 0; }
+      .footer { border-top: 0; padding: 8pt 0 0 0; }
+      .cta, .btn { display: none !important; }
+      a { color: inherit; text-decoration: none; }
+
+      /* Avoid awkward page breaks */
+      h2.section-title, h3 { page-break-after: avoid; break-after: avoid-page; }
+      .block { page-break-inside: avoid; break-inside: avoid; margin: 10pt 0; padding: 12pt; }
+      .grid-2 { break-inside: avoid; }
+
+      /* Tables scaling */
+      .table { font-size: 11pt; }
+      .table th, .table td { padding: 8pt 9pt; }
+      .table tr { break-inside: avoid; page-break-inside: avoid; }
+
+      /* Images */
+      img { max-width: 100%; height: auto; }
+      .logo { width: 48px; height: 48px; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="brand">
+        <img class="logo" src="logch.png" alt="The Unknown Shopper — logotipo" loading="eager"
+             onerror="this.onerror=null; this.src='../logch.png'" />
+        <div>
+          <h1>Carta Propuesta de Servicios</h1>
+          <p>Estudio de Mercado — Villahermosa, Tabasco</p>
+        </div>
+      </div>
+      <div class="meta">
+        <div><strong>Fecha:</strong> <span id="doc-date">...</span></div>
+        <div><strong>Cliente:</strong> <a href="https://www.omomobility.com/" target="_blank" rel="noopener">Omomobility</a></div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="block">
+        <h3 style="margin-top:0">Resumen de la oferta</h3>
+        <ul>
+          <li><strong>Qué ofrecemos:</strong> estudio de mercado para Villahermosa con análisis de demanda, competencia, segmentos, TCO y recomendaciones accionables.</li>
+          <li><strong>Qué entregamos:</strong> documento ejecutivo, dataset y tabulados, modelo financiero TCO, presentación con roadmap, y (si se contrata) resultados de <em>mystery shopping</em> y encuestas con gráficas.</li>
+          <li><strong>Qué cobramos:</strong> honorarios de investigación/análisis + ejecución de campo (entrevistas/visitas) + servicios opcionales (mystery y encuestas) + viáticos.</li>
+        </ul>
+      </section>
+
+      <section class="block">
+        <p>Atención: <strong>Oswaldo J. Domínguez Baeza</strong><br>Distribuidor</p>
+        <p>
+          En <strong>The Unknown Shopper</strong> agradecemos la oportunidad de presentar nuestra propuesta para realizar un
+          <em>Estudio de Mercado</em> que evalúe la viabilidad de inversión para la comercialización de motocicletas eléctricas y
+          baterías en la ciudad de Villahermosa, Tabasco.
+        </p>
+      </section>
+
+      <h2 class="section-title">1) Objetivo del Proyecto</h2>
+      <section class="block">
+        <p>
+          Evaluar la viabilidad comercial, operativa y financiera del ingreso/expansión de <strong>Omomobility</strong> en Villahermosa,
+          identificando el tamaño de mercado, segmentos prioritarios, panorama competitivo, requerimientos de operación/servicio e
+          implicaciones económicas (<abbr title="Total Cost of Ownership">TCO</abbr> y escenarios financieros), con recomendaciones
+          accionables para una fase piloto y despliegue.
+        </p>
+        <div class="footnote">
+          <dl>
+            <dt>TCO (Total Cost of Ownership):</dt>
+            <dd>costo total de propiedad (compra, energía, mantenimiento, consumibles y depreciación) a lo largo del ciclo de vida.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <h2 class="section-title">2) Alcance</h2>
+      <section class="block">
+        <div class="grid-2">
+          <ul>
+            <li><strong>Cobertura geográfica:</strong> Villahermosa y área metropolitana.</li>
+            <li><strong>Portafolio considerado:</strong> motocicletas eléctricas urbanas (uso personal, reparto y trabajo) y
+              baterías/paquetes de energía.</li>
+          </ul>
+          <ul>
+            <li><strong>Horizonte de análisis:</strong> proyección a 3 años con ramp-up trimestral.</li>
+            <li><strong>Enfoque de campo:</strong> entrevistas y levantamiento local orientados a segmentos de mayor adopción potencial.</li>
+          </ul>
+        </div>
+        <p class="lead"><span class="tag">Fuera de alcance</span> análisis jurídico exhaustivo, ingeniería de sitio de carga, certificaciones técnicas específicas, auditorías financieras (salvo adendum).</p>
+        <div class="footnote">
+          <dl>
+            <dt>Ramp-up trimestral:</dt>
+            <dd>crecimiento planificado por trimestres (cada 3 meses) en ventas, capacidad operativa y metas.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <h2 class="section-title">3) Metodología</h2>
+      <section class="block">
+        <h3>Desk research</h3>
+        <ul>
+          <li>INEGI, IMCO, CFE/CRE, Profeco, fuentes sectoriales y de movilidad.</li>
+        </ul>
+        <h3>Fieldwork local</h3>
+        <ul>
+          <li>Mystery shopping en distribuidores/tiendas relevantes (Italika, Vento, NIU, SEV, Sunra, multimarca).</li>
+          <li>Entrevistas semiestructuradas con repartidores, administradores de flotas, talleres y actores de apps de reparto/ride-hailing.</li>
+          <li>Encuesta breve a usuarios potenciales (online/offline) para intención de compra y barreras.</li>
+        </ul>
+        <h3>Modelado</h3>
+        <ul>
+          <li>TCO comparado (eléctrica vs. combustión) por segmento/uso.</li>
+          <li>Modelo de demanda (TAM/SAM/SOM) y escenarios con sensibilidad (precio, tasa, costo de energía, financiamiento).</li>
+        </ul>
+        <h3>Encuestas de percepción (detalle)</h3>
+        <ul>
+          <li><strong>Objetivo:</strong> medir awareness/consideración, intención de compra, percepción de desempeño/fiabilidad, barreras y disparadores de adopción (triggers).</li>
+          <li><strong>Universo:</strong> residentes y trabajadores en Villahermosa con potencial uso de motocicleta (personal, reparto, trabajo).</li>
+          <li><strong>Diseño muestral:</strong> muestreo por cuotas (zona/edad/ocupación/uso de moto). <em>Tamaño sugerido</em>: n = [200–300] entrevistas; <em>margen de error</em> aprox. ±[6–7] p.p. al 95% (para n≈200, p=0.5).</li>
+          <li><strong>Canales:</strong> presencial en puntos de afluencia (zonas comerciales/centro), y online con screener geográfico.</li>
+          <li><strong>Instrumento:</strong> cuestionario de 10–12 minutos (25–30 ítems) con escalas Likert y preguntas cerradas/abiertas.</li>
+          <li><strong>Plataforma y captura:</strong> formulario digital (web) para registrar respuestas en campo/online con almacenamiento en <em>Firestore</em>. Esto permite consolidación automática, validaciones en el punto de captura y resguardo seguro.</li>
+          <li><strong>Ventajas operativas:</strong> resultados en tiempo real (tabulados y gráficas preliminares), control de calidad (timestamps, consistencia; geolocalización opcional), y exportación a CSV/Sheets para análisis.</li>
+          <li><strong>Métricas clave:</strong> conocimiento espontáneo/asistido (Awareness), Consideración, Intención (0–10), <abbr title="Customer Satisfaction Score">CSAT</abbr>/<abbr title="Net Promoter Score">NPS</abbr> potencial, Atributos valorados, Barreras y Triggers, disposición a pagar (Gabor-Granger/Van Westendorp, si procede), percepción de TCO vs. gasolina.</li>
+          <li><strong>Control de calidad:</strong> validación de ubicación/tiempo, revisión de consistencia, limpieza y anonimización.</li>
+        </ul>
+        <div class="footnote">
+          <dl>
+            <dt>Desk research:</dt>
+            <dd>revisión y análisis de información secundaria (datos públicos/privados existentes).</dd>
+          </dl>
+          <dl>
+            <dt>Fieldwork:</dt>
+            <dd>trabajo de campo; actividades presenciales (entrevistas, encuestas, visitas) para recolectar datos primarios.</dd>
+          </dl>
+          <dl>
+            <dt>Mystery shopping:</dt>
+            <dd>visitas encubiertas para evaluar experiencia de compra, precios, financiamiento y servicio en tiendas.</dd>
+          </dl>
+          <dl>
+            <dt>Ride-hailing:</dt>
+            <dd>servicio de transporte bajo demanda mediante apps (p. ej., Uber, Didi), operado por conductores independientes.</dd>
+          </dl>
+          <dl>
+            <dt>TAM / SAM / SOM:</dt>
+            <dd>tamaño total del mercado; segmento accesible; cuota objetivo a capturar en el horizonte del proyecto.</dd>
+          </dl>
+          <dl>
+            <dt>Firestore:</dt>
+            <dd>base de datos en la nube de Google para almacenar respuestas de forma segura y sincronizada en tiempo real.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <h2 class="section-title">3.1) Implementación del estudio (paso a paso)</h2>
+      <section class="block">
+        <ol>
+          <li><strong>Kickoff y afinación de alcance (Semana 1):</strong> objetivos finales, segmentos prioritarios, lista de competidores/tiendas, aprobación de instrumentos.</li>
+          <li><strong>Desk research (Semanas 1–2):</strong> recopilación y curaduría de fuentes (INEGI, CFE/CRE, IMCO, Profeco, etc.). <em>Salida:</em> base de datos secundaria.</li>
+          <li><strong>Trabajo de campo (Semanas 3–4):</strong> entrevistas/visitas técnicas; <em>opcional</em>: <em>mystery shopping</em> y encuestas de percepción. <em>Salida:</em> notas, registros, microdatos.</li>
+          <li><strong>Modelado y análisis (Semana 5):</strong> TCO y escenarios, integración de resultados de encuestas/mystery, conclusiones.</li>
+          <li><strong>Informe y presentación (Semana 6):</strong> documento final, gráficas/tabulados, presentación ejecutiva.</li>
+        </ol>
+        <p class="lead"><strong>Resultados clave:</strong> tamaño de oportunidad, segmentos prioritarios, posicionamiento y plan de entrada (GTM) con números.</p>
+      </section>
+
+      <h2 class="section-title">3.2) Motivadores de compra y benchmarking competitivo</h2>
+      <section class="block">
+        <h3>Qué queremos responder</h3>
+        <ul>
+          <li>¿Por qué la gente compra motos eléctricas hoy? (ahorro, desempeño, autonomía, garantía, servicio, marca).</li>
+          <li>¿Qué pesa más en la decisión? (cercanía del punto de venta/servicio, financiamiento, disponibilidad inmediata, precio/TCO).</li>
+          <li>¿Cómo se comparan estos factores entre Omomobility y marcas competidoras locales?</li>
+          <li>¿Qué necesita Omomobility para estar al nivel o superar a la competencia?</li>
+        </ul>
+        <h3>Cómo lo mediremos</h3>
+        <ul>
+          <li><strong>Encuestas de percepción:</strong> importancia vs. satisfacción por atributo; intención de compra por marca; disponibilidad a pagar.</li>
+          <li><strong>Mystery shopping:</strong> precios, opciones de financiamiento, tiempos de entrega, trato, información técnica, posventa y cercanía.</li>
+          <li><strong>Revisión desk:</strong> red de servicio/tiendas, reputación (reseñas), garantías y SLA publicados.</li>
+        </ul>
+        <h3>Qué entregaremos</h3>
+        <ul>
+          <li><strong>Matriz de brechas competitivas (gap analysis):</strong> comparación Omomobility vs. principales competidores por atributos clave.</li>
+          <li><strong>Plan de cierre de brechas:</strong> acciones priorizadas (financiamiento, cobertura de servicio, inventario, garantía, mensajes de valor).</li>
+          <li><strong>Gráficas clave:</strong> importancia vs. desempeño (IPA), ranking de motivadores, mapa de cercanía/servicio, comparativo de opciones de crédito.</li>
+        </ul>
+        <div class="footnote">
+          <dl>
+            <dt>Benchmarking competitivo:</dt>
+            <dd>evaluación sistemática de Omomobility frente a competidores directos en atributos críticos para el cliente.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <h2 class="section-title">4) Entregables</h2>
+      <section class="block">
+        <table class="table" role="table">
+          <thead>
+            <tr>
+              <th>Entregable</th>
+              <th>Descripción</th>
+              <th>Formato</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Documento de Estudio de Mercado</td>
+              <td>Hallazgos, análisis y recomendaciones</td>
+              <td>PDF / MD</td>
+            </tr>
+            <tr>
+              <td>Dataset de soporte</td>
+              <td>Datos consolidados con diccionario</td>
+              <td>CSV / Sheets</td>
+            </tr>
+            <tr>
+              <td>Modelo financiero</td>
+              <td>Supuestos y escenarios editables</td>
+              <td>Excel / Sheets</td>
+            </tr>
+            <tr>
+              <td>Presentación ejecutiva</td>
+              <td>Roadmap de implementación y KPIs</td>
+              <td>PDF / Slides</td>
+            </tr>
+            <tr>
+              <td>Matriz de brechas y plan de cierre</td>
+              <td>Gap analysis Omomobility vs. competencia y acciones priorizadas</td>
+              <td>PDF / Slides</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="footnote">
+          <dl>
+            <dt>Dataset:</dt>
+            <dd>conjunto de datos estructurados listos para análisis (microdatos y tabulados) con diccionario de variables.</dd>
+          </dl>
+        </div>
+        <h3>Matriz servicio → entregables</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Servicio</th>
+              <th>Tipo</th>
+              <th>Entregables clave</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Investigación y análisis</td>
+              <td><span class="tag">Incluido</span></td>
+              <td>Documento, modelo TCO, presentación, <strong>matriz de brechas y plan de cierre</strong></td>
+            </tr>
+            <tr>
+              <td>Trabajo de campo (entrevistas y visitas técnicas)</td>
+              <td><span class="tag">Incluido</span></td>
+              <td>Notas sistematizadas y hallazgos</td>
+            </tr>
+            <tr>
+              <td>Mystery shopping</td>
+              <td><span class="tag">Opcional</span></td>
+              <td>Checklist por tienda, precios/financiamiento, evaluación comparativa</td>
+            </tr>
+            <tr>
+              <td>Encuestas de percepción</td>
+              <td><span class="tag">Opcional</span></td>
+              <td>Microdatos anonimizados, tabulados, gráficas</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <h2 class="section-title">5) Cronograma</h2>
+      <section class="block">
+        <p><strong>Duración estimada:</strong> 6 semanas</p>
+        <ol>
+          <li>Semanas 1–2: Desk research, diseño de instrumentos, mapeo de competencia y precios.</li>
+          <li>Semanas 3–4: Trabajo de campo (entrevistas, encuestas, mystery shopping) y consolidación de datos.</li>
+          <li>Semana 5: TCO y modelo financiero; elaboración de borrador.</li>
+          <li>Semana 6: Revisión con Omomobility, ajustes y entrega final (+ presentación ejecutiva).</li>
+        </ol>
+        <p><strong>Hitos:</strong> H1 (aprobación plan e instrumentos), H2 (cierre de campo), H2.1 (cierre de encuestas y tabulados preliminares), H3 (borrador con gráficas), H4 (entrega final).</p>
+      </section>
+
+      <h2 class="section-title">6) Equipo y Gobierno del Proyecto</h2>
+      <section class="block">
+        <ul>
+          <li><strong>Líder de proyecto:</strong> The Unknown Shopper (coordinación y análisis)</li>
+          <li><strong>Analista de datos/finanzas:</strong> Modelado TCO y escenarios</li>
+          <li><strong>Investigador de campo:</strong> Entrevistas, encuestas y mystery shopping</li>
+          <li><strong>Punto de contacto del cliente:</strong> [Nombre y área de Omomobility]</li>
+        </ul>
+        <p class="lead">Rituales: kickoff, sesiones semanales de 30–45 min, canal operativo (email/chat) y repositorio compartido.</p>
+      </section>
+
+      <h2 class="section-title">7) Inversión</h2>
+      <section class="block">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Concepto</th>
+              <th>Tipo</th>
+              <th>Monto estimado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Honorarios de investigación y análisis</td>
+              <td><span class="tag">Incluido</span></td>
+              <td>$25,000 MXN</td>
+            </tr>
+            <tr>
+              <td>Trabajo de campo (entrevistas y visitas técnicas)</td>
+              <td><span class="tag">Incluido</span></td>
+              <td>$14,000 MXN</td>
+            </tr>
+            <tr>
+              <td>Mystery shopping (3 visitas a tiendas/distribuidores)</td>
+              <td><span class="tag">Opcional</span></td>
+              <td>$8,500 MXN</td>
+            </tr>
+            <tr>
+              <td>Encuestas de percepción (n = 250)</td>
+              <td><span class="tag">Opcional</span></td>
+              <td>$30,000 MXN</td>
+            </tr>
+            <tr>
+              <td>Encuestas de percepción (n = 500)</td>
+              <td><span class="tag">Opcional</span></td>
+              <td>$50,000 MXN</td>
+            </tr>
+            <tr>
+              <td>Encuestas de percepción (n = 1000)</td>
+              <td><span class="tag">Opcional</span></td>
+              <td>$80,000 MXN</td>
+            </tr>
+            <tr>
+              <td>Gastos y viáticos (tope)</td>
+              <td><span class="tag">Incluido</span></td>
+              <td>$6,000 MXN</td>
+            </tr>
+            <tr>
+              <th>Total base (sin opcionales)</th>
+              <th colspan="2">$45,000 MXN + IVA</th>
+            </tr>
+            <tr>
+              <th>Total con encuestas (n=250)</th>
+              <th colspan="2">$75,000 MXN + IVA</th>
+            </tr>
+            <tr>
+              <th>Total con encuestas (n=500)</th>
+              <th colspan="2">$95,000 MXN + IVA</th>
+            </tr>
+            <tr>
+              <th>Total con encuestas (n=1000)</th>
+              <th colspan="2">$125,000 MXN + IVA</th>
+            </tr>
+          </tbody>
+        </table>
+        <p><strong>Opciones de facturación:</strong> 50% anticipo a la firma, 50% contra entrega final; o 40% anticipo, 40% contra borrador, 20% contra entrega final.</p>
+        <p class="lead">Notas: los montos pueden ajustarse según alcance final (n de encuestas, número de tiendas/visitas). <strong>Mystery shopping</strong> se cotiza por paquete de 3 visitas; paquetes adicionales se presupuestan por adendum. <strong>Encuestas de percepción</strong> cuentan con escalas por volumen (n=250/500/1000). De requerirse pilotos extendidos o fases de implementación, se cotizarán vía adendum.</p>
+        <div class="footnote">
+          <dl>
+            <dt>Viáticos:</dt>
+            <dd>gastos operativos de desplazamiento y consumibles del equipo de campo, limitados a un tope acordado.</dd>
+          </dl>
+          <dl>
+            <dt>Opcional:</dt>
+            <dd>servicio que puede contratarse adicionalmente al alcance base del estudio.</dd>
+          </dl>
+        </div>
+        <h3>¿Qué incluye cada concepto?</h3>
+        <ul>
+          <li><strong>Honorarios de investigación y análisis:</strong> diseño del estudio, desk research, análisis de datos, modelado TCO/demanda, redacción de informe y presentación.</li>
+          <li><strong>Trabajo de campo (entrevistas y visitas técnicas):</strong> agenda, guías, levantamiento con actores clave (flotas/talleres/tiendas), sistematización de hallazgos.</li>
+          <li><strong>Mystery shopping:</strong> guion y checklist, visitas anónimas a distribuidores, registro de precios/financiamiento/servicio, evaluación comparativa.</li>
+          <li><strong>Encuestas de percepción:</strong> diseño/cuestionario, levantamiento (presencial/online), incentivos, control de calidad, limpieza, tabulados y gráficas. <em>Esquemas disponibles</em>: n=250, n=500 y n=1000.</li>
+          <li><strong>Gastos y viáticos:</strong> traslados locales, consumibles e imprevistos del equipo de campo (hasta tope indicado).</li>
+        </ul>
+      </section>
+
+      <h2 class="section-title">8) Términos y Condiciones</h2>
+      <section class="block">
+        <ul>
+          <li>Validez de la propuesta: 30 días naturales a partir de la fecha.</li>
+          <li>Confidencialidad: NDA bilateral; uso exclusivo de la información para este proyecto.</li>
+          <li>Propiedad intelectual: entregables finales para Omomobility; metodologías genéricas de The Unknown Shopper.</li>
+          <li>Cambios de alcance: modificaciones sustanciales se formalizan por adendum.</li>
+          <li>Forma de trabajo: remoto con visitas in situ para campo; coordinación con punto de contacto designado.</li>
+          <li>Privacidad de datos: cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares; consentimiento informado, anonimización y resguardo seguro.</li>
+        </ul>
+      </section>
+
+      <h2 class="section-title">9) Aceptación</h2>
+      <section class="block">
+        <p>Para proceder, agradecemos:</p>
+        <ul>
+          <li>Confirmación de aceptación de alcance, cronograma, términos y esquema de inversión.</li>
+          <li>Envío de datos de facturación y contacto operativo.</li>
+          <li>Aprobación de la agenda de trabajo y de los instrumentos de levantamiento.</li>
+        </ul>
+      </section>
+
+      <section class="block">
+        <p>Agradecemos su consideración y quedamos atentos para resolver dudas o ajustar esta propuesta a sus prioridades.</p>
+        <p><strong>Atentamente:</strong></p>
+        <p>
+          The Unknown Shopper<br />
+          Alberto García<br />
+          Publicista<br />
+          the@unknownshoppers.com
+        </p>
+        <div class="cta">
+          <button class="btn btn-primary" onclick="window.print()">Descargar PDF</button>
+          <a class="btn btn-outline" href="https://www.omomobility.com/" target="_blank" rel="noopener">Sitio de Omomobility</a>
+          <a class="btn btn-outline" href="presentacion.html" target="_blank" rel="noopener">Presentación (simulada)</a>
+          <a class="btn btn-outline" href="resultados.html" target="_blank" rel="noopener">Anexo metodológico</a>
+        </div>
+      </section>
+
+      <section class="block">
+        <p class="lead"><strong>Siguientes pasos:</strong> calendario de entrevistas con stakeholders, lista preliminar de competidores/tiendas a visitar, lineamientos de marca para la presentación ejecutiva.</p>
+        <div class="footnote">
+          <dl>
+            <dt>Stakeholders:</dt>
+            <dd>personas o áreas interesadas o impactadas por el proyecto (p. ej., dirección, operaciones, comercial, servicio, finanzas).</dd>
+          </dl>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>Propuesta • The Unknown Shopper</div>
+      <div id="doc-generated">Documento generado el --/--/----</div>
+    </footer>
+  </div>
+  <script>
+    (function () {
+      try {
+        const months = [
+          'enero','febrero','marzo','abril','mayo','junio',
+          'julio','agosto','septiembre','octubre','noviembre','diciembre'
+        ];
+        const now = new Date();
+        const dd = String(now.getDate()).padStart(2, '0');
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const yyyy = now.getFullYear();
+        const longFmt = `${dd} de ${months[now.getMonth()]} de ${yyyy}`;
+        const shortFmt = `${dd}/${mm}/${yyyy}`;
+
+        const dateEl = document.getElementById('doc-date');
+        if (dateEl) dateEl.textContent = longFmt;
+        const genEl = document.getElementById('doc-generated');
+        if (genEl) genEl.textContent = `Documento generado el ${shortFmt}`;
+
+        // Ensure correct timestamp before printing
+        window.addEventListener('beforeprint', () => {
+          const now2 = new Date();
+          const dd2 = String(now2.getDate()).padStart(2, '0');
+          const mm2 = String(now2.getMonth() + 1).padStart(2, '0');
+          const yyyy2 = now2.getFullYear();
+          const short2 = `${dd2}/${mm2}/${yyyy2}`;
+          const genEl2 = document.getElementById('doc-generated');
+          if (genEl2) genEl2.textContent = `Documento generado el ${short2}`;
+        });
+      } catch (e) { /* no-op */ }
+    })();
+  </script>
+</body>
+</html>
