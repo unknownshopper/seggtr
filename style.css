@@ -55,3 +55,65 @@ input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--prim
 .foot{ display:flex; justify-content:space-between; align-items:center; margin:22px 0 }
 .foot a{ color:var(--primary); text-decoration:none }
 .foot a:hover{ text-decoration:underline }
+
+/* Optimizaciones móviles para encuestadores - AGREGADO */
+@media (max-width: 768px) {
+  /* Campos más grandes para toque fácil */
+  input[type="number"], input[type="text"], select, textarea {
+    padding: 14px 16px !important;
+    font-size: 16px !important; /* Evita zoom en iOS */
+    min-height: 48px !important; /* Tamaño táctil recomendado */
+  }
+  
+  /* Checkboxes y radios más grandes */
+  input[type="checkbox"], input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+  }
+  
+  /* Botones más grandes */
+  .btn {
+    padding: 16px 20px !important;
+    font-size: 16px !important;
+    min-height: 48px !important;
+  }
+  
+  /* Secciones más espaciadas */
+  fieldset {
+    margin-bottom: 24px;
+    padding: 20px;
+    border-radius: 12px;
+  }
+}
+
+/* Estados de validación visual */
+.field-error {
+  border-color: #e53e3e !important;
+  box-shadow: 0 0 0 3px rgba(229,62,62,.12) !important;
+}
+
+.field-success {
+  border-color: #38a169 !important;
+  box-shadow: 0 0 0 3px rgba(56,161,105,.12) !important;
+}
+
+/* Toast notifications */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.toast.show { opacity: 1; }
+.toast.success { background: #38a169; }
+.toast.error { background: #e53e3e; }

@@ -41,3 +41,15 @@ if (formEncuestaEl) formEncuestaEl.addEventListener('submit', (e)=>{
   const all = readAll(); all.push(row); writeAll(all);
   e.target.reset(); alert('¡Gracias! Respuesta registrada.');
 });
+
+document.getElementById('ocupacion').addEventListener('change', function() {
+  const otroField = document.getElementById('ocupacion_otro');
+  if (this.value === 'Otro') {
+    otroField.style.display = 'block';
+    otroField.required = true;
+  } else {
+    otroField.style.display = 'none';
+    otroField.required = false;
+    otroField.value = '';
+  }
+});
