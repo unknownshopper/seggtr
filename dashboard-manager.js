@@ -1,0 +1,358 @@
+// Dashboard Manager
+class DashboardManager {
+  constructor() {
+    this.data = [];
+    this.charts = {};
+    this.init();
+  }
+  
+  init() {
+    this.loadData();
+    this.setupEventListeners();
+    this.renderDashboard();
+    this.updateLastUpdateTime();
+  }
+  
+  loadData() {
+    try {
+      this.data = JSON.parse(localStorage.getItem('encuestas') || '[]');
+    } catch (e) {
+      this.data = [];
+    }
+  }
+  
+  setupEventListeners() {
+    document.getElementById('refreshData').addEventListener('click', () => {
+      this.loadData();
+      this.renderDashboard();
+      this.updateLastUpdateTime();
+      this.showToast('Datos actualizados', 'success');
+    });
+    
+    document.getElementById('exportReport').addEventListener('click', () => {
+      this.exportReport();
+    });
+    
+    document.getElementById('clearAllData').addEventListener('click', () => {
+      if (confirm('¿Estás seguro de que quieres eliminar todos los datos? Esta acción no se puede deshacer.')) {
+        localStorage.removeItem('encuestas');
+        this.data = [];
+        this.renderDashboard();
+        this.showToast('Todos los datos han sido eliminados', 'error');
+      }
+    });
+  }
+  
+  renderDashboard() {
+    if (this.data.length === 0) {
+      document.getElementById('noDataMessage').style.display = 'block';
+      document.querySelector('.stats-grid').style.display = 'none';
+      document.querySelector('.dashboard-grid').style.display = 'none';
+      return;
+    }
+    
+    document.getElementById('noDataMessage').style.display = 'none';
+    document.querySelector('.stats-grid').style.display = 'grid';
+    document.querySelector('.dashboard-grid').style.display = 'grid';
+    
+    this.renderStats();
+    this.renderCharts();
+  }
+  
+  renderStats() {
+    const total = this.data.length;
+    const avgIntention = this.data.reduce((sum, item) => sum + (parseFloat(item.intencion) || 0), 0) / total;
+    const avgAge = this.data.reduce((sum, item) => sum + (parseFloat(item.edad) || 0), 0) / total;
+    const mobileUsers = this.data.filter(item => item.usaMoto === 'Sí').length;
+    
+    document.getElementById('totalResponses').textContent = total;
+    document.getElementById('avgIntention').textContent = avgIntention.toFixed(1);
+    document.getElementById('avgAge').textContent = Math.round(avgAge);
+    document.getElementById('mobileUsers').textContent = `${Math.round((mobileUsers / total) * 100)}%`;
+  }
+  
+  renderCharts() {
+    this.renderAgeChart();
+    this.renderIntentionChart();
+    this.renderZoneChart();
+    this.renderOccupationChart();
+    this.renderBarriersChart();
+    this.renderAwarenessChart();
+  }
+  
+  renderAgeChart() {
+    const ctx = document.getElementById('ageChart').getContext('2d');
+    
+    // Agrupar por rangos de edad
+    const ageRanges = {
+      '15-25': 0, '26-35': 0, '36-45': 0, '46-55': 0, '56+': 0
+    };
+    
+    this.data.forEach(item => {
+      const age = parseInt(item.edad);
+      if (age <= 25) ageRanges['15-25']++;
+      else if (age <= 35) ageRanges['26-35']++;
+      else if (age <= 45) ageRanges['36-45']++;
+      else if (age <= 55) ageRanges['46-55']++;
+      else ageRanges['56+']++;
+    });
+    
+    if (this.charts.age) this.charts.age.destroy();
+    
+    this.charts.age = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(ageRanges),
+        datasets: [{
+          label: 'Número de encuestados',
+          data: Object.values(ageRanges),
+          backgroundColor: 'rgba(30, 136, 229, 0.8)',
+          borderColor: 'rgba(30, 136, 229, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+  
+  renderIntentionChart() {
+    const ctx = document.getElementById('intentionChart').getContext('2d');
+    
+    // Agrupar por rangos de intención
+    const intentionRanges = {
+      '0-2': 0, '3-4': 0, '5-6': 0, '7-8': 0, '9-10': 0
+    };
+    
+    this.data.forEach(item => {
+      const intention = parseInt(item.intencion);
+      if (intention <= 2) intentionRanges['0-2']++;
+      else if (intention <= 4) intentionRanges['3-4']++;
+      else if (intention <= 6) intentionRanges['5-6']++;
+      else if (intention <= 8) intentionRanges['7-8']++;
+      else intentionRanges['9-10']++;
+    });
+    
+    if (this.charts.intention) this.charts.intention.destroy();
+    
+    this.charts.intention = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(intentionRanges),
+        datasets: [{
+          data: Object.values(intentionRanges),
+          backgroundColor: [
+            '#e53e3e', '#fd7f28', '#fbbf24', '#34d399', '#10b981'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+  
+  renderZoneChart() {
+    const ctx = document.getElementById('zoneChart').getContext('2d');
+    
+    const zoneCounts = {};
+    this.data.forEach(item => {
+      const zone = item.zona || 'Sin especificar';
+      zoneCounts[zone] = (zoneCounts[zone] || 0) + 1;
+    });
+    
+    // Tomar solo las top 8 zonas
+    const sortedZones = Object.entries(zoneCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 8);
+    
+    if (this.charts.zone) this.charts.zone.destroy();
+    
+    this.charts.zone = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: sortedZones.map(([zone]) => zone),
+        datasets: [{
+          label: 'Encuestados por zona',
+          data: sortedZones.map(([,count]) => count),
+          backgroundColor: 'rgba(14, 165, 233, 0.8)',
+          borderColor: 'rgba(14, 165, 233, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            ticks: {
+              maxRotation: 45
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  renderOccupationChart() {
+    const ctx = document.getElementById('occupationChart').getContext('2d');
+    
+    const occupationCounts = {};
+    this.data.forEach(item => {
+      const occupation = item.ocupacion || 'Sin especificar';
+      occupationCounts[occupation] = (occupationCounts[occupation] || 0) + 1;
+    });
+    
+    if (this.charts.occupation) this.charts.occupation.destroy();
+    
+    this.charts.occupation = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: Object.keys(occupationCounts),
+        datasets: [{
+          data: Object.values(occupationCounts),
+          backgroundColor: [
+            '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+  
+  renderBarriersChart() {
+    const ctx = document.getElementById('barriersChart').getContext('2d');
+    
+    const barrierCounts = {};
+    this.data.forEach(item => {
+      const barriers = (item.barreras || '').split('|').filter(b => b.trim());
+      barriers.forEach(barrier => {
+        barrierCounts[barrier] = (barrierCounts[barrier] || 0) + 1;
+      });
+    });
+    
+    const sortedBarriers = Object.entries(barrierCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 6);
+    
+    if (this.charts.barriers) this.charts.barriers.destroy();
+    
+    this.charts.barriers = new Chart(ctx, {
+      type: 'horizontalBar',
+      data: {
+        labels: sortedBarriers.map(([barrier]) => barrier),
+        datasets: [{
+          label: 'Frecuencia',
+          data: sortedBarriers.map(([,count]) => count),
+          backgroundColor: 'rgba(239, 68, 68, 0.8)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+  
+  renderAwarenessChart() {
+    const ctx = document.getElementById('awarenessChart').getContext('2d');
+    
+    const awarenessCounts = {};
+    this.data.forEach(item => {
+      const awareness = item.awareness_omo || 'Sin respuesta';
+      awarenessCounts[awareness] = (awarenessCounts[awareness] || 0) + 1;
+    });
+    
+    if (this.charts.awareness) this.charts.awareness.destroy();
+    
+    this.charts.awareness = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(awarenessCounts),
+        datasets: [{
+          data: Object.values(awarenessCounts),
+          backgroundColor: [
+            '#6366f1', '#8b5cf6', '#a855f7', '#c084fc', '#d8b4fe'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+  
+  exportReport() {
+    if (this.data.length === 0) {
+      this.showToast('No hay datos para exportar', 'error');
+      return;
+    }
+    
+    // Generar reporte CSV con estadísticas
+    const stats = this.generateStatsReport();
+    const blob = new Blob([stats], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `reporte_omomobility_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    this.showToast('Reporte exportado exitosamente', 'success');
+  }
+  
+  generateStatsReport() {
+    const total = this.data.length;
+    const avgIntention = this.data.reduce((sum, item) => sum + (parseFloat(item.intencion) || 0), 0) / total;
+    const avgAge = this.data.reduce((sum, item) => sum + (parseFloat(item.edad) || 0), 0) / total;
+    const mobileUsers = this.data.filter(item => item.usaMoto === 'Sí').length;
+    
+    return `Reporte Estadístico - Omomobility
+Fecha de generación: ${new Date().toLocaleString()}
+Total de encuestas: ${total}
+Intención promedio: ${avgIntention.toFixed(2)}
+Edad promedio: ${Math.round(avgAge)}
+Usuarios actuales de moto: ${mobileUsers} (${Math.round((mobileUsers / total) * 100)}%)
+
+Datos detallados disponibles en exportación CSV desde la encuesta.`;
+  }
+  
+  updateLastUpdateTime() {
+    document.getElementById('lastUpdate').textContent = 
+      `Última actualización: ${new Date().toLocaleTimeString()}`;
+  }
+  
+  showToast(message, type = 'info') {
+    // Reutilizar la función de toast del mobile script si está disponible
+    if (window.mobileSurvey) {
+      window.mobileSurvey.showToast(message, type);
+    } else {
+      alert(message); // Fallback simple
+    }
+  }
+}
+
+// Inicializar dashboard
+document.addEventListener('DOMContentLoaded', () => {
+  window.dashboard = new DashboardManager();
+});
