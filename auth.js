@@ -188,43 +188,68 @@ canAccess(page, role) {
     });
   },
   
-    // Agregar información de usuario y botón logout
-    addUserInfo() {
-      const session = this.getSession();
-      if (!session) return;
+    // Agregar información de usuario y botón logout (solo admin/supervisor)
+addUserInfo() {
+    const session = this.getSession();
+    if (!session) return;
   
-      const header = document.querySelector('.header');
-      if (header) {
-        const userInfo = document.createElement('div');
-        userInfo.style.cssText = `
-          position: absolute;
-          top: 10px;
-          right: 20px;
-          background: rgba(255,255,255,0.9);
-          padding: 8px 15px;
-          border-radius: 20px;
-          font-size: 12px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        `;
-        
-        userInfo.innerHTML = `
-          <span style="color: #666;">👤 ${session.name}</span>
-          <button onclick="AuthSystem.logout()" style="
-            margin-left: 10px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-          ">Salir</button>
-        `;
-        
-        header.style.position = 'relative';
-        header.appendChild(userInfo);
-      }
-    },
+    const header = document.querySelector('.header');
+    if (!header) return;
+  
+    // Evitar duplicados si ya se añadió
+    const existing = document.getElementById('auth-user-info');
+    if (existing) existing.remove();
+  
+    const canLogout = (session.role === 'admin' || session.role === 'supervisor' 
+        || window.location.pathname.split('/').pop() === 'encuesta.html');
+          
+    const userInfo = document.createElement('div');
+    userInfo.id = 'auth-user-info';
+    userInfo.style.cssText = `
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      background: rgba(255,255,255,0.95);
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 9999;
+    `;
+  
+    // Etiqueta de rol con color según rol
+    const roleColor = session.role === 'admin' ? '#dc3545'
+                     : session.role === 'supervisor' ? '#0d6efd'
+                     : '#6c757d';
+  
+    userInfo.innerHTML = `
+      <span style="color: #444;">👤 ${session.name}</span>
+      <span style="
+        background: ${roleColor}1a;
+        color: ${roleColor};
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-weight: 600;
+        text-transform: capitalize;
+      ">${session.role}</span>
+      ${canLogout ? `
+        <button onclick="AuthSystem.logout()" style="
+          background: #dc3545;
+          color: white;
+          border: none;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 11px;
+          cursor: pointer;
+        ">Salir</button>` : ''}
+    `;
+  
+    header.style.position = 'relative';
+    header.appendChild(userInfo);
+  },
   
     // Cerrar sesión
     logout() {

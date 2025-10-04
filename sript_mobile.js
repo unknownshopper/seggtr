@@ -110,3 +110,7 @@ class MobileSurvey {
       });
     }
   });
+
+  window.mobileSurvey = window.mobileSurvey || {
+    showToast: (msg) => console.log('[toast]', msg)
+  };
