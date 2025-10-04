@@ -31,30 +31,31 @@
           <label for="zona">Zona *</label>
           <select id="zona" name="zona" required>
             <option value="">Selecciona…</option>
+            <option>Atasta de Serra</option>
+            <option>Carrizal</option>
+            <option>Casa Blanca</option>
             <option>Centro</option>
-            <option>Tabasco 2000</option>
-            <option>Tamaraindos</option>
-            <option>Gaviotas</option>
-            <option>Monal</option>
-            <option>La Manga</option>
+            <option>Cunduacán</option>
             <option>Dos Montes</option>
             <option>El Refugio</option>
-            <option>Otra</option>
-            <option>Casa Blanca</option>
-            <option>Atasta de Serra</option>
-            <option>José María Pino Suárez</option>
-            <option>Tierra Colorada</option>
-            <option>Primero de Mayo</option>
-            <option>José Colomo</option>
-            <option>Carrizal</option>
-            <option>Tamulté de las Sabanas</option>
-            <option>Parrilla</option>
-            <option>Macultepec</option>
-            <option>Ocuitzapotlán</option>
-            <option>Nacajuca</option>
+            <option>Gaviotas</option>
             <option>Jalpa de Méndez</option>
-            <option>Cunduacán</option>
+            <option>José Colomo</option>
+            <option>José María Pino Suárez</option>
+            <option>La Manga</option>
+            <option>Macultepec</option>
+            <option>Monal</option>
+            <option>Nacajuca</option>
+            <option>Ocuitzapotlán</option>
+            <option>Parrilla</option>
+            <option>Primero de Mayo</option>
+            <option>Tabasco 2000</option>
+            <option>Tamaraindos</option>
+            <option>Tamulté de las Sabanas</option>
+            <option>Tierra Colorada</option>
+            <option>Otro</option>
           </select>
+          <input id="zona_otro" name="zona_otro" type="text" placeholder="Especifica la colonia" style="display:none; margin-top:6px;" />
         </div>
       </div>
 
@@ -90,6 +91,8 @@
             <option>Sí</option>
             <option>No</option>
           </select>
+          <input id="moto_actual" name="moto_actual" type="text" placeholder="Especifica marca/modelo de tu moto" style="display:none; margin-top:6px;" />
+
         </div>
         <div>
           <label for="intencion">Intención de compra (0–10) *</label>
@@ -296,7 +299,11 @@
       <!-- Lote 2: Atributos valorados, Barreras extendidas, Servicio/Postventa -->
 
 <fieldset class="section">
-  <legend>Atributos valorados (1 = Nada, 5 = Muy importante)</legend>
+     <legend>Atributos valorados al elegir una moto eléctrica</legend>
+     <div style="margin-bottom: 15px; padding: 10px; background-color: #f0f8ff; border-left: 4px solid #28a745; font-size: 14px;">
+       <strong>Instrucciones:</strong> Califica qué tan importante es cada característica para ti al momento de elegir una moto eléctrica.
+       <br><strong>1 = Nada importante</strong> | <strong>3 = Moderadamente importante</strong> | <strong>5 = Muy importante</strong>
+     </div>
   <div class="row">
     <div>
       <label for="atr_precio">Precio</label>
@@ -350,19 +357,23 @@
 </fieldset>
 
 <fieldset class="section">
-  <legend>Barreras extendidas</legend>
+  <legend>Barreras para comprar una moto eléctrica</legend>
+  <div style="margin-bottom: 15px; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #007bff; font-size: 14px;">
+    <strong>Instrucciones:</strong> Selecciona todas las razones que te harían dudar o evitar comprar una moto eléctrica. 
+    Marca todas las opciones que consideres como obstáculos o preocupaciones para ti.
+  </div>
   <div class="group">
-    <label><input type="checkbox" name="barreras_ext" value="Costo inicial" /> Costo inicial</label>
-    <label><input type="checkbox" name="barreras_ext" value="Costo mantenimiento" /> Costo mantenimiento</label>
-    <label><input type="checkbox" name="barreras_ext" value="Refacciones disponibles" /> Refacciones disponibles</label>
-    <label><input type="checkbox" name="barreras_ext" value="Puntos de carga" /> Puntos de carga</label>
-    <label><input type="checkbox" name="barreras_ext" value="Autonomía" /> Autonomía</label>
-    <label><input type="checkbox" name="barreras_ext" value="Desempeño" /> Desempeño</label>
-    <label><input type="checkbox" name="barreras_ext" value="Garantía" /> Garantía</label>
-    <label><input type="checkbox" name="barreras_ext" value="Servicio técnico" /> Servicio técnico</label>
-    <label><input type="checkbox" name="barreras_ext" value="Disponibilidad inmediata" /> Disponibilidad inmediata</label>
-    <label><input type="checkbox" name="barreras_ext" value="Financiamiento" /> Financiamiento</label>
-    <label><input type="checkbox" name="barreras_ext" value="Desconocimiento" /> Desconocimiento</label>
+    <label><input type="checkbox" name="barreras_ext" value="Costo inicial" /> Costo inicial muy alto</label>
+    <label><input type="checkbox" name="barreras_ext" value="Costo mantenimiento" /> Costo de mantenimiento incierto</label>
+    <label><input type="checkbox" name="barreras_ext" value="Refacciones disponibles" /> Falta de refacciones disponibles</label>
+    <label><input type="checkbox" name="barreras_ext" value="Puntos de carga" /> Pocos puntos de carga</label>
+    <label><input type="checkbox" name="barreras_ext" value="Autonomía" /> Autonomía insuficiente</label>
+    <label><input type="checkbox" name="barreras_ext" value="Desempeño" /> Desempeño inferior a moto de gasolina</label>
+    <label><input type="checkbox" name="barreras_ext" value="Garantía" /> Garantía limitada o poco clara</label>
+    <label><input type="checkbox" name="barreras_ext" value="Servicio técnico" /> Falta de servicio técnico especializado</label>
+    <label><input type="checkbox" name="barreras_ext" value="Disponibilidad inmediata" /> No hay disponibilidad inmediata</label>
+    <label><input type="checkbox" name="barreras_ext" value="Financiamiento" /> Opciones de financiamiento limitadas</label>
+    <label><input type="checkbox" name="barreras_ext" value="Desconocimiento" /> Falta de información sobre la tecnología</label>
   </div>
 </fieldset>
 
@@ -459,32 +470,6 @@
   </div>
 </fieldset>
 
-<fieldset class="section">
-  <legend>Marcas consideradas (ampliado)</legend>
-  <div class="row">
-    <div>
-      <label for="marca_top">Marca preferida</label>
-      <input id="marca_top" name="marca_top" type="text" placeholder="Omomobility / Italika / NIU / ..." />
-    </div>
-    <div>
-      <label for="marca_alt">Segunda opción</label>
-      <input id="marca_alt" name="marca_alt" type="text" />
-    </div>
-  </div>
-  <div class="row">
-    <div>
-      <label for="presupuesto_max">Presupuesto máximo (MXN)</label>
-      <input id="presupuesto_max" name="presupuesto_max" type="number" min="0" step="500" />
-    </div>
-    <div>
-      <label for="tiempo_decision">Tiempo esperado para decidir</label>
-      <select id="tiempo_decision" name="tiempo_decision">
-        <option value="">Selecciona…</option>
-        <option>Este mes</option><option>1–3 meses</option><option>3–6 meses</option><option>>6 meses</option>
-      </select>
-    </div>
-  </div>
-</fieldset>
 
 <fieldset class="section">
   <legend>Preguntas abiertas adicionales</legend>
