@@ -81,13 +81,24 @@ class DashboardManager {
   }
   
   renderAgeChart() {
-    const ctx = document.getElementById('ageChart').getContext('2d');
-    
+    const canvas = document.getElementById('ageChart');
+    if (!canvas) return;
+  
+    // Forzar tamaño fijo del canvas
+    canvas.width = 400;
+    canvas.height = 300;
+    canvas.style.width = '400px';
+    canvas.style.height = '300px';
+    canvas.style.maxWidth = '400px';
+    canvas.style.maxHeight = '300px';
+  
+    const ctx = canvas.getContext('2d');
+  
     // Agrupar por rangos de edad
     const ageRanges = {
       '15-25': 0, '26-35': 0, '36-45': 0, '46-55': 0, '56+': 0
     };
-    
+  
     this.data.forEach(item => {
       const age = parseInt(item.edad);
       if (age <= 25) ageRanges['15-25']++;
@@ -96,9 +107,9 @@ class DashboardManager {
       else if (age <= 55) ageRanges['46-55']++;
       else ageRanges['56+']++;
     });
-    
+  
     if (this.charts.age) this.charts.age.destroy();
-    
+  
     this.charts.age = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -112,23 +123,33 @@ class DashboardManager {
         }]
       },
       options: {
-        responsive: true,
+        responsive: false,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        }
+        animation: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
       }
     });
   }
   
   renderIntentionChart() {
-    const ctx = document.getElementById('intentionChart').getContext('2d');
-    
-    // Agrupar por rangos de intención
+    const canvas = document.getElementById('intentionChart');
+    if (!canvas) return;
+  
+    // Forzar tamaño fijo del canvas
+    canvas.width = 400;
+    canvas.height = 300;
+    canvas.style.width = '400px';
+    canvas.style.height = '300px';
+    canvas.style.maxWidth = '400px';
+    canvas.style.maxHeight = '300px';
+  
+    const ctx = canvas.getContext('2d');
+  
     const intentionRanges = {
       '0-2': 0, '3-4': 0, '5-6': 0, '7-8': 0, '9-10': 0
     };
-    
+  
     this.data.forEach(item => {
       const intention = parseInt(item.intencion);
       if (intention <= 2) intentionRanges['0-2']++;
@@ -137,104 +158,130 @@ class DashboardManager {
       else if (intention <= 8) intentionRanges['7-8']++;
       else intentionRanges['9-10']++;
     });
-    
+  
     if (this.charts.intention) this.charts.intention.destroy();
-    
+  
     this.charts.intention = new Chart(ctx, {
       type: 'doughnut',
       data: {
         labels: Object.keys(intentionRanges),
         datasets: [{
           data: Object.values(intentionRanges),
-          backgroundColor: [
-            '#e53e3e', '#fd7f28', '#fbbf24', '#34d399', '#10b981'
-          ]
+          backgroundColor: ['#e53e3e', '#fd7f28', '#fbbf24', '#34d399', '#10b981']
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false
+        responsive: false,
+        maintainAspectRatio: false,
+        animation: false
       }
     });
   }
   
   renderZoneChart() {
-    const ctx = document.getElementById('zoneChart').getContext('2d');
-    
+    const canvas = document.getElementById('zoneChart');
+    if (!canvas) return;
+  
+    // Forzar tamaño fijo del canvas
+    canvas.width = 400;
+    canvas.height = 300;
+    canvas.style.width = '400px';
+    canvas.style.height = '300px';
+    canvas.style.maxWidth = '400px';
+    canvas.style.maxHeight = '300px';
+  
+    const ctx = canvas.getContext('2d');
+  
     const zoneCounts = {};
     this.data.forEach(item => {
       const zone = item.zona || 'Sin especificar';
       zoneCounts[zone] = (zoneCounts[zone] || 0) + 1;
     });
-    
-    // Tomar solo las top 8 zonas
+  
     const sortedZones = Object.entries(zoneCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 8);
-    
+  
     if (this.charts.zone) this.charts.zone.destroy();
-    
+  
     this.charts.zone = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: sortedZones.map(([zone]) => zone),
         datasets: [{
           label: 'Encuestados por zona',
-          data: sortedZones.map(([,count]) => count),
+          data: sortedZones.map(([, count]) => count),
           backgroundColor: 'rgba(14, 165, 233, 0.8)',
           borderColor: 'rgba(14, 165, 233, 1)',
           borderWidth: 1
         }]
       },
       options: {
-        responsive: true,
+        responsive: false,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        },
+        animation: false,
+        plugins: { legend: { display: false } },
         scales: {
-          x: {
-            ticks: {
-              maxRotation: 45
-            }
-          }
+          x: { ticks: { maxRotation: 45 } },
+          y: { beginAtZero: true }
         }
       }
     });
   }
   
   renderOccupationChart() {
-    const ctx = document.getElementById('occupationChart').getContext('2d');
-    
+    const canvas = document.getElementById('occupationChart');
+    if (!canvas) return;
+  
+    // Forzar tamaño fijo del canvas
+    canvas.width = 400;
+    canvas.height = 300;
+    canvas.style.width = '400px';
+    canvas.style.height = '300px';
+    canvas.style.maxWidth = '400px';
+    canvas.style.maxHeight = '300px';
+  
+    const ctx = canvas.getContext('2d');
+  
     const occupationCounts = {};
     this.data.forEach(item => {
       const occupation = item.ocupacion || 'Sin especificar';
       occupationCounts[occupation] = (occupationCounts[occupation] || 0) + 1;
     });
-    
+  
     if (this.charts.occupation) this.charts.occupation.destroy();
-    
+  
     this.charts.occupation = new Chart(ctx, {
       type: 'pie',
       data: {
         labels: Object.keys(occupationCounts),
         datasets: [{
           data: Object.values(occupationCounts),
-          backgroundColor: [
-            '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'
-          ]
+          backgroundColor: ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444']
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false
+        responsive: false,
+        maintainAspectRatio: false,
+        animation: false
       }
     });
   }
   
   renderBarriersChart() {
-    const ctx = document.getElementById('barriersChart').getContext('2d');
-    
+    const canvas = document.getElementById('barriersChart');
+    if (!canvas) return;
+  
+    // Forzar tamaño fijo del canvas
+    canvas.width = 400;
+    canvas.height = 300;
+    canvas.style.width = '400px';
+    canvas.style.height = '300px';
+    canvas.style.maxWidth = '400px';
+    canvas.style.maxHeight = '300px';
+  
+    const ctx = canvas.getContext('2d');
+  
     const barrierCounts = {};
     this.data.forEach(item => {
       const barriers = (item.barreras || '').split('|').filter(b => b.trim());
@@ -242,60 +289,70 @@ class DashboardManager {
         barrierCounts[barrier] = (barrierCounts[barrier] || 0) + 1;
       });
     });
-    
+  
     const sortedBarriers = Object.entries(barrierCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 6);
-    
+  
     if (this.charts.barriers) this.charts.barriers.destroy();
-    
+  
     this.charts.barriers = new Chart(ctx, {
-      type: 'horizontalBar',
+      type: 'bar',
       data: {
         labels: sortedBarriers.map(([barrier]) => barrier),
         datasets: [{
           label: 'Frecuencia',
-          data: sortedBarriers.map(([,count]) => count),
+          data: sortedBarriers.map(([, count]) => count),
           backgroundColor: 'rgba(239, 68, 68, 0.8)',
           borderColor: 'rgba(239, 68, 68, 1)',
           borderWidth: 1
         }]
       },
       options: {
-        responsive: true,
+        responsive: false,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        }
+        animation: false,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } }
       }
     });
   }
   
   renderAwarenessChart() {
-    const ctx = document.getElementById('awarenessChart').getContext('2d');
-    
+    const canvas = document.getElementById('awarenessChart');
+    if (!canvas) return;
+  
+    // Forzar tamaño fijo del canvas
+    canvas.width = 400;
+    canvas.height = 300;
+    canvas.style.width = '400px';
+    canvas.style.height = '300px';
+    canvas.style.maxWidth = '400px';
+    canvas.style.maxHeight = '300px';
+  
+    const ctx = canvas.getContext('2d');
+  
     const awarenessCounts = {};
     this.data.forEach(item => {
       const awareness = item.awareness_omo || 'Sin respuesta';
       awarenessCounts[awareness] = (awarenessCounts[awareness] || 0) + 1;
     });
-    
+  
     if (this.charts.awareness) this.charts.awareness.destroy();
-    
+  
     this.charts.awareness = new Chart(ctx, {
       type: 'doughnut',
       data: {
         labels: Object.keys(awarenessCounts),
         datasets: [{
           data: Object.values(awarenessCounts),
-          backgroundColor: [
-            '#6366f1', '#8b5cf6', '#a855f7', '#c084fc', '#d8b4fe'
-          ]
+          backgroundColor: ['#6366f1', '#8b5cf6', '#a855f7', '#c084fc', '#d8b4fe']
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false
+        responsive: false,
+        maintainAspectRatio: false,
+        animation: false
       }
     });
   }
