@@ -103,15 +103,85 @@ function setInterviewerIdFromSession() {
       const session = AuthSystem.getSession();
       username = session?.username || '';
     }
+    // Si la sesión aún no trae username, usar email de Firebase si existe
+    if (!username && window.fbAuth && window.fbAuth.currentUser) {
+      username = window.fbAuth.currentUser.email || window.fbAuth.currentUser.uid || '';
+    }
   } catch (_) {}
 
+  // Derivar un ID visible y normalizado para el encuestador
   if (username) {
-    field.value = username;
-    field.readOnly = true;              // Lo fija para evitar cambios manuales
+    const u = String(username).toLowerCase();
+    let display = u;
+
+    if (u.includes('@')) {
+      const [local, domain] = u.split('@');
+      if (domain === 'omobility.com') {
+        if (local === 'encuestador') display = 'encuestador1';
+        else if (/^encuestador[23]$/.test(local)) display = local; // encuestador2 o encuestador3
+        else if (local === 'admin') display = 'admin';
+        else display = local;
+      } else {
+        display = local; // otros dominios: usar la parte local
+      }
+    } else {
+      // usuario local sin dominio
+      if (u === 'admin') display = 'admin';
+      else if (u === 'encuestador') display = 'encuestador';
+      else display = u;
+    }
+
+    field.value = display;
+    field.placeholder = display;
+    field.readOnly = true; // Bloqueado
     field.style.backgroundColor = '#f7f7f7';
     field.title = 'Autocompletado desde sesión';
   }
 }
+
+function userCanSubmitSurvey() {
+  try {
+    if (window.AuthSystem && typeof AuthSystem.getSession === 'function') {
+      const s = AuthSystem.getSession();
+      const role = (s?.role || '').toLowerCase();
+      if (role === 'encuestador' || role === 'admin') return true;
+    }
+    // Fallback: si ya hay usuario de Firebase pero la sesión local aún no tiene rol,
+    // damos permiso como encuestador para no bloquear el envío.
+    if (window.fbAuth && window.fbAuth.currentUser) {
+      return true;
+    }
+  } catch (_) {}
+  // Por defecto, ser conservadores
+  return false;
+}
+
+function enforceSurveyPermissions() {
+  const formEncuestaEl = document.getElementById('formEncuesta');
+  if (!formEncuestaEl) return;
+  const submitBtn = formEncuestaEl.querySelector('button[type="submit"]');
+
+  const can = userCanSubmitSurvey();
+  if (!can) {
+    // Deshabilitar envío para supervisor (u otros no permitidos)
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add('outline');
+      submitBtn.title = 'Solo encuestadores y admin pueden enviar';
+      submitBtn.textContent = 'Sin permiso para enviar';
+    }
+  } else {
+    // Asegurar habilitado cuando sí puede
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('outline');
+      submitBtn.title = '';
+      submitBtn.textContent = 'Enviar respuesta';
+    }
+  }
+}
+
+
 
 const FormHandler = {
   serializeForm(form) {
@@ -163,8 +233,17 @@ const FormHandler = {
     const formEncuestaEl = document.getElementById('formEncuesta');
     if (!formEncuestaEl) return;
   
+    // Ajusta el botón según permisos (supervisor deshabilitado)
+    enforceSurveyPermissions();
+  
     formEncuestaEl.addEventListener('submit', async (e) => {
       e.preventDefault();
+  
+      // Defensa adicional si el estado de sesión cambia tarde
+      if (!userCanSubmitSurvey()) {
+        alert('No tienes permiso para enviar esta encuesta.');
+        return;
+      }
   
       const submitBtn = formEncuestaEl.querySelector('button[type="submit"]');
       const originalText = submitBtn ? submitBtn.textContent : '';
@@ -194,8 +273,7 @@ const FormHandler = {
           geo_accuracy: row.geo_accuracy
         };
   
-        // 4) Generar imagen de evidencia (PNG base64) con overlay de metadatos
-        //    Guardamos dataURL en el registro. Nota: localStorage tiene límites (~5MB).
+        // 4) Generar imagen de evidencia (JPEG base64) con overlay de metadatos
         let imageDataUrl = null;
         try {
           imageDataUrl = await generateSurveyImage(formEncuestaEl, metadata);
@@ -234,7 +312,77 @@ const FormHandler = {
       }
     });
   },
+
+  // ——— Remember me helpers ———
+  getRememberFlag() {
+    try { return localStorage.getItem('omo_remember_me') === '1'; } catch { return false; }
+  },
+  setRememberFlag(v) {
+    try { localStorage.setItem('omo_remember_me', v ? '1' : '0'); } catch {}
+  },
+  rememberUsername(username) {
+    try { localStorage.setItem('omo_last_user', username || ''); } catch {}
+  },
+  getRememberedUsername() {
+    try { return localStorage.getItem('omo_last_user') || ''; } catch { return ''; }
+  },
+  ensureRememberUI() {
+    const form = document.getElementById('loginForm');
+    if (!form) return;
+    let remember = form.querySelector('#rememberMe');
+    if (!remember) {
+      const holder = document.createElement('div');
+      holder.style.cssText = 'margin:6px 0; display:flex; align-items:center; gap:6px; font-size:12px;';
+      holder.innerHTML = `
+        <input type="checkbox" id="rememberMe" />
+        <label for="rememberMe">Recordarme en este dispositivo</label>
+      `;
+      form.appendChild(holder);
+      remember = holder.querySelector('#rememberMe');
+    }
+    remember.checked = this.getRememberFlag();
   
+    // Prefill username
+    const userInput = document.getElementById('username');
+    if (userInput) {
+      const last = this.getRememberedUsername();
+      if (last && !userInput.value) userInput.value = last;
+    }
+  
+    // Persistir cambio de la casilla
+    remember.addEventListener('change', () => this.setRememberFlag(remember.checked));
+  },
+
+ensureRememberUI() {
+  const form = document.getElementById('loginForm');
+  if (!form) return;
+  let remember = form.querySelector('#rememberMe');
+  if (!remember) {
+    // Insertar UI simple
+    const holder = document.createElement('div');
+    holder.style.cssText = 'margin:6px 0; display:flex; align-items:center; gap:6px; font-size:12px;';
+    holder.innerHTML = `
+      <input type="checkbox" id="rememberMe" />
+      <label for="rememberMe">Recordarme en este dispositivo</label>
+    `;
+    form.appendChild(holder);
+    remember = holder.querySelector('#rememberMe');
+  }
+  remember.checked = this.getRememberFlag();
+
+  // Prefill username
+  const userInput = document.getElementById('username');
+  if (userInput) {
+    const last = this.getRememberedUsername();
+    if (last && !userInput.value) userInput.value = last;
+  }
+
+  // Persistir cambio de la casilla
+  remember.addEventListener('change', () => this.setRememberFlag(remember.checked));
+},
+
+  
+
   setupConditionalFields() {
     const ocupacionSelect = document.getElementById('ocupacion');
     if (ocupacionSelect) {
@@ -283,7 +431,7 @@ const FormHandler = {
       });
     }
   },
-  
+
   init() {
     // Intento inmediato (puede ya existir sesión previa en localStorage)
     setInterviewerIdFromSession();
@@ -292,6 +440,21 @@ const FormHandler = {
     setTimeout(() => {
       setInterviewerIdFromSession();
     }, 600);
+  
+    // Aplicar permisos (botón Enviar)
+    enforceSurveyPermissions();
+    // Reintentos escalonados
+    setTimeout(() => enforceSurveyPermissions(), 600);
+    setTimeout(() => enforceSurveyPermissions(), 1500);
+    setTimeout(() => enforceSurveyPermissions(), 3000);
+  
+    // Polling defensivo que se corta cuando ya hay permiso
+    const permInterval = setInterval(() => {
+      enforceSurveyPermissions();
+      if (userCanSubmitSurvey()) clearInterval(permInterval);
+    }, 1500);
+    // Auto-stop de seguridad a los 10s
+    setTimeout(() => clearInterval(permInterval), 10000);
   
     this.setupFormSubmission();
     this.setupConditionalFields();

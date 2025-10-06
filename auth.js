@@ -144,28 +144,49 @@ isAuthenticated() {
   return true;
 },
 
-  // Obtener sesión actual
-  getSession() {
-    try {
-      // Si hay usuario Firebase, combinar con datos locales (temporal para rol)
-      const u = (window.fbAuth && window.fbAuth.currentUser) ? window.fbAuth.currentUser : null;
-      if (u) {
-        const fallback = JSON.parse(localStorage.getItem('omomobility_session') || '{}');
-        return {
-          username: u.email || u.uid,
-          role: fallback.role || 'encuestador',
-          name: u.displayName || fallback.name || (u.email ? u.email.split('@')[0] : 'Usuario'),
-          loginTime: fallback.loginTime || new Date().toISOString(),
-          expires: fallback.expires || new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString()
-        };
+// Obtener sesión actual
+getSession() {
+  try {
+    // 1) Leer primero la sesión local estable
+    const localRaw = localStorage.getItem('omomobility_session');
+    const localSess = localRaw ? JSON.parse(localRaw) : null;
+    if (localSess) {
+      // Normalizar: si username es 'admin', forzar rol admin
+      if ((localSess.username || '').toLowerCase() === 'admin') {
+        localSess.role = 'admin';
       }
-      // Fallback local puro
-      const sessionData = localStorage.getItem('omomobility_session');
-      return sessionData ? JSON.parse(sessionData) : null;
-    } catch {
-      return null;
     }
-  },
+
+    // 2) Si hay usuario Firebase, combinar datos, PERO mantener rol del local si existe
+    const u = (window.fbAuth && window.fbAuth.currentUser) ? window.fbAuth.currentUser : null;
+    if (u) {
+      const combined = {
+        username: u.email || u.uid,
+        role: (localSess && localSess.role) ? localSess.role : 'encuestador',
+        name: u.displayName || (localSess?.name) || (u.email ? u.email.split('@')[0] : 'Usuario'),
+        loginTime: (localSess?.loginTime) || new Date().toISOString(),
+        expires: (localSess?.expires) || new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString()
+      };
+      // Normalizar admin por username
+      if ((combined.username || '').toLowerCase() === 'admin') {
+        combined.role = 'admin';
+      }
+      return combined;
+    }
+
+    // 3) Sin Firebase: devolver local
+    if (localSess) {
+      if ((localSess.username || '').toLowerCase() === 'admin') {
+        localSess.role = 'admin';
+      }
+      return localSess;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+},
 
   // Verificar autenticación y autorización por página
   checkAuthOnProtectedPages() {
@@ -200,33 +221,38 @@ isAuthenticated() {
     }
   },
 
-  // Regla de autorización por página y rol
-  canAccess(page, role) {
-    const p = (page || '').toLowerCase();
+// Regla de autorización por página y rol
+canAccess(page, role) {
+  const p = (page || '').toLowerCase();
 
-    // Admin: acceso total
-    if (role === 'admin') return true;
+  // Admin: acceso total
+  if (role === 'admin') return true;
 
-    // Encuestador: SOLO encuesta.html
-    if (role === 'encuestador') {
-      return p === 'encuesta.html';
-    }
+  // Encuestador: SOLO encuesta.html y puede ver listado
+  if (role === 'encuestador') {
+    const allowed = [
+      'encuesta.html',
+      'listadeencuestas.html'
+    ];
+    return allowed.includes(p);
+  }
 
-    // Supervisor: index + páginas informativas + encuesta
-    if (role === 'supervisor') {
-      const allowed = [
-        'index.html',
-        'encuesta.html',
-        'carta_propuesta_omomobility.html',
-        'presentacion.html',
-        'resultados.html'
-      ];
-      return allowed.includes(p);
-    }
+  // Supervisor: index + páginas informativas + encuesta + listado
+  if (role === 'supervisor') {
+    const allowed = [
+      'index.html',
+      'encuesta.html',
+      'carta_propuesta_omomobility.html',
+      'presentacion.html',
+      'resultados.html',
+      'listadeencuestas.html'
+    ];
+    return allowed.includes(p);
+  }
 
-    // Rol desconocido: negar
-    return false;
-  },
+  // Rol desconocido: negar
+  return false;
+},
 
   // Restringir enlaces en index para roles sin permiso
   restrictLinksOnIndex(role) {

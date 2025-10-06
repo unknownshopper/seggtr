@@ -147,17 +147,40 @@
     function canDelete(role) { return role === 'admin'; }
 
     function loadSession() {
-      try {
-        const s = (window.AuthSystem && typeof AuthSystem.getSession === 'function') ? AuthSystem.getSession() : null;
-        state.role = (s && s.role) ? s.role : 'encuestador';
-        const badge = document.getElementById('roleBadge');
-        if (badge) {
-          badge.innerHTML = '<span class="muted">Rol:</span> ' + getRoleBadge(state.role);
+  const prev = state.role;
+  let role = 'encuestador';
+
+  try {
+    if (window.AuthSystem && typeof AuthSystem.getSession === 'function') {
+      const s = AuthSystem.getSession();
+      if (s?.role) role = s.role;
+      if ((s?.username || '').toLowerCase() === 'admin') {
+        role = 'admin';
+      }
+    } else {
+      // fallback al localStorage directo
+      const raw = localStorage.getItem('omomobility_session');
+      if (raw) {
+        const sess = JSON.parse(raw);
+        role = sess?.role || role;
+        if ((sess?.username || '').toLowerCase() === 'admin') {
+          role = 'admin';
         }
-      } catch {
-        state.role = 'encuestador';
       }
     }
+  } catch(_) {}
+
+  state.role = role;
+
+  const badge = document.getElementById('roleBadge');
+  if (badge) {
+    badge.innerHTML = '<span class="muted">Rol:</span> ' + getRoleBadge(state.role);
+  }
+
+  if (state.role !== prev) {
+    render();
+  }
+}
 
     function loadData() {
       const rows = DataManager.readAll() || [];
@@ -336,19 +359,45 @@
 
     document.getElementById('saveEdit').addEventListener('click', saveEdit);
 
-    // Inicialización
-    document.addEventListener('DOMContentLoaded', () => {
-      loadSession();
-      loadData();
-      wireEvents();
 
-      // Restringir vistas si no autenticado
-      if (!canView(state.role)) {
-        alert('No tienes permisos para acceder.');
-        window.location.href = 'login.html';
-      }
-    });
-  })();
+    function watchRoleReady() {
+  let tries = 0;
+  const iv = setInterval(() => {
+    const prev = state.role;
+    loadSession();            // vuelve a leer AuthSystem.getSession()
+    if (state.role !== prev) {
+      render();               // re-dibuja acciones según nuevo rol
+    }
+    // corta si ya resolvió o tras ~3s (10*300ms)
+    if (state.role === 'admin' || state.role === 'supervisor' || ++tries >= 10) {
+      clearInterval(iv);
+    }
+  }, 300);
+}
+
+
+  // Inicialización
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1) Enforce auth/role mapping (redirige si no puede entrar)
+    if (window.AuthSystem && typeof AuthSystem.checkAuthOnProtectedPages === 'function') {
+      AuthSystem.checkAuthOnProtectedPages();
+    }
+
+    // 2) Cargar sesión/tabla/eventos
+    loadSession();
+    loadData();
+    wireEvents();
+
+    // 3) Observa actualización de rol hasta que esté listo (por si la sesión llega tarde)
+    watchRoleReady();
+
+    // 4) Defensa extra (si no puede ver, salir)
+    if (!canView(state.role)) {
+      alert('No tienes permisos para acceder.');
+      window.location.href = 'login.html';
+    }
+  });
+})();
   </script>
 </body>
 </html>
