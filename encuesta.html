@@ -21,7 +21,14 @@
     </header>
 
     <form id="formEncuesta">
-      <!-- Campos base originales -->
+      <!-- Identificación del encuestador -->
+      <div class="row">
+        <div>
+          <label for="encuestador_id">ID del encuestador *</label>
+          <input id="encuestador_id" name="encuestador_id" type="text" required placeholder="Ej. E-001" />
+          <small class="note">Este dato aparecerá en la evidencia (imagen) y en el registro.</small>
+        </div>
+      </div>
       <div class="row">
         <div>
           <label for="edad">Edad *</label>
@@ -501,6 +508,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   
   <script src="data-manager.js"></script>
   <script src="form-handler.js"></script>

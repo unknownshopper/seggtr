@@ -4,6 +4,8 @@ const AuthSystem = {
   users: {
     admin: { password: 'shopper01', role: 'admin', name: 'Administrador' },
     encuestador: { password: 'enc123', role: 'encuestador', name: 'Encuestador' },
+    encuestador2: { password: 'enc123', role: 'encuestador', name: 'Encuestador2' },
+    encuestador3: { password: 'enc123', role: 'encuestador', name: 'Encuestador3' },
     supervisor: { password: 'RolexMiami', role: 'supervisor', name: 'OswDom123' }
   },
 

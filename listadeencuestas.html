@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lista de encuestas — Omomobility</title>
+  <link rel="icon" href="logcho.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 16px 0; }
+    .search { min-width: 220px; }
+    table { width: 100%; border-collapse: collapse; background: var(--paper); }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    th { text-align: left; font-weight: 600; color: var(--muted); background: #fafafa; }
+    .actions { display: flex; gap: 6px; }
+    .pill { padding: 2px 8px; border-radius: 999px; font-size: 12px; display: inline-block; }
+    .role-admin { background: #dc35451a; color: #dc3545; }
+    .role-supervisor { background: #0d6efd1a; color: #0d6efd; }
+    .role-encuestador { background: #6c757d1a; color: #6c757d; }
+    .pagination { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+    .btn.small { padding: 6px 10px; font-size: 12px; }
+    .muted { color: var(--muted); }
+    .nowrap { white-space: nowrap; }
+    .w100 { width: 100px; } .w120 { width: 120px; } .w160 { width: 160px; }
+    .thumb { max-width: 140px; max-height: 90px; border: 1px solid var(--border); border-radius: 6px; }
+    .note { font-size: 12px; color: var(--muted); }
+    .header-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    dialog { border: none; border-radius: 10px; padding: 0; max-width: 720px; width: 90%; }
+    .modal { padding: 16px; }
+    .modal h3 { margin: 0 0 8px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field input, .field select, .field textarea { padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
+    .right { text-align: right; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header" style="position: relative;">
+      <img class="logo" src="logcho.png" alt="Omomobility" onerror="this.onerror=null; this.src='logch.png'"/>
+      <div>
+        <h1>Lista de encuestas</h1>
+        <p class="lead">Consulta y gestiona hasta 250 encuestas almacenadas localmente.</p>
+      </div>
+      <div id="roleBadge" class="header-actions"></div>
+    </header>
+
+    <div class="toolbar">
+      <input id="search" class="search" type="text" placeholder="Buscar por encuestador, zona, comentarios..." />
+      <select id="pageSize" class="btn outline small">
+        <option value="25">25 por página</option>
+        <option value="50" selected>50 por página</option>
+        <option value="100">100 por página</option>
+      </select>
+      <span id="countInfo" class="note"></span>
+      <div class="header-actions">
+        <a href="index.html" class="btn outline small">← Inicio</a>
+        <a href="encuesta.html" class="btn small">Nueva encuesta</a>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="w160">Fecha</th>
+            <th>Encuestador</th>
+            <th>Zona</th>
+            <th class="w100">Edad</th>
+            <th class="w100">Intención</th>
+            <th class="w120">Ubicación</th>
+            <th>Evidencia</th>
+            <th class="w160">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="pagination">
+        <button id="prev" class="btn outline small">Anterior</button>
+        <span id="pageInfo" class="note"></span>
+        <button id="next" class="btn outline small">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="viewModal">
+    <div class="modal">
+      <h3>Detalle de encuesta</h3>
+      <div id="detail"></div>
+      <div class="right" style="margin-top: 12px;">
+        <button class="btn" onclick="document.getElementById('viewModal').close()">Cerrar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="editModal">
+    <div class="modal">
+      <h3>Editar encuesta</h3>
+      <div class="grid-2">
+        <div class="field">
+          <label>Edad</label>
+          <input id="edit_edad" type="number" min="15" max="80"/>
+        </div>
+        <div class="field">
+          <label>Intención (0–10)</label>
+          <input id="edit_intencion" type="number" min="0" max="10"/>
+        </div>
+        <div class="field">
+          <label>Zona</label>
+          <input id="edit_zona" type="text" />
+        </div>
+        <div class="field">
+          <label>Comentarios</label>
+          <textarea id="edit_comentarios" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="right" style="margin-top: 12px;">
+        <button class="btn outline" onclick="document.getElementById('editModal').close()">Cancelar</button>
+        <button id="saveEdit" class="btn">Guardar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="data-manager.js"></script>
+  <script src="auth.js"></script>
+  <script>
+  (function() {
+    const MAX = 250; // mostrar máximo 250
+    const state = {
+      role: 'encuestador',
+      page: 1,
+      pageSize: 50,
+      filtered: [],
+      all: [],
+      editIndex: null
+    };
+
+    function getRoleBadge(role) {
+      const cls = role === 'admin' ? 'role-admin' : role === 'supervisor' ? 'role-supervisor' : 'role-encuestador';
+      return '<span class="pill ' + cls + '">' + role + '</span>';
+    }
+
+    function canView(role) { return ['admin', 'supervisor', 'encuestador'].includes(role); }
+    function canEdit(role) { return role === 'admin'; }
+    function canDelete(role) { return role === 'admin'; }
+
+    function loadSession() {
+      try {
+        const s = (window.AuthSystem && typeof AuthSystem.getSession === 'function') ? AuthSystem.getSession() : null;
+        state.role = (s && s.role) ? s.role : 'encuestador';
+        const badge = document.getElementById('roleBadge');
+        if (badge) {
+          badge.innerHTML = '<span class="muted">Rol:</span> ' + getRoleBadge(state.role);
+        }
+      } catch {
+        state.role = 'encuestador';
+      }
+    }
+
+    function loadData() {
+      const rows = DataManager.readAll() || [];
+      // No truncamos almacenamiento; truncamos la vista
+      state.all = rows.slice(0, MAX);
+      applyFilter();
+    }
+
+    function applyFilter() {
+      const q = (document.getElementById('search').value || '').toLowerCase().trim();
+      const list = state.all.filter(r => {
+        const hay = (v) => (v ?? '').toString().toLowerCase().includes(q);
+        return !q ||
+          hay(r.encuestador_id) ||
+          hay(r.zona) ||
+          hay(r.comentarios) ||
+          hay(r.ts);
+      });
+      state.filtered = list;
+      state.page = 1;
+      render();
+    }
+
+    function paginate(arr) {
+      const start = (state.page - 1) * state.pageSize;
+      return arr.slice(start, start + state.pageSize);
+    }
+
+    function fmtDate(iso) {
+      try { return new Date(iso).toLocaleString(); } catch { return iso || ''; }
+    }
+
+    function fmtGeo(r) {
+      if (r.geo_lat == null || r.geo_lng == null) return '<span class=\"muted\">N/A</span>';
+      const acc = (r.geo_accuracy != null) ? ` ±${Math.round(r.geo_accuracy)}m` : '';
+      return `${Number(r.geo_lat).toFixed(5)}, ${Number(r.geo_lng).toFixed(5)}${acc}`;
+    }
+
+    function render() {
+      const total = state.filtered.length;
+      const pages = Math.max(1, Math.ceil(total / state.pageSize));
+      state.page = Math.min(state.page, pages);
+
+      const tbody = document.getElementById('rows');
+      tbody.innerHTML = '';
+
+      const pageRows = paginate(state.filtered);
+      pageRows.forEach((r, i) => {
+        const idx = (state.page - 1) * state.pageSize + i; // índice real en filtered
+        // Enlace a evidencia (thumbnail inline si existe)
+        const evidence = r.image_proof_png
+          ? `<img class="thumb" src="${r.image_proof_png}" alt="evidencia" />`
+          : `<span class="muted">Sin imagen</span>`;
+
+        const actions = [];
+        actions.push(`<button class="btn outline small" data-action="view" data-idx="${idx}">Ver</button>`);
+        if (canEdit(state.role)) actions.push(`<button class="btn outline small" data-action="edit" data-idx="${idx}">Editar</button>`);
+        if (canDelete(state.role)) actions.push(`<button class="btn outline small" style="color:#e53e3e;border-color:#e53e3e" data-action="delete" data-idx="${idx}">Eliminar</button>`);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="nowrap">${fmtDate(r.ts)}</td>
+          <td>${r.encuestador_id || '<span class="muted">N/A</span>'}</td>
+          <td>${r.zona || '<span class="muted">N/A</span>'}</td>
+          <td class="nowrap">${r.edad ?? ''}</td>
+          <td class="nowrap">${r.intencion ?? ''}</td>
+          <td class="nowrap">${fmtGeo(r)}</td>
+          <td>${evidence}</td>
+          <td><div class="actions">${actions.join('')}</div></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('pageInfo').textContent = `Página ${state.page} de ${pages}`;
+      document.getElementById('countInfo').textContent = `${total} encuestas (mostrando máx. ${MAX})`;
+      document.getElementById('prev').disabled = state.page <= 1;
+      document.getElementById('next').disabled = state.page >= pages;
+    }
+
+    function wireEvents() {
+      document.getElementById('search').addEventListener('input', () => applyFilter());
+      document.getElementById('pageSize').addEventListener('change', (e) => {
+        state.pageSize = parseInt(e.target.value, 10) || 50;
+        render();
+      });
+      document.getElementById('prev').addEventListener('click', () => { state.page = Math.max(1, state.page - 1); render(); });
+      document.getElementById('next').addEventListener('click', () => {
+        const total = state.filtered.length;
+        const pages = Math.max(1, Math.ceil(total / state.pageSize));
+        state.page = Math.min(pages, state.page + 1);
+        render();
+      });
+
+      document.getElementById('rows').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const action = btn.getAttribute('data-action');
+        const idx = parseInt(btn.getAttribute('data-idx'), 10);
+        const realItem = state.filtered[idx];
+        if (!realItem) return;
+
+        if (action === 'view') {
+          openView(realItem);
+        }
+        if (action === 'edit' && canEdit(state.role)) {
+          openEdit(realItem);
+        }
+        if (action === 'delete' && canDelete(state.role)) {
+          doDelete(realItem);
+        }
+      });
+    }
+
+    function openView(r) {
+      const pre = document.createElement('pre');
+      pre.style.whiteSpace = 'pre-wrap';
+      pre.style.font = '12px/1.4 monospace';
+      pre.textContent = JSON.stringify(r, null, 2);
+      const box = document.getElementById('detail');
+      box.innerHTML = '';
+      box.appendChild(pre);
+      document.getElementById('viewModal').showModal();
+    }
+
+    function openEdit(r) {
+      const idx = state.all.indexOf(r);
+      state.editIndex = idx;
+      document.getElementById('edit_edad').value = r.edad ?? '';
+      document.getElementById('edit_intencion').value = r.intencion ?? '';
+      document.getElementById('edit_zona').value = r.zona ?? '';
+      document.getElementById('edit_comentarios').value = r.comentarios ?? '';
+      document.getElementById('editModal').showModal();
+    }
+
+    function doDelete(r) {
+      if (!confirm('¿Eliminar esta encuesta? Esta acción no se puede deshacer.')) return;
+      const all = DataManager.readAll();
+      const pos = all.indexOf(r);
+      // Si no encontró por referencia (por recreación), hacemos match por ts+encuestador_id
+      let removed = false;
+      if (pos >= 0) {
+        all.splice(pos, 1);
+        removed = true;
+      } else {
+        const idx = all.findIndex(x => x.ts === r.ts && x.encuestador_id === r.encuestador_id);
+        if (idx >= 0) { all.splice(idx, 1); removed = true; }
+      }
+      if (removed) {
+        DataManager.writeAll(all);
+        loadData(); // refrescar
+        alert('Encuesta eliminada.');
+      } else {
+        alert('No se pudo eliminar (no encontrada).');
+      }
+    }
+
+    function saveEdit() {
+      const idx = state.editIndex;
+      if (idx == null || idx < 0) { document.getElementById('editModal').close(); return; }
+      const all = DataManager.readAll();
+      // Buscar por ts+encuestador_id para mayor robustez
+      const ref = state.all[idx];
+      const real = all.find(x => x.ts === ref.ts && x.encuestador_id === ref.encuestador_id);
+      if (!real) { alert('No se pudo guardar, registro no encontrado.'); return; }
+
+      real.edad = Number(document.getElementById('edit_edad').value) || real.edad;
+      real.intencion = Number(document.getElementById('edit_intencion').value) || real.intencion;
+      real.zona = document.getElementById('edit_zona').value || real.zona;
+      real.comentarios = document.getElementById('edit_comentarios').value || real.comentarios;
+
+      DataManager.writeAll(all);
+      document.getElementById('editModal').close();
+      loadData();
+      alert('Cambios guardados.');
+    }
+
+    document.getElementById('saveEdit').addEventListener('click', saveEdit);
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSession();
+      loadData();
+      wireEvents();
+
+      // Restringir vistas si no autenticado
+      if (!canView(state.role)) {
+        alert('No tienes permisos para acceder.');
+        window.location.href = 'login.html';
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
