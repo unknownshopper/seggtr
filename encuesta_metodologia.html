@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Omomobility • Metodología de Encuesta</title>
+  <meta name="description" content="Itinerario operativo, cuotas por punto y horarios recomendados para el levantamiento de 250 encuestas en Villahermosa." />
+  <link rel="icon" href="logcho.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* KPIs */
+    .kpis{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:12px }
+    @media (max-width:900px){ .kpis{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+    @media (max-width:640px){ .kpis{ grid-template-columns:1fr } }
+    .kpi{ background:var(--paper); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow:0 6px 14px rgba(10,31,68,.06) }
+    .kpi .k{ font:700 22px/1 "Inter",sans-serif; color:var(--ink); margin:0 0 6px }
+    .kpi .l{ color:var(--muted); font-size:13px; margin:0 }
+    /* Listas limpias */
+    .clean ul{ margin:6px 0 0 18px }
+    .badge{ display:inline-block; padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); background:#f8fafc; color:#0f172a }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <img class="logo" src="logcho.png" alt="The Unknown Shopper — logotipo" onerror="this.onerror=null; this.src='logch.png'" />
+      <div class="titles">
+        <h1>Metodología de Encuesta (Operación de Campo)</h1>
+        <p>Itinerario, cuotas y horarios para 250 encuestas en 3 zonas de Villahermosa.</p>
+      </div>
+      <div class="meta"><div id="generated">--/--/----</div></div>
+    </header>
+
+    <main class="page">
+      <h2 class="section-title">KPIs del levantamiento</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="k">250</div><p class="l">Encuestas totales</p></div>
+        <div class="kpi"><div class="k">3</div><p class="l">Zonas operativas</p></div>
+        <div class="kpi"><div class="k">6-8</div><p class="l">Enc/h realista por encuestador</p></div>
+        <div class="kpi"><div class="k">10-12</div><p class="l">Enc/h objetivo en picos</p></div>
+      </div>
+
+      <h2 class="section-title">Itinerario y cuotas por punto</h2>
+
+      <div class="card clean">
+        <h3>Punto A — 100 encuestas <span class="badge">Centro (Taxis/Colectivos)</span></h3>
+        <p><strong>Ubicación:</strong> C. Hermanos Bastar Zozaya & C. Eusebio Castillo, Centro Delegación Cinco, 86000 Villahermosa.</p>
+        <p><strong>Horarios sugeridos:</strong></p>
+        <ul>
+          <li>07:00-10:00 (pico AM) → 45 encuestas</li>
+          <li>12:00-14:00 (mediodía) → 20 encuestas</li>
+          <li>17:00-20:00 (pico PM) → 35 encuestas</li>
+        </ul>
+        <p><strong>Dotación:</strong> 3 encuestadores. Ritmo: 10-12 enc/hora por equipo (6-8 enc/h realista por persona).</p>
+      </div>
+
+      <div class="card clean">
+        <h3>Punto B — 100 encuestas <span class="badge">IMSS 46 (Casa Blanca)</span></h3>
+        <p><strong>Ubicación:</strong> IMSS HGZ No.46 “Dr. Bartolomé Reynés Berezaluce”, Av. Universidad s/n, Casa Blanca 2A. Sección, 86060 Villahermosa.</p>
+        <p><strong>Horarios sugeridos:</strong></p>
+        <ul>
+          <li>07:00-10:00 → 45 encuestas</li>
+          <li>12:00-14:00 → 20 encuestas</li>
+          <li>16:00-19:00 → 35 encuestas</li>
+        </ul>
+        <p><strong>Dotación:</strong> 3 encuestadores. Ritmo: 10-12 enc/hora por equipo (6-8 enc/h por persona).</p>
+      </div>
+
+      <div class="card clean">
+        <h3>Punto C — 50 encuestas <span class="badge">Soriana Híper San Joaquín</span></h3>
+        <p><strong>Ubicación:</strong> Perif. Carlos Pellicer Cámara s/n, 18 de Marzo, 86127 Villahermosa.</p>
+        <p><strong>Horarios sugeridos:</strong></p>
+        <ul>
+          <li>11:00-14:00 → 20 encuestas</li>
+          <li>17:00-20:00 → 30 encuestas</li>
+        </ul>
+        <p><strong>Dotación:</strong> 2 encuestadores. Ritmo: 10-12 enc/hora por equipo (6-8 enc/h por persona).</p>
+      </div>
+
+      <h2 class="section-title">Lineamientos operativos</h2>
+      <div class="card clean">
+        <ul>
+          <li><strong>Cribado rápido:</strong> ¿Usa moto actualmente? Si “Sí”, continuar; si “No”, registrar motivo y cerrar.</li>
+          <li><strong>Variables clave:</strong> motivo de uso (trabajo/reparto/personal), zona origen, punto de compra/servicio (Waldos/Walmart/Chedraui/Liverpool/Remo/Otro), percepción de refacciones y tiempos, intención de compra y rango de precio.</li>
+          <li><strong>Ética y permisos:</strong> identificación, carta de proyecto, no fotos de personas sin consentimiento.</li>
+          <li><strong>Logística:</strong> QR a encuesta `encuesta.html?punto=A|B|C`, powerbank y datos móviles.</li>
+        </ul>
+      </div>
+
+      <h2 class="section-title">Notas de productividad</h2>
+      <div class="card clean">
+        <ul>
+          <li>Ritmo realista: 6-8 enc/h por persona en afluencia media.</li>
+          <li>En picos se puede alcanzar 10-12 enc/h con cribado ágil.</li>
+          <li>Objetivo de día completo: cumplir 250 en 3 zonas distribuidas como 100/100/50.</li>
+          <li>El ejercicio podrá concluirse en una sola visita a cada zona si las condiciones son favorables para el levantamiento.</li>
+        </ul>
+      </div>
+
+      <div class="foot">
+        <a href="index.html">← Volver al portal</a>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div>Proyecto • The Unknown Shopper</div>
+      <div id="generated">--/--/----</div>
+    </footer>
+  </div>
+
+  <script>
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    const el = document.getElementById('generated');
+    if (el) el.textContent = `${dd}/${mm}/${yyyy}`;
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

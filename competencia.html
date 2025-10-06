@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Omomobility • Estudio de Mercado — Competencia</title>
+  <meta name="description" content="Comparativo de competencia, tablas y gráficas del estudio de mercado en Villahermosa." />
+  <link rel="icon" href="logcho.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Fallback por si aún no agregas estilos de .datatable en style.css */
+    table.fallback { width:100%; border-collapse:collapse; font-size:14px }
+    table.fallback th, table.fallback td { padding:10px 12px; border-bottom:1px solid #e5e7eb; text-align:left; vertical-align:top }
+    table.fallback thead th { background:#fff; position:sticky; top:0; z-index:1; font-weight:600 }
+    table.fallback tbody tr:nth-child(even){ background:#fafafa }
+    table.fallback td:first-child { white-space:nowrap; font-weight:600 }
+    /* Testimonios (.testi) */
+.testi{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:14px;
+}
+@media (max-width:800px){ .testi{ grid-template-columns: 1fr } }
+
+.testi p{
+  margin:0;
+  background: var(--paper);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px 14px 18px;
+  color: var(--ink);
+  box-shadow: 0 6px 14px rgba(10,31,68,.06);
+  position: relative;
+  border-left:4px solid var(--primary);
+}
+
+/* Comilla decorativa */
+.testi p::before{
+  content: "“";
+  position:absolute;
+  top:-8px;
+  left:10px;
+  font-size:36px;
+  color:#e2e8f0;
+  line-height:1;
+}
+
+/* Autor (si se usa <small> dentro del <p>) */
+.testi p small{
+  display:block;
+  margin-top:8px;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 13px;
+}
+
+/* Lista de lugares dentro de testimonios (chips) */
+.testi-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:8px 0 6px 0;
+  padding:0;
+  list-style:none;
+}
+.testi-list li{
+  background: var(--paper);
+  color: var(--ink);
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:13px;
+}
+@media (max-width:640px){
+  .testi p{ padding:12px 14px 12px 16px }
+  .testi p::before{ font-size:28px }
+  .testi p small{ font-size:12px }
+  .testi-list li{ font-size:12px; padding:5px 9px }
+}   
+/* Globo de testimonio con contenido mixto (texto + lista) */
+.testi .testi-card{
+  background: var(--paper);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px 14px 18px;
+  color: var(--ink);
+  box-shadow: 0 6px 14px rgba(10,31,68,.06);
+  position: relative;
+  border-left:4px solid var(--primary);
+}
+
+/* Comilla decorativa consistente con .testi p */
+.testi .testi-card::before{
+  content: "“";
+  position:absolute;
+  top:-8px;
+  left:10px;
+  font-size:36px;
+  color:#e2e8f0;
+  line-height:1;
+}
+
+/* Autor dentro del globo */
+.testi .testi-card small{
+  display:block;
+  margin-top:8px;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 13px;
+}
+
+/* Ajustes responsive */
+@media (max-width:640px){
+  .testi .testi-card{ padding:12px 14px 12px 16px }
+  .testi .testi-card::before{ font-size:28px }
+  .testi .testi-card small{ font-size:12px }
+}
+/* KPIs y badges */
+.kpis{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:12px }
+@media (max-width:900px){ .kpis{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+@media (max-width:640px){ .kpis{ grid-template-columns:1fr } }
+
+.kpi{ background:var(--paper); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow:0 6px 14px rgba(10,31,68,.06) }
+.kpi .k{ font:700 22px/1 "Inter",sans-serif; color:var(--ink); margin:0 0 6px }
+.kpi .l{ color:var(--muted); font-size:13px; margin:0 }
+
+.badge{ display:inline-block; padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); background:#f8fafc; color:#0f172a }
+.badge.ok{ background:#ecfdf5; color:#065f46; border-color:#bbf7d0 }
+.badge.warn{ background:#fffbeb; color:#92400e; border-color:#fde68a }
+.badge.no{ background:#fef2f2; color:#991b1b; border-color:#fecaca }
+
+  </style>
+ 
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <img class="logo" src="logcho.png" alt="The Unknown Shopper — logotipo" onerror="this.onerror=null; this.src='logch.png'" />
+      <div class="titles">
+        <h1>Competencia y oferta actual</h1>
+        <p>Comparativo por tienda: autonomía, servicio, refacciones, garantía, precios y tienda en línea.</p>
+      </div>
+      <div class="meta">
+        <div><strong>Página:</strong> Competencia</div>
+      </div>
+    </header>
+
+    <main class="page">
+      <h2 class="section-title">Comparativo de competencia (datos de campo)</h2>
+      <div class="kpis">
+        <div class="kpi">
+          <div class="k">9</div>
+          <p class="l">Tiendas evaluadas</p>
+        </div>
+        <div class="kpi">
+          <div class="k">5</div>
+          <p class="l">Con tienda en línea</p>
+        </div>
+        <div class="kpi">
+          <div class="k">3</div>
+          <p class="l">Sin producto/activación (Elektra, Mega, Soriana)</p>
+        </div>
+        <div class="kpi">
+          <div class="k">1 año</div>
+          <p class="l">Garantía líder (Walmart, Chedraui, Liverpool, Remo)</p>
+        </div>
+      </div>
+      <div class="card" style="overflow:auto;">
+        <table class="datatable fallback">
+            <thead>
+                <tr>
+                  <th scope="col">Tienda</th>
+                  <th scope="col">Autonomía</th>
+                  <th scope="col">Servicio</th>
+                  <th scope="col">Refacciones</th>
+                  <th scope="col">Garantía</th>
+                  <th scope="col">Precios (MXN)</th>
+                  <th scope="col">Tienda en línea</th>
+                  <th scope="col">Disponibilidad</th>
+                </tr>
+              </thead>
+          <tbody>
+            <tr>
+              <td>Waldos Moto</td>
+              <td>50-60 km</td>
+              <td>Tamulté</td>
+              <td>Taller hace pedidos</td>
+              <td>6 meses</td>
+              <td>6-9k; <br>11-13k; <br>21-24k</td>
+              <td>Sí</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Waldos Strada</td>
+              <td>50-60 km</td>
+              <td>Tamulté</td>
+              <td>Taller hace pedidos</td>
+              <td>6 meses</td>
+              <td>6-9k; <br>11-13k; <br>21-24k</td>
+              <td>Sí</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Walmart</td>
+              <td>50-60 km</td>
+              <td>Mr Volt</td>
+              <td>Taller hace pedidos</td>
+              <td>1 año</td>
+              <td>6-9k</td>
+              <td>Sí</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Chedraui</td>
+              <td>50-60 km</td>
+              <td>El Valeroso</td>
+              <td>Taller hace pedidos</td>
+              <td>1 año</td>
+              <td>6-9k</td>
+              <td>Sí</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Liverpool</td>
+              <td>50-60 km</td>
+              <td>Mr Volt</td>
+              <td>Taller hace pedidos</td>
+              <td>1 año</td>
+              <td>21-24k</td>
+              <td>Sí</td>
+              <td></td>
+            </tr>
+            <tr>
+                <td>Elektra</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>Activación de producto próximamente</td>
+              </tr>
+              <tr>
+                <td>Mega</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>No hay producto en existencia</td>
+              </tr>
+              <tr>
+                <td>Soriana</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>No hay producto en existencia</td>
+              </tr>
+            <tr>
+                <td>Remo Motos</td>
+                <td>50-60 km	</td>
+                <td>Remo Motos</td>
+                <td>Remo Motos</td>
+                <td>1 año</td>
+                <td>6-9k; <br>11-13k; </td>
+                <td>No</td>
+                <td></td>
+              </tr>
+          </tbody>
+        </table>
+        <div class="note">Talleres asociados: Mr Volt (Liverpool), El Valeroso (Chedraui), Tamulté (Waldos).</div>
+      </div>
+
+      <h2 class="section-title">Testimonios de importancia</h2>
+<div class="card">
+  <div class="testi">
+    <p>
+      "La falta de refacciones es la principal causa por la que quedamos mal con el cliente."
+      <small>Mr Volt</small>
+    </p>
+
+    <p>
+      "La falta de información al cliente sobre el cuidado del equipo por parte del vendedor es importante para la vida útil del producto."
+      <small>Taller Valeroso</small>
+    </p>
+
+    <p>
+      "La mayoría de tiendas se desentienden de las garantías y se tiran la bolita."
+      <small>Tamulté</small>
+    </p>
+
+        <p>"El 90% de las motos se las llevan a otros municipios como <strong>Macuspana</strong>, <strong>Jalpa</strong>, <strong>Teapa</strong> y <strong>Reforma</strong>, por lo que la mayoría de las ventas se realizan fuera de Villahermosa." <br> <small>Remo Motos</small></p>
+
+    <p>
+      "Nuestro deseo es trabajar con una marca que nos pueda proveer refacciones rápidamente, para poder resolver problemas de los clientes."
+      <small>Mr Volt, El Valeroso</small>
+    </p>
+
+    <p>
+        "La principal falla de los vehículos es la batería, en su mayoría de veces la falta de información sobre el cuidado de la batería al cliente"
+        <small>El Valeroso</small>
+      </p>
+  </div>
+</div>
+
+
+      <!-- <div class="foot">
+        <a href="index.html">← Volver al portal</a>
+      </div> -->
+    </main>
+
+    <footer class="footer">
+      <div>Proyecto • The Unknown Shopper</div>
+      <div id="generated">--/--/----</div>
+    </footer>
+  </div>
+
+  <script>
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    const el = document.getElementById('generated');
+    if (el) el.textContent = `${dd}/${mm}/${yyyy}`;
+ 
+
+  
+  </script>
+</body>
+</html>
