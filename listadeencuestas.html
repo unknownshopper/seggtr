@@ -11,29 +11,56 @@
     .page { max-width: 1200px; margin: 0 auto; padding: 16px; }
     .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 16px 0; }
     .search { min-width: 220px; }
-    table { width: 100%; border-collapse: collapse; background: var(--paper); }
+  
+    /* Tabla mejorada */
+    table { width: 100%; border-collapse: collapse; background: var(--paper); border-radius: 12px; overflow: hidden; }
     th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
-    th { text-align: left; font-weight: 600; color: var(--muted); background: #fafafa; }
+    th { position: sticky; top: 0; z-index: 1; text-align: left; font-weight: 600; color: var(--muted); background: #f7f7f7; backdrop-filter: blur(4px); }
+    tbody tr:nth-child(odd) { background: #fcfcfc; }
+    tbody tr:hover { background: #fffbe6; }
+  
     .actions { display: flex; gap: 6px; }
     .pill { padding: 2px 8px; border-radius: 999px; font-size: 12px; display: inline-block; }
     .role-admin { background: #dc35451a; color: #dc3545; }
     .role-supervisor { background: #0d6efd1a; color: #0d6efd; }
     .role-encuestador { background: #6c757d1a; color: #6c757d; }
+  
     .pagination { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
     .btn.small { padding: 6px 10px; font-size: 12px; }
     .muted { color: var(--muted); }
     .nowrap { white-space: nowrap; }
     .w100 { width: 100px; } .w120 { width: 120px; } .w160 { width: 160px; }
-    .thumb { max-width: 140px; max-height: 90px; border: 1px solid var(--border); border-radius: 6px; }
-    .note { font-size: 12px; color: var(--muted); }
-    .header-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-    dialog { border: none; border-radius: 10px; padding: 0; max-width: 720px; width: 90%; }
-    .modal { padding: 16px; }
-    .modal h3 { margin: 0 0 8px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field input, .field select, .field textarea { padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
-    .right { text-align: right; }
+  
+    /* Evidencia */
+    .thumb { max-width: 120px; max-height: 80px; border: 1px solid var(--border); border-radius: 8px; transition: transform .15s ease, box-shadow .15s ease; }
+    .thumb:hover { transform: scale(1.4); box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+  
+    /* Celdas mejoradas */
+    .cell-user { display: flex; align-items: center; gap: 8px; }
+    .avatar {
+      width: 28px; height: 28px; border-radius: 999px;
+      background: #eef2ff; color: #4f46e5; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px; border: 1px solid #e5e7eb;
+    }
+    .chip {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      background: #f0fdf4; color: #16a34a; font-size: 12px; border: 1px solid #e2e8f0;
+    }
+    .num { text-align: center; font-variant-numeric: tabular-nums; }
+    .geo { color: #64748b; font-size: 12px; }
+  
+    /* Barra de intención mini */
+    .intent {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .intent-bar {
+      width: 90px; height: 8px; border-radius: 999px; background: #e5e7eb; overflow: hidden; border: 1px solid #e2e8f0;
+    }
+    .intent-fill {
+      height: 100%; background: linear-gradient(90deg, #34d399, #10b981);
+      width: 0%;
+    }
   </style>
 </head>
 <body>
@@ -91,6 +118,29 @@
       <div id="detail"></div>
       <div class="right" style="margin-top: 12px;">
         <button class="btn" onclick="document.getElementById('viewModal').close()">Cerrar</button>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="imageModal">
+    <div class="modal">
+      <h3>Evidencia</h3>
+      <div class="img-wrap" id="imageWrap"></div>
+      <div class="detail" style="margin-top: 10px;">
+        <div class="kv">
+          <label>Encuestador</label>
+          <div class="val" id="img_encuestador">—</div>
+        </div>
+        <div class="kv">
+          <label>Fecha</label>
+          <div class="val" id="img_fecha">—</div>
+        </div>
+        <div class="kv">
+          <label>Ubicación</label>
+          <div class="val mono" id="img_geo">—</div>
+        </div>
+      </div>
+      <div class="right" style="margin-top: 12px;">
+        <button class="btn" onclick="document.getElementById('imageModal').close()">Cerrar</button>
       </div>
     </div>
   </dialog>
@@ -242,15 +292,28 @@
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="nowrap">${fmtDate(r.ts)}</td>
-          <td>${r.encuestador_id || '<span class="muted">N/A</span>'}</td>
-          <td>${r.zona || '<span class="muted">N/A</span>'}</td>
-          <td class="nowrap">${r.edad ?? ''}</td>
-          <td class="nowrap">${r.intencion ?? ''}</td>
-          <td class="nowrap">${fmtGeo(r)}</td>
-          <td>${evidence}</td>
-          <td><div class="actions">${actions.join('')}</div></td>
-        `;
+        <td class="nowrap">${fmtDate(r.ts)}</td>
+        <td>
+          <div class="cell-user">
+            <span class="avatar">${(r.encuestador_id || 'NA').toString().trim().slice(0,2).toUpperCase()}</span>
+            <span>${r.encuestador_id || '<span class="muted">N/A</span>'}</span>
+          </div>
+        </td>
+        <td><span class="chip">${(r.zona || 'Sin especificar')}</span></td>
+        <td class="num">${r.edad ?? ''}</td>
+        <td class="num">
+          <div class="intent">
+            <div class="intent-bar"><div class="intent-fill" style="width: ${Math.max(0, Math.min(100, Number(r.intencion || 0) * 10))}%;"></div></div>
+            <span>${r.intencion ?? ''}</span>
+          </div>
+        </td>
+        <td class="nowrap"><span class="geo">${fmtGeo(r)}</span></td>
+<td>
+  ${r.image_proof_png
+    ? `<img class="thumb" src="${r.image_proof_png}" alt="evidencia" data-action="evidence" data-idx="${idx}" />`
+    : `<span class="muted">Sin imagen</span>`}
+</td>        <td><div class="actions">${actions.join('')}</div></td>
+      `;
         tbody.appendChild(tr);
       });
 
@@ -275,36 +338,81 @@
       });
 
       document.getElementById('rows').addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-action]');
-        if (!btn) return;
-        const action = btn.getAttribute('data-action');
-        const idx = parseInt(btn.getAttribute('data-idx'), 10);
+      // Click en evidencia (imagen)
+      const img = e.target.closest('img.thumb[data-action="evidence"]');
+      if (img) {
+        const idx = parseInt(img.getAttribute('data-idx'), 10);
         const realItem = state.filtered[idx];
-        if (!realItem) return;
+        if (realItem) openImage(realItem);
+        return;
+      }
 
-        if (action === 'view') {
-          openView(realItem);
-        }
-        if (action === 'edit' && canEdit(state.role)) {
-          openEdit(realItem);
-        }
-        if (action === 'delete' && canDelete(state.role)) {
-          doDelete(realItem);
-        }
-      });
+      // Click en botones de acciones
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const action = btn.getAttribute('data-action');
+      const idx = parseInt(btn.getAttribute('data-idx'), 10);
+      const realItem = state.filtered[idx];
+      if (!realItem) return;
+
+      if (action === 'view') {
+        openView(realItem);
+      }
+      if (action === 'edit' && canEdit(state.role)) {
+        openEdit(realItem);
+      }
+      if (action === 'delete' && canDelete(state.role)) {
+        doDelete(realItem);
+      }
+    });
     }
 
     function openView(r) {
-      const pre = document.createElement('pre');
-      pre.style.whiteSpace = 'pre-wrap';
-      pre.style.font = '12px/1.4 monospace';
-      pre.textContent = JSON.stringify(r, null, 2);
       const box = document.getElementById('detail');
-      box.innerHTML = '';
-      box.appendChild(pre);
+      const geoTxt = fmtGeo(r);
+      const barreras = (r.barreras || '').toString();
+      const marcaAsistida = (r.marca_asistida || '').toString();
+
+      box.innerHTML = `
+        <div class="detail">
+          <div class="kv"><label>Fecha</label><div class="val">${fmtDate(r.ts)}</div></div>
+          <div class="kv"><label>Encuestador</label><div class="val">${r.encuestador_id || '<span class="muted">N/A</span>'}</div></div>
+          <div class="kv"><label>Zona</label><div class="val">${r.zona || '<span class="muted">N/A</span>'}</div></div>
+          <div class="kv"><label>Edad</label><div class="val">${r.edad ?? ''}</div></div>
+          <div class="kv"><label>Intención (0–10)</label><div class="val">${r.intencion ?? ''}</div></div>
+          <div class="kv"><label>Ubicación</label><div class="val mono">${geoTxt}</div></div>
+
+          <div class="kv full"><label>Comentarios</label><div class="val">${(r.comentarios || '').toString() || '<span class="muted">—</span>'}</div></div>
+          <div class="kv full"><label>Barreras</label><div class="val">${barreras || '<span class="muted">—</span>'}</div></div>
+
+          <div class="kv"><label>Marca considerada</label><div class="val">${(r.marca || '').toString() || '<span class="muted">—</span>'}</div></div>
+          <div class="kv"><label>Awareness OMO</label><div class="val">${(r.awareness_omo || '').toString() || '<span class="muted">—</span>'}</div></div>
+
+          ${r.image_proof_png ? `
+            <div class="kv full">
+              <label>Evidencia</label>
+              <div class="img-wrap"><img src="${r.image_proof_png}" alt="evidencia"/></div>
+            </div>
+          ` : ''}
+        </div>
+      `;
       document.getElementById('viewModal').showModal();
     }
+    function openImage(r) {
+      const wrap = document.getElementById('imageWrap');
+      wrap.innerHTML = r.image_proof_png
+        ? `<img src="${r.image_proof_png}" alt="Evidencia"/>`
+        : '<div class="muted">Sin imagen</div>';
 
+      document.getElementById('img_encuestador').textContent = r.encuestador_id || '—';
+      document.getElementById('img_fecha').textContent = fmtDate(r.ts);
+      document.getElementById('img_geo').textContent =
+        (r.geo_lat != null && r.geo_lng != null)
+          ? `${Number(r.geo_lat).toFixed(5)}, ${Number(r.geo_lng).toFixed(5)}${r.geo_accuracy != null ? ' ±' + Math.round(r.geo_accuracy) + 'm' : ''}`
+          : 'N/A';
+
+      document.getElementById('imageModal').showModal();
+    }
     function openEdit(r) {
       const idx = state.all.indexOf(r);
       state.editIndex = idx;
