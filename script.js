@@ -1,4 +1,7 @@
-// Archivo principal - solo inicialización
+// Inicialización segura por página
 document.addEventListener('DOMContentLoaded', () => {
-  FormHandler.init();
+  const hasForm = !!document.getElementById('formEncuesta');
+  if (hasForm && window.FormHandler && typeof FormHandler.init === 'function') {
+    FormHandler.init();
+  }
 });
