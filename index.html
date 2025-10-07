@@ -107,8 +107,15 @@
 
 
 <!-- Tus scripts -->
-<script src="script.js"></script>
 <script src="auth.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.AuthSystem && typeof AuthSystem.checkAuthOnProtectedPages === 'function') {
+      AuthSystem.checkAuthOnProtectedPages();
+    }
+  });
+</script>
+<script src="script.js"></script>
 
 
 </body>
