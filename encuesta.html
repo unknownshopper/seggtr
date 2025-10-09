@@ -523,5 +523,17 @@
   
   <!-- Al final el que llama a FormHandler.init() -->
   <script src="script.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      // Llamada tardía y segura
+      setTimeout(() => {
+        try { 
+          if (typeof setInterviewerIdFromSession === 'function') {
+            setInterviewerIdFromSession();
+          }
+        } catch (_) {}
+      }, 0);
+    });
+  </script>
 </body>
 </html>

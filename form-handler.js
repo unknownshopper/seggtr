@@ -109,33 +109,45 @@ function setInterviewerIdFromSession() {
     }
   } catch (_) {}
 
-  // Derivar un ID visible y normalizado para el encuestador
+  // Derivar un ID visible y normalizado para el encuestador/admin
+  let display = '';
   if (username) {
     const u = String(username).toLowerCase();
-    let display = u;
 
     if (u.includes('@')) {
       const [local, domain] = u.split('@');
       if (domain === 'omobility.com') {
-        if (local === 'encuestador') display = 'encuestador1';
-        else if (/^encuestador[23]$/.test(local)) display = local; // encuestador2 o encuestador3
-        else if (local === 'admin') display = 'admin';
-        else display = local;
+        if (local === 'admin') {
+          display = 'admin';
+        } else if (local.startsWith('encuestador')) {
+          display = 'Encuestador'; // Mostrar literal “Encuestador”
+        } else {
+          display = local; // otros usuarios del dominio
+        }
       } else {
-        display = local; // otros dominios: usar la parte local
+        // otros dominios: usar la parte local tal cual
+        display = local;
       }
     } else {
       // usuario local sin dominio
       if (u === 'admin') display = 'admin';
-      else if (u === 'encuestador') display = 'encuestador';
+      else if (u.startsWith('encuestador')) display = 'Encuestador';
       else display = u;
     }
+  }
 
+  if (display) {
     field.value = display;
     field.placeholder = display;
-    field.readOnly = true; // Bloqueado
+    field.readOnly = true;            // bloquear edición
     field.style.backgroundColor = '#f7f7f7';
     field.title = 'Autocompletado desde sesión';
+
+    // Protección extra contra cambios manuales
+    const lockVal = () => { field.value = display; };
+    field.addEventListener('keydown', (e) => { e.preventDefault(); lockVal(); });
+    field.addEventListener('input', lockVal);
+    field.addEventListener('paste', (e) => { e.preventDefault(); lockVal(); });
   }
 }
 
@@ -316,12 +328,28 @@ const FormHandler = {
         DataManager.writeAll(all);
 
         // 5.1) Intentar guardar en Firestore (no bloquea si falla)
+        // 5.1) Intentar guardar en Firestore (no bloquea si falla)
         try {
           const res = await saveSurveyToFirestore(row);
           if (!res.ok) {
-            console.warn('No se guardó en Firestore:', res.reason);
+            const reason = res.reason || 'error';
+            const msg = `Guardado local OK. Firestore falló: ${reason}`;
+            console.warn('No se guardó en Firestore:', reason);
+            if (window.mobileSurvey && typeof window.mobileSurvey.showToast === 'function') {
+              window.mobileSurvey.showToast(msg, 'error');
+            } else {
+              alert(msg);
+            }
           }
-        } catch (_) {}
+        } catch (e) {
+          const msg = `Guardado local OK. Firestore falló: ${e?.message || 'error'}`;
+          console.warn('No se guardó en Firestore (ex):', e);
+          if (window.mobileSurvey && typeof window.mobileSurvey.showToast === 'function') {
+            window.mobileSurvey.showToast(msg, 'error');
+          } else {
+            alert(msg);
+          }
+        }
 
         
   
@@ -494,5 +522,121 @@ ensureRememberUI() {
   
     this.setupFormSubmission();
     this.setupConditionalFields();
+  
+    // Poll robusto: espera a tener campo y sesión; si sigue vacío, hace fallback directo
+    (function () {
+      const deadline = Date.now() + 10000; // 10s máx
+      const iv = setInterval(() => {
+        const f = document.getElementById('encuestador_id');
+        const sess = (window.AuthSystem && typeof AuthSystem.getSession === 'function') ? AuthSystem.getSession() : null;
+        const hasUser = !!(sess && sess.username);
+  
+        // Si hay campo pero vacío, y ya hay sesión → intenta setInterviewerIdFromSession()
+        if (f && !f.value && hasUser) {
+          setInterviewerIdFromSession();
+  
+          // Fallback directo si sigue vacío
+          if (!f.value) {
+            const u = String(sess.username || '').toLowerCase();
+            let display = '';
+            if (u.includes('@')) {
+              const [local, domain] = u.split('@');
+              if (domain === 'omobility.com') {
+                if (local === 'admin') display = 'admin';
+                else if (local.startsWith('encuestador')) display = 'Encuestador';
+                else display = local;
+              } else {
+                display = local;
+              }
+            } else {
+              if (u === 'admin') display = 'admin';
+              else if (u.startsWith('encuestador')) display = 'Encuestador';
+              else display = u;
+            }
+  
+            if (display) {
+              f.value = display;
+              f.placeholder = display;
+              f.readOnly = true;
+              f.style.backgroundColor = '#f7f7f7';
+              f.title = 'Autocompletado desde sesión';
+              const lockVal = () => { f.value = display; };
+              f.addEventListener('keydown', (e) => { e.preventDefault(); lockVal(); });
+              f.addEventListener('input', lockVal);
+              f.addEventListener('paste', (e) => { e.preventDefault(); lockVal(); });
+            }
+          }
+        }
+  
+        // Si ya está lleno, o se acabó el tiempo → detener
+        if ((f && f.value) || Date.now() > deadline) {
+          clearInterval(iv);
+        }
+      }, 400);
+    })();
+  } // ← cierra el método init()
+};   // ← cierra el objeto FormHandler
+
+// Enforce interviewer ID autofill independent of FormHandler.init()
+(function enforceInterviewerIdAutofill() {
+  function computeDisplayFromUsername(username) {
+    const u = String(username || '').toLowerCase();
+    if (!u) return '';
+    if (u.includes('@')) {
+      const [local, domain] = u.split('@');
+      if (domain === 'omobility.com') {
+        if (local === 'admin') return 'admin';
+        if (local.startsWith('encuestador')) return 'Encuestador';
+        return local;
+      }
+      return local;
+    } else {
+      if (u === 'admin') return 'admin';
+      if (u.startsWith('encuestador')) return 'Encuestador';
+      return u;
+    }
   }
-};
+
+  function lockField(f, display) {
+    f.value = display;
+    f.placeholder = display;
+    f.readOnly = true;
+    f.style.backgroundColor = '#f7f7f7';
+    f.title = 'Autocompletado desde sesión';
+    const lockVal = () => { f.value = display; };
+    f.addEventListener('keydown', (e) => { e.preventDefault(); lockVal(); });
+    f.addEventListener('input', lockVal);
+    f.addEventListener('paste', (e) => { e.preventDefault(); lockVal(); });
+  }
+
+  function tryFill() {
+    const f = document.getElementById('encuestador_id');
+    const sess = (window.AuthSystem && typeof AuthSystem.getSession === 'function') ? AuthSystem.getSession() : null;
+    const username = sess?.username || (window.fbAuth?.currentUser?.email) || '';
+    if (!f || !username) return false;
+
+    if (!f.value) {
+      const display = computeDisplayFromUsername(username);
+      if (display) {
+        lockField(f, display);
+        return true;
+      }
+    }
+    return !!f.value;
+  }
+
+  function start() {
+    const deadline = Date.now() + 15000; // hasta 15s
+    const tick = () => {
+      if (tryFill() || Date.now() > deadline) return;
+      setTimeout(tick, 300);
+    };
+    tick();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();

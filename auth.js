@@ -55,6 +55,7 @@ init() {
   },
 
   // Manejar login
+// Manejar login
 async handleLogin() {
   const emailOrUser = document.getElementById('username')?.value?.trim();
   const password = document.getElementById('password')?.value;
@@ -64,7 +65,7 @@ async handleLogin() {
     return;
   }
 
-  // Login con Firebase (si está disponible)
+  // Intento con Firebase (si está disponible)
   if (window.fbAuth) {
     try {
       const cred = await window.fbAuth.signInWithEmailAndPassword(emailOrUser, password);
@@ -80,7 +81,7 @@ async handleLogin() {
       role = (role || '').toString().trim().toLowerCase();
       if (!['admin','supervisor','encuestador'].includes(role)) {
         role = 'encuestador';
-}
+      }
 
       // 2) Guardar sesión local
       const session = {
@@ -92,7 +93,7 @@ async handleLogin() {
       };
       localStorage.setItem('omomobility_session', JSON.stringify(session));
 
-      // 3) Redirigir por rol (evitar redirigir a la misma página)
+      // 3) Redirigir por rol
       this.showMessage('¡Login exitoso! Redirigiendo...', 'success');
       setTimeout(() => {
         const target = role === 'encuestador' ? 'encuesta.html' : 'index.html';
@@ -101,27 +102,29 @@ async handleLogin() {
           window.location.href = target;
         }
       }, 800);
+      return; // Éxito con Firebase → salir
     } catch (err) {
+      // Falló Firebase → intentar fallback local sin bloquear
       const msg = err?.code ? err.code.replace('auth/', '').replace(/-/g, ' ') : 'Error de autenticación';
-      this.showMessage(msg, 'error');
+      this.showMessage(`Firebase: ${msg}. Probando login local...`, 'error');
+      // Importante: no hacemos return aquí para permitir el fallback local
     }
-    return;
   }
 
-  // Fallback local (sin Firebase)
+  // Fallback local (sin Firebase o si Firebase falló)
   if (this.authenticate(emailOrUser, password)) {
     const user = this.users[emailOrUser];
     this.createSession(emailOrUser, user);
-    this.showMessage('¡Login exitoso! Redirigiendo...', 'success');
+    this.showMessage('Inicio de sesión local (sin Firebase).', 'success');
     setTimeout(() => {
       const target = user.role === 'encuestador' ? 'encuesta.html' : 'index.html';
       const current = window.location.pathname.split('/').pop();
       if (current !== target) {
         window.location.href = target;
       }
-    }, 1000);
+    }, 800);
   } else {
-    this.showMessage('Usuario o contraseña incorrectos', 'error');
+    this.showMessage('Usuario o contraseña incorrectos (local).', 'error');
   }
 },
 
@@ -143,7 +146,6 @@ async handleLogin() {
     localStorage.setItem('omomobility_session', JSON.stringify(session));
   },
 
-  // Verificar si está autenticado
   // Verificar si está autenticado
 isAuthenticated() {
   // Fuente de la verdad: Firebase Auth

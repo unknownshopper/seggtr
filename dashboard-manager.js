@@ -14,14 +14,68 @@ class DashboardManager {
   }
 
   loadData() {
-    try {
-      if (window.DataManager && typeof DataManager.readAll === 'function') {
-        this.data = DataManager.readAll();
-      } else {
-        this.data = JSON.parse(localStorage.getItem('encuestas') || '[]');
+    // Intenta Firestore primero
+    if (window.db) {
+      this.fetchFromFirestore().then(rows => {
+        if (Array.isArray(rows) && rows.length) {
+          this.data = rows;
+        } else {
+          // Fallback a localStorage si no hay datos en Firestore
+          try {
+            if (window.DataManager && typeof DataManager.readAll === 'function') {
+              this.data = DataManager.readAll();
+            } else {
+              this.data = JSON.parse(localStorage.getItem('encuestas') || '[]');
+            }
+          } catch (e) {
+            this.data = [];
+          }
+        }
+        // Render tras cargar
+        this.renderDashboard();
+        this.updateLastUpdateTime();
+      }).catch(() => {
+        // Si falla Firestore, fallback a localStorage
+        try {
+          if (window.DataManager && typeof DataManager.readAll === 'function') {
+            this.data = DataManager.readAll();
+          } else {
+            this.data = JSON.parse(localStorage.getItem('encuestas') || '[]');
+          }
+        } catch (e) {
+          this.data = [];
+        }
+        this.renderDashboard();
+        this.updateLastUpdateTime();
+      });
+    } else {
+      // Sin Firestore disponible: localStorage
+      try {
+        if (window.DataManager && typeof DataManager.readAll === 'function') {
+          this.data = DataManager.readAll();
+        } else {
+          this.data = JSON.parse(localStorage.getItem('encuestas') || '[]');
+        }
+      } catch (e) {
+        this.data = [];
       }
+    }
+  }
+  async fetchFromFirestore() {
+    try {
+      const colRef = window.db.collection('surveys');
+      // Si quieres ordenar por fecha y tienes _createdAt:
+      // const snap = await colRef.orderBy('_createdAt', 'desc').limit(250).get();
+      const snap = await colRef.limit(250).get();
+      const rows = [];
+      snap.forEach(doc => {
+        const d = doc.data() || {};
+        rows.push(d);
+      });
+      return rows;
     } catch (e) {
-      this.data = [];
+      console.warn('Firestore read failed:', e?.message || e);
+      return [];
     }
   }
 
