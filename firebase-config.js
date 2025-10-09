@@ -17,4 +17,4 @@ firebase.initializeApp(firebaseConfig);
 
 // después de firebase.initializeApp(firebaseConfig);
 window.fbAuth = firebase.auth();
-window.db = firebase.firestore();   
+window.db = firebase.firestore(); // ← asegúrate de tener esta línea

@@ -181,7 +181,33 @@ function enforceSurveyPermissions() {
   }
 }
 
+async function saveSurveyToFirestore(row) {
+  try {
+    if (!window.db || !window.fbAuth) return { ok: false, reason: 'no_firebase' };
 
+    const user = window.fbAuth.currentUser;
+    if (!user) return { ok: false, reason: 'no_auth' };
+
+    // Colección donde guardaremos
+    const col = window.db.collection('surveys');
+
+    // Puedes usar add (id autogenerado) o un id determinista por ts+encuestador
+    // Opción simple: add
+    const payload = {
+      ...row,
+      _createdAt: new Date().toISOString(),
+      _createdBy: user.uid,
+      _createdEmail: user.email || null,
+      _origin: location.origin
+    };
+
+    await col.add(payload);
+    return { ok: true };
+  } catch (e) {
+    console.error('Firestore write error:', e);
+    return { ok: false, reason: e?.message || 'error' };
+  }
+}
 
 const FormHandler = {
   serializeForm(form) {
@@ -288,6 +314,16 @@ const FormHandler = {
         const all = DataManager.readAll();
         all.push(row);
         DataManager.writeAll(all);
+
+        // 5.1) Intentar guardar en Firestore (no bloquea si falla)
+        try {
+          const res = await saveSurveyToFirestore(row);
+          if (!res.ok) {
+            console.warn('No se guardó en Firestore:', res.reason);
+          }
+        } catch (_) {}
+
+        
   
         // 6) Limpiar y feedback
         e.target.reset();

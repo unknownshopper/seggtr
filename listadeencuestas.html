@@ -88,6 +88,12 @@
       </div>
     </div>
 
+    <button id="exportCsv" class="btn outline small">Exportar CSV</button>
+<label class="btn outline small" style="cursor:pointer;">
+  Importar CSV
+  <input id="importCsv" type="file" accept=".csv,text/csv" style="display:none;">
+</label>
+
     <div class="table-wrap">
       <table>
         <thead>
@@ -174,6 +180,11 @@
   </dialog>
 
   <script src="data-manager.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Config e inicialización -->
+  <script src="firebase-config.js"></script>
   <script src="auth.js"></script>
   <script>
   (function() {

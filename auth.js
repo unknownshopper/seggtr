@@ -55,7 +55,6 @@ init() {
   },
 
   // Manejar login
- // Reemplaza tu handleLogin completo por esta versión async
 async handleLogin() {
   const emailOrUser = document.getElementById('username')?.value?.trim();
   const password = document.getElementById('password')?.value;
@@ -65,19 +64,25 @@ async handleLogin() {
     return;
   }
 
+  // Login con Firebase (si está disponible)
   if (window.fbAuth) {
     try {
       const cred = await window.fbAuth.signInWithEmailAndPassword(emailOrUser, password);
       const user = cred.user;
 
-      // 1) Traer rol desde Firestore
+      // 1) Traer rol desde Firestore (si existe)
       let role = 'encuestador';
       if (window.db) {
         const snap = await window.db.collection('users').doc(user.uid).get();
         if (snap.exists && snap.data()?.role) role = snap.data().role;
       }
+      // Normalizar role
+      role = (role || '').toString().trim().toLowerCase();
+      if (!['admin','supervisor','encuestador'].includes(role)) {
+        role = 'encuestador';
+}
 
-      // 2) Construir sesión con rol real
+      // 2) Guardar sesión local
       const session = {
         username: user.email || user.uid,
         role,
@@ -87,8 +92,15 @@ async handleLogin() {
       };
       localStorage.setItem('omomobility_session', JSON.stringify(session));
 
+      // 3) Redirigir por rol (evitar redirigir a la misma página)
       this.showMessage('¡Login exitoso! Redirigiendo...', 'success');
-      setTimeout(() => { window.location.href = 'index.html'; }, 800);
+      setTimeout(() => {
+        const target = role === 'encuestador' ? 'encuesta.html' : 'index.html';
+        const current = window.location.pathname.split('/').pop();
+        if (current !== target) {
+          window.location.href = target;
+        }
+      }, 800);
     } catch (err) {
       const msg = err?.code ? err.code.replace('auth/', '').replace(/-/g, ' ') : 'Error de autenticación';
       this.showMessage(msg, 'error');
@@ -96,12 +108,18 @@ async handleLogin() {
     return;
   }
 
-  // Fallback local si no hay Firebase
+  // Fallback local (sin Firebase)
   if (this.authenticate(emailOrUser, password)) {
     const user = this.users[emailOrUser];
     this.createSession(emailOrUser, user);
     this.showMessage('¡Login exitoso! Redirigiendo...', 'success');
-    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+    setTimeout(() => {
+      const target = user.role === 'encuestador' ? 'encuesta.html' : 'index.html';
+      const current = window.location.pathname.split('/').pop();
+      if (current !== target) {
+        window.location.href = target;
+      }
+    }, 1000);
   } else {
     this.showMessage('Usuario o contraseña incorrectos', 'error');
   }
@@ -147,7 +165,7 @@ isAuthenticated() {
 // Obtener sesión actual
 getSession() {
   try {
-    // 1) Leer primero la sesión local estable
+    // 1) Leer sesión local primero
     const localRaw = localStorage.getItem('omomobility_session');
     const localSess = localRaw ? JSON.parse(localRaw) : null;
     if (localSess) {
@@ -155,9 +173,22 @@ getSession() {
       if ((localSess.username || '').toLowerCase() === 'admin') {
         localSess.role = 'admin';
       }
+      // Si no hay rol en local, por defecto encuestador (evita rebotes)
+      if (!localSess.role) {
+        localSess.role = 'encuestador';
+      }
+      // Dentro de getSession(), tras setear localSess.role:
+      localSess.role = (localSess.role || '').toString().trim().toLowerCase();
+      if ((localSess.username || '').toLowerCase() === 'admin') {
+        localSess.role = 'admin';
+      }
+      if (!['admin','supervisor','encuestador'].includes(localSess.role)) {
+        localSess.role = 'encuestador';
+      }
     }
+    
 
-    // 2) Si hay usuario Firebase, combinar datos, PERO mantener rol del local si existe
+    // 2) Si hay usuario Firebase, combinar datos, pero mantener rol local si existe
     const u = (window.fbAuth && window.fbAuth.currentUser) ? window.fbAuth.currentUser : null;
     if (u) {
       const combined = {
@@ -171,14 +202,18 @@ getSession() {
       if ((combined.username || '').toLowerCase() === 'admin') {
         combined.role = 'admin';
       }
+      combined.role = (combined.role || '').toString().trim().toLowerCase();
+      if ((combined.username || '').toLowerCase() === 'admin') {
+        combined.role = 'admin';
+      }
+      if (!['admin','supervisor','encuestador'].includes(combined.role)) {
+        combined.role = 'encuestador';
+      }
       return combined;
     }
 
-    // 3) Sin Firebase: devolver local
+    // 3) Sin Firebase: devolver local (ya normalizado con rol)
     if (localSess) {
-      if ((localSess.username || '').toLowerCase() === 'admin') {
-        localSess.role = 'admin';
-      }
       return localSess;
     }
 
@@ -188,66 +223,83 @@ getSession() {
   }
 },
 
-  // Verificar autenticación y autorización por página
-  checkAuthOnProtectedPages() {
-    const currentPage = window.location.pathname.split('/').pop();
-    // Páginas públicas
-    const publicPages = ['login.html', ''];
+ // Verificar autenticación y autorización por página
+checkAuthOnProtectedPages() {
+  const currentPage = window.location.pathname.split('/').pop();
+  // Páginas públicas
+  const publicPages = ['login.html', ''];
+  if (publicPages.includes(currentPage)) return;
 
-    if (publicPages.includes(currentPage)) return;
-
-    if (!this.isAuthenticated()) {
-      window.location.href = 'login.html';
-      return;
-    }
-
-    const session = this.getSession();
-    if (!this.canAccess(currentPage, session.role)) {
-      // Si no tiene permiso, encuestador va a encuesta; otros a index
-      if (session.role === 'encuestador') {
-        window.location.href = 'encuesta.html';
-      } else {
-        window.location.href = 'index.html';
-      }
-      return;
-    }
-
-    // Agregar info de usuario y logout
-    this.addUserInfo();
-
-    // Aplicar restricciones visuales en index para roles con acceso limitado
-    if (currentPage === 'index.html') {
-      this.restrictLinksOnIndex(session.role);
-    }
-  },
-
-// Regla de autorización por página y rol
-canAccess(page, role) {
-  const p = (page || '').toLowerCase();
-
-  // Admin: acceso total
-  if (role === 'admin') return true;
-
-  // Encuestador: SOLO encuesta.html y puede ver listado
-  if (role === 'encuestador') {
-    const allowed = [
-      'encuesta.html',
-      'listadeencuestas.html'
-    ];
-    return allowed.includes(p);
+  // No autenticado → login (con anti-bucle)
+  if (!this.isAuthenticated()) {
+    const target = 'login.html';
+    try {
+      const last = JSON.parse(sessionStorage.getItem('lastRedirect') || 'null');
+      const now = Date.now();
+      if (last && last.target === target && (now - last.time) < 800) return;
+      sessionStorage.setItem('lastRedirect', JSON.stringify({ target, time: now }));
+    } catch {}
+    if (currentPage !== target) window.location.href = target;
+    return;
   }
 
-  // Supervisor: index + páginas informativas + encuesta + listado
-  if (role === 'supervisor') {
-    const allowed = [
-      'index.html',
-      'encuesta.html',
-      'carta_propuesta_omomobility.html',
-      'presentacion.html',
-      'resultados.html',
-      'listadeencuestas.html'
-    ];
-    return allowed.includes(p);
+  // Autenticado: verificar acceso por rol
+  const session = this.getSession();
+  if (!this.canAccess(currentPage, session.role)) {
+    const target = (session.role === 'encuestador') ? 'encuesta.html' : 'index.html';
+    try {
+      const last = JSON.parse(sessionStorage.getItem('lastRedirect') || 'null');
+      const now = Date.now();
+      if (!(last && last.target === target && (now - last.time) < 800)) {
+        sessionStorage.setItem('lastRedirect', JSON.stringify({ target, time: now }));
+        if (currentPage !== target) window.location.href = target;
+      }
+    } catch {
+      if (currentPage !== target) window.location.href = target;
+    }
+    return;
+  }
+
+  // UI de usuario y restricciones de links
+  this.addUserInfo();
+  if (currentPage === 'index.html') {
+    this.restrictLinksOnIndex(session.role);
+  }
+  try { sessionStorage.removeItem('lastRedirect'); } catch {}
+},
+
+
+// Regla de autorización por página y rol
+// Regla de autorización por página y rol
+canAccess(page, role) {
+  // Normalizar entradas
+  const p = (page || '').toString().trim().toLowerCase();
+  const r = (role || '').toString().trim().toLowerCase();
+
+  // Admin: acceso total
+  if (r === 'admin') return true;
+
+  // Páginas permitidas por rol
+  const encuestadorAllowed = new Set([
+    'encuesta.html',
+    'listadeencuestas.html'
+  ]);
+
+  const supervisorAllowed = new Set([
+    'index.html',
+    'encuesta.html',
+    'carta_propuesta_omomobility.html',
+    'presentacion.html',
+    'resultados.html',
+    'listadeencuestas.html'
+  ]);
+
+  if (r === 'encuestador') {
+    return encuestadorAllowed.has(p);
+  }
+
+  if (r === 'supervisor') {
+    return supervisorAllowed.has(p);
   }
 
   // Rol desconocido: negar

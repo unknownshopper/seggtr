@@ -134,3 +134,11 @@ input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--prim
 
 .img-wrap { text-align: center; }
 .img-wrap img { max-width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--border); }
+
+/* Print styles */
+@media print {
+  .no-print, .actions, .controls, .foot { display: none !important; }
+  body { background: #fff !important; }
+  .shell, .page { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+  .card { box-shadow: none !important; }
+}

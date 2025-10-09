@@ -109,6 +109,8 @@
     <div class="controls">
       <button id="refreshData" class="btn">🔄 Actualizar datos</button>
       <button id="exportReport" class="btn outline">📊 Exportar reporte</button>
+      <!-- Agregar dentro de <div class="controls"> -->
+      <button id="downloadPdf" class="btn no-print" onclick="window.print()">🖨️ Descargar PDF</button>
       <button id="clearAllData" class="btn outline" style="color: #e53e3e; border-color: #e53e3e;">🗑️ Limpiar todos los datos</button>
       <span id="lastUpdate" class="note" style="margin-left: auto;"></span>
     </div>
@@ -177,6 +179,14 @@
       <a href="encuesta.html">Hacer encuesta →</a>
     </div>
   </div>
+  <!-- Firebase SDKs (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Config e inicialización -->
+  <script src="firebase-config.js"></script>
+
+  <!-- Tus scripts -->
   <script src="auth.js"></script>
   <script src="data-manager.js"></script>
   <script src="dashboard-manager.js"></script>
