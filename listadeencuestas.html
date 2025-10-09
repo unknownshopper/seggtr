@@ -69,8 +69,7 @@
       <img class="logo" src="logcho.png" alt="Omomobility" onerror="this.onerror=null; this.src='logch.png'"/>
       <div>
         <h1>Lista de encuestas</h1>
-        <p class="lead">Consulta y gestiona hasta 250 encuestas almacenadas localmente.</p>
-      </div>
+        <p class="lead">Consulta y gestiona hasta 250 encuestas desde Firebase (fallback: este dispositivo).</p>      </div>
       <div id="roleBadge" class="header-actions"></div>
     </header>
 
@@ -243,12 +242,65 @@
   }
 }
 
-    function loadData() {
-      const rows = DataManager.readAll() || [];
-      // No truncamos almacenamiento; truncamos la vista
-      state.all = rows.slice(0, MAX);
-      applyFilter();
-    }
+function loadData() {
+  const fallback = () => {
+    const rows = DataManager.readAll() || [];
+    state.all = rows.slice(0, MAX);
+    applyFilter();
+  };
+
+  if (window.db) {
+    fetchFromFirestore().then(rows => {
+      if (Array.isArray(rows) && rows.length) {
+        state.all = rows.slice(0, MAX);
+        applyFilter();
+      } else {
+        fallback();
+      }
+    }).catch(() => {
+      fallback();
+    });
+  } else {
+    fallback();
+  }
+}
+
+async function fetchFromFirestore() {
+  try {
+    const colRef = window.db.collection('surveys');
+    // Si tienes _createdAt puedes ordenar (creará índice si lo pide):
+    // const snap = await colRef.orderBy('_createdAt', 'desc').limit(250).get();
+    const snap = await colRef.limit(250).get();
+    const rows = [];
+    snap.forEach(doc => {
+      const d = doc.data() || {};
+      if (d._probe) return; // omitir registros de prueba
+
+      rows.push({
+        // fecha normalizada
+        ts: d.ts || d._createdAt || d.when || null,
+        // campos estándar del formulario
+        encuestador_id: d.encuestador_id || '',
+        zona: d.zona || 'Sin especificar',
+        edad: d.edad ?? '',
+        intencion: d.intencion ?? '',
+        comentarios: d.comentarios || '',
+        // geolocalización
+        geo_lat: d.geo_lat ?? null,
+        geo_lng: d.geo_lng ?? null,
+        geo_accuracy: d.geo_accuracy ?? null,
+        // evidencia
+        image_proof_png: d.image_proof_png || null,
+        // deja pasar cualquier otro campo que uses
+        ...d
+      });
+    });
+    return rows;
+  } catch (e) {
+    console.warn('Firestore read failed:', e?.message || e);
+    return [];
+  }
+}
 
     function applyFilter() {
       const q = (document.getElementById('search').value || '').toLowerCase().trim();

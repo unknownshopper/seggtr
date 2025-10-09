@@ -497,12 +497,16 @@
         <!-- Agregar dentro de <div class="actions"> -->
         <button type="button" class="btn outline no-print" onclick="window.print()">Descargar PDF</button>
       </div>
-      <div class="note">Al enviar, la respuesta se guarda localmente en este dispositivo (localStorage). Puedes exportar/importar CSV para consolidar.</div>
+      <div class="note">
+        Al enviar, la respuesta se guarda en Firebase (colección <code>surveys</code>). 
+        Si no hay conexión o permisos, se guarda localmente como respaldo y se intentará sincronizar después.
+      </div>
     </form>
 
     <div class="foot">
       <div class="note" style="text-align: center; color: var(--muted); font-size: 13px;">
-        Encuesta de percepción - Omomobility | Datos guardados localmente
+        Encuesta de percepción - Omomobility | Datos guardados en Firebase (<code>surveys</code>). 
+        Si estás sin conexión, se guardan temporalmente en este dispositivo.
       </div>
     </div>
   </div>
@@ -534,6 +538,12 @@
         } catch (_) {}
       }, 0);
     });
+  </script>
+  <script>
+    (function(){
+      const ok = !!(window.db && window.fbAuth && window.fbAuth.currentUser);
+      console.log('[Encuesta] Firebase listo:', ok, 'Usuario:', window.fbAuth?.currentUser?.email || null);
+    })();
   </script>
 </body>
 </html>

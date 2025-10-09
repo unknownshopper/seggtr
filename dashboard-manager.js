@@ -61,16 +61,30 @@ class DashboardManager {
       }
     }
   }
+
   async fetchFromFirestore() {
     try {
       const colRef = window.db.collection('surveys');
-      // Si quieres ordenar por fecha y tienes _createdAt:
       // const snap = await colRef.orderBy('_createdAt', 'desc').limit(250).get();
       const snap = await colRef.limit(250).get();
       const rows = [];
       snap.forEach(doc => {
         const d = doc.data() || {};
-        rows.push(d);
+        if (d._probe) return;
+  
+        rows.push({
+          ts: d.ts || d._createdAt || d.when || null,
+          encuestador_id: d.encuestador_id || '',
+          zona: d.zona || 'Sin especificar',
+          edad: d.edad ?? '',
+          intencion: d.intencion ?? '',
+          comentarios: d.comentarios || '',
+          geo_lat: d.geo_lat ?? null,
+          geo_lng: d.geo_lng ?? null,
+          geo_accuracy: d.geo_accuracy ?? null,
+          image_proof_png: d.image_proof_png || null,
+          ...d
+        });
       });
       return rows;
     } catch (e) {
