@@ -151,6 +151,50 @@ function setInterviewerIdFromSession() {
   }
 }
 
+function forceFillInterviewerId() {
+  const f = document.getElementById('encuestador_id');
+  if (!f) return;
+  if (f.value) return;
+
+  // Intenta usar la lógica existente
+  try { setInterviewerIdFromSession(); } catch (_) {}
+
+  if (f.value) return;
+
+  // Fallback directo desde sesión/email si siguiera vacío
+  try {
+    const sess = (window.AuthSystem && typeof AuthSystem.getSession === 'function') ? AuthSystem.getSession() : null;
+    const username = sess?.username || (window.fbAuth?.currentUser?.email) || '';
+    const u = String(username || '').toLowerCase();
+    let display = '';
+    if (u.includes('@')) {
+      const [local, domain] = u.split('@');
+      if (domain === 'omobility.com') {
+        if (local === 'admin') display = 'admin';
+        else if (local.startsWith('encuestador')) display = 'Encuestador';
+        else display = local;
+      } else {
+        display = local;
+      }
+    } else {
+      if (u === 'admin') display = 'admin';
+      else if (u.startsWith('encuestador')) display = 'Encuestador';
+      else display = u;
+    }
+    if (display) {
+      f.value = display;
+      f.placeholder = display;
+      f.readOnly = true;
+      f.style.backgroundColor = '#f7f7f7';
+      f.title = 'Autocompletado desde sesión';
+      const lockVal = () => { f.value = display; };
+      f.addEventListener('keydown', (e) => { e.preventDefault(); lockVal(); });
+      f.addEventListener('input', lockVal);
+      f.addEventListener('paste', (e) => { e.preventDefault(); lockVal(); });
+    }
+  } catch (_) {}
+}
+
 function userCanSubmitSurvey() {
   try {
     if (window.AuthSystem && typeof AuthSystem.getSession === 'function') {
@@ -276,6 +320,26 @@ const FormHandler = {
   
     formEncuestaEl.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      // Forzar ID de encuestador y validar requeridos antes de continuar
+    forceFillInterviewerId();
+
+    // Si faltan requeridos, mostrar al usuario qué falta y no seguir
+    if (!formEncuestaEl.checkValidity()) {
+      formEncuestaEl.reportValidity();
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+      return;
+    }
+
+    const submitBtnEl = formEncuestaEl.querySelector('button[type="submit"]');
+    if (submitBtnEl && !submitBtnEl.__omoBound) {
+      submitBtnEl.__omoBound = true;
+      submitBtnEl.addEventListener('click', () => {
+        forceFillInterviewerId();
+        // Si algo falta, el navegador marcará el campo que falta
+        formEncuestaEl.reportValidity();
+      });
+    }
   
       // Defensa adicional si el estado de sesión cambia tarde
       if (!userCanSubmitSurvey()) {
