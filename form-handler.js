@@ -216,25 +216,41 @@ function enforceSurveyPermissions() {
   const formEncuestaEl = document.getElementById('formEncuesta');
   if (!formEncuestaEl) return;
   const submitBtn = formEncuestaEl.querySelector('button[type="submit"]');
+  if (!submitBtn) return;
 
-  const can = userCanSubmitSurvey();
-  if (!can) {
-    // Deshabilitar envío para supervisor (u otros no permitidos)
-    if (submitBtn) {
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Esperando Firebase...';
+
+  const enableIfReady = () => {
+    const hasUser = !!(window.fbAuth && window.fbAuth.currentUser);
+    const can = userCanSubmitSurvey();
+    
+    if (!can) {
       submitBtn.disabled = true;
-      submitBtn.classList.add('outline');
-      submitBtn.title = 'Solo encuestadores y admin pueden enviar';
-      submitBtn.textContent = 'Sin permiso para enviar';
+      submitBtn.textContent = 'Sin permiso';
+      return false;
     }
-  } else {
-    // Asegurar habilitado cuando sí puede
-    if (submitBtn) {
+    
+    if (hasUser) {
       submitBtn.disabled = false;
-      submitBtn.classList.remove('outline');
-      submitBtn.title = '';
       submitBtn.textContent = 'Enviar respuesta';
+      return true;
     }
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Esperando Firebase...';
+    return false;
+  };
+
+  if (window.fbAuth?.onAuthStateChanged) {
+    window.fbAuth.onAuthStateChanged(() => enableIfReady());
   }
+  
+  const iv = setInterval(() => {
+    if (enableIfReady()) clearInterval(iv);
+  }, 300);
+  
+  setTimeout(() => clearInterval(iv), 15000);
 }
 
 async function saveSurveyToFirestore(row) {
@@ -566,87 +582,27 @@ ensureRememberUI() {
   },
 
   init() {
-    // Intento inmediato (puede ya existir sesión previa en localStorage)
     setInterviewerIdFromSession();
-  
-    // Reintento corto para cuando AuthSystem termine de inicializar
-    setTimeout(() => {
-      setInterviewerIdFromSession();
-    }, 600);
-  
-    // Aplicar permisos (botón Enviar)
+    setTimeout(() => setInterviewerIdFromSession(), 600);
+    
     enforceSurveyPermissions();
-    // Reintentos escalonados
-    setTimeout(() => enforceSurveyPermissions(), 600);
-    setTimeout(() => enforceSurveyPermissions(), 1500);
-    setTimeout(() => enforceSurveyPermissions(), 3000);
-  
-    // Polling defensivo que se corta cuando ya hay permiso
-    const permInterval = setInterval(() => {
-      enforceSurveyPermissions();
-      if (userCanSubmitSurvey()) clearInterval(permInterval);
-    }, 1500);
-    // Auto-stop de seguridad a los 10s
-    setTimeout(() => clearInterval(permInterval), 10000);
-  
     this.setupFormSubmission();
     this.setupConditionalFields();
+    
+    // Poll para encuestador_id
+    const deadline = Date.now() + 10000;
+    const iv = setInterval(() => {
+      const f = document.getElementById('encuestador_id');
+      if ((f && f.value) || Date.now() > deadline) {
+        clearInterval(iv);
+      } else {
+        setInterviewerIdFromSession();
+      }
+    }, 400);
+  }
+};
   
-    // Poll robusto: espera a tener campo y sesión; si sigue vacío, hace fallback directo
-    (function () {
-      const deadline = Date.now() + 10000; // 10s máx
-      const iv = setInterval(() => {
-        const f = document.getElementById('encuestador_id');
-        const sess = (window.AuthSystem && typeof AuthSystem.getSession === 'function') ? AuthSystem.getSession() : null;
-        const hasUser = !!(sess && sess.username);
-  
-        // Si hay campo pero vacío, y ya hay sesión → intenta setInterviewerIdFromSession()
-        if (f && !f.value && hasUser) {
-          setInterviewerIdFromSession();
-  
-          // Fallback directo si sigue vacío
-          if (!f.value) {
-            const u = String(sess.username || '').toLowerCase();
-            let display = '';
-            if (u.includes('@')) {
-              const [local, domain] = u.split('@');
-              if (domain === 'omobility.com' || domain === 'unknownshoppers.com') {
-                if (local === 'admin') display = 'admin';
-                else if (local.startsWith('encuestador')) display = 'Encuestador';
-                else display = local;
-              } else {
-                display = local;
-              }
-            } else {
-              if (u === 'admin') display = 'admin';
-              else if (u.startsWith('encuestador')) display = 'Encuestador';
-              else display = u;
-            }
-  
-            if (display) {
-              f.value = display;
-              f.placeholder = display;
-              f.readOnly = true;
-              f.style.backgroundColor = '#f7f7f7';
-              f.title = 'Autocompletado desde sesión';
-              const lockVal = () => { f.value = display; };
-              f.addEventListener('keydown', (e) => { e.preventDefault(); lockVal(); });
-              f.addEventListener('input', lockVal);
-              f.addEventListener('paste', (e) => { e.preventDefault(); lockVal(); });
-            }
-          }
-        }
-  
-        // Si ya está lleno, o se acabó el tiempo → detener
-        if ((f && f.value) || Date.now() > deadline) {
-          clearInterval(iv);
-        }
-      }, 400);
-    })();
-  } // ← cierra el método init()
-};   // ← cierra el objeto FormHandler
-
-// Enforce interviewer ID autofill independent of FormHandler.init()
+  // Enforce interviewer ID autofill independent of FormHandler.init()
 (function enforceInterviewerIdAutofill() {
   function computeDisplayFromUsername(username) {
     const u = String(username || '').toLowerCase();
