@@ -295,6 +295,7 @@ async function fetchFromFirestore() {
         ...d
       });
     });
+    console.log('[Dashboard] Firestore rows:', rows.length, rows[0] ? Object.keys(rows[0]) : 'no rows');
     return rows;
   } catch (e) {
     console.warn('Firestore read failed:', e?.message || e);
@@ -570,5 +571,46 @@ async function fetchFromFirestore() {
   });
 })();
   </script>
+  <script>
+    (function firebaseStatusBadge(){
+      function ensureBadge() {
+        const header = document.querySelector('.header') || document.body;
+        if (!header) return;
+        let el = document.getElementById('fb-status-badge');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'fb-status-badge';
+          el.style.cssText = `
+            position:absolute; top:10px; right:20px; z-index:9999;
+            display:flex; align-items:center; gap:8px;
+            background: rgba(255,255,255,0.95); border:1px solid #e5e7eb;
+            padding:6px 10px; border-radius:999px; font: 12px Inter, sans-serif;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          `;
+          header.style.position = 'relative';
+          header.appendChild(el);
+        }
+        const ok = !!(window.db && window.fbAuth && window.fbAuth.currentUser);
+        const email = window.fbAuth?.currentUser?.email || '—';
+        el.innerHTML = `
+          <span style="width:10px;height:10px;border-radius:999px;background:${ok ? '#16a34a' : '#ef4444'};display:inline-block;"></span>
+          <span>${ok ? 'Firebase: Online' : 'Firebase: Offline'}</span>
+          <span style="color:#64748b">(${email})</span>
+        `;
+      }
+      // Intentos durante 5s para esperar fbAuth
+      const deadline = Date.now() + 5000;
+      (function tick(){
+        ensureBadge();
+        if (Date.now() < deadline && !(window.fbAuth && window.fbAuth.currentUser)) {
+          setTimeout(tick, 300);
+        }
+      })();
+      // Refresca ante cambios de auth si es posible
+      if (window.fbAuth?.onAuthStateChanged) {
+        window.fbAuth.onAuthStateChanged(() => ensureBadge());
+      }
+    })();
+    </script>
 </body>
 </html>

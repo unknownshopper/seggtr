@@ -18,14 +18,14 @@ class DashboardManager {
     if (window.db) {
       this.fetchFromFirestore().then(rows => {
         if (Array.isArray(rows) && rows.length) {
-          this.data = rows;
+          this.data = this.preprocessData(rows);
         } else {
           // Fallback a localStorage si no hay datos en Firestore
           try {
             if (window.DataManager && typeof DataManager.readAll === 'function') {
-              this.data = DataManager.readAll();
+              this.data = this.preprocessData(DataManager.readAll());
             } else {
-              this.data = JSON.parse(localStorage.getItem('encuestas') || '[]');
+              this.data = this.preprocessData(JSON.parse(localStorage.getItem('encuestas') || '[]'));
             }
           } catch (e) {
             this.data = [];
@@ -38,9 +38,9 @@ class DashboardManager {
         // Si falla Firestore, fallback a localStorage
         try {
           if (window.DataManager && typeof DataManager.readAll === 'function') {
-            this.data = DataManager.readAll();
+            this.data = this.preprocessData(DataManager.readAll());
           } else {
-            this.data = JSON.parse(localStorage.getItem('encuestas') || '[]');
+            this.data = this.preprocessData(JSON.parse(localStorage.getItem('encuestas') || '[]'));
           }
         } catch (e) {
           this.data = [];
@@ -52,13 +52,15 @@ class DashboardManager {
       // Sin Firestore disponible: localStorage
       try {
         if (window.DataManager && typeof DataManager.readAll === 'function') {
-          this.data = DataManager.readAll();
+          this.data = this.preprocessData(DataManager.readAll());
         } else {
-          this.data = JSON.parse(localStorage.getItem('encuestas') || '[]');
+          this.data = this.preprocessData(JSON.parse(localStorage.getItem('encuestas') || '[]'));
         }
       } catch (e) {
         this.data = [];
       }
+      this.renderDashboard();
+      this.updateLastUpdateTime();
     }
   }
 
@@ -91,6 +93,45 @@ class DashboardManager {
       console.warn('Firestore read failed:', e?.message || e);
       return [];
     }
+  }
+
+  preprocessData(rows) {
+    return (rows || []).map(r => {
+      // Coerciones numéricas seguras
+      const edad = Number.parseInt(r.edad);
+      const intencion = Number.parseInt(r.intencion);
+  
+      // Normalizaciones de texto
+      const zona = (r.zona || 'Sin especificar').toString().trim();
+      const ocupacion = (r.ocupacion || 'Sin especificar').toString().trim();
+  
+      // Normaliza usaMoto a 'Sí'/'No'
+      let usaMoto = r.usaMoto;
+      if (usaMoto === true) usaMoto = 'Sí';
+      if (usaMoto === false) usaMoto = 'No';
+      usaMoto = (usaMoto || '').toString().trim();
+  
+      // Barreras: asegurar string con separador |
+      const barreras = String(r.barreras || '')
+        .split('|')
+        .map(b => b.trim())
+        .filter(Boolean)
+        .join('|');
+  
+      // Fecha ts ISO: intenta usar ts/_createdAt/when
+      const ts = r.ts || r._createdAt || r.when || null;
+  
+      return {
+        ...r,
+        ts,
+        edad: Number.isFinite(edad) ? edad : '',
+        intencion: Number.isFinite(intencion) ? intencion : '',
+        zona,
+        ocupacion,
+        usaMoto,
+        barreras
+      };
+    });
   }
 
   setupEventListeners() {

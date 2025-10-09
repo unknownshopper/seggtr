@@ -116,7 +116,7 @@ function setInterviewerIdFromSession() {
 
     if (u.includes('@')) {
       const [local, domain] = u.split('@');
-      if (domain === 'omobility.com') {
+      if (domain === 'omobility.com' || domain === 'unknownshoppers.com') {
         if (local === 'admin') {
           display = 'admin';
         } else if (local.startsWith('encuestador')) {
@@ -169,7 +169,7 @@ function forceFillInterviewerId() {
     let display = '';
     if (u.includes('@')) {
       const [local, domain] = u.split('@');
-      if (domain === 'omobility.com') {
+      if (domain === 'omobility.com' || domain === 'unknownshoppers.com') {
         if (local === 'admin') display = 'admin';
         else if (local.startsWith('encuestador')) display = 'Encuestador';
         else display = local;
@@ -238,10 +238,14 @@ function enforceSurveyPermissions() {
 }
 
 async function saveSurveyToFirestore(row) {
+  console.log('[saveSurveyToFirestore] Inicio - db:', !!window.db, 'fbAuth:', !!window.fbAuth, 'currentUser:', window.fbAuth?.currentUser?.email || null);
+  
   try {
     if (!window.db || !window.fbAuth) return { ok: false, reason: 'no_firebase' };
 
     const user = window.fbAuth.currentUser;
+    console.log('[saveSurveyToFirestore] user tras leer:', user?.email || null, 'uid:', user?.uid || null);
+    
     if (!user) return { ok: false, reason: 'no_auth' };
 
     // Colección donde guardaremos
@@ -258,6 +262,7 @@ async function saveSurveyToFirestore(row) {
     };
 
     await col.add(payload);
+    console.log('[Form] Guardado en Firestore OK:', payload._createdAt, 'user:', payload._createdBy, 'email:', payload._createdEmail);
     return { ok: true };
   } catch (e) {
     console.error('Firestore write error:', e);
@@ -605,7 +610,7 @@ ensureRememberUI() {
             let display = '';
             if (u.includes('@')) {
               const [local, domain] = u.split('@');
-              if (domain === 'omobility.com') {
+              if (domain === 'omobility.com' || domain === 'unknownshoppers.com') {
                 if (local === 'admin') display = 'admin';
                 else if (local.startsWith('encuestador')) display = 'Encuestador';
                 else display = local;
@@ -648,7 +653,7 @@ ensureRememberUI() {
     if (!u) return '';
     if (u.includes('@')) {
       const [local, domain] = u.split('@');
-      if (domain === 'omobility.com') {
+      if (domain === 'omobility.com' || domain === 'unknownshoppers.com') {
         if (local === 'admin') return 'admin';
         if (local.startsWith('encuestador')) return 'Encuestador';
         return local;
