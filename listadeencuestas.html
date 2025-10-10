@@ -371,7 +371,7 @@ async function fetchFromFirestore() {
             <span>${r.intencion ?? ''}</span>
           </div>
         </td>
-        <td class="nowrap"><span class="geo">${fmtGeo(r)}</span></td>
+        <td class="nowrap" style="user-select: text; cursor: text;"><span class="geo" style="user-select: text;">${fmtGeo(r)}</span></td>
 <td>
   ${r.image_proof_png
     ? `<img class="thumb" src="${r.image_proof_png}" alt="evidencia" data-action="evidence" data-idx="${idx}" />`
@@ -487,29 +487,61 @@ async function fetchFromFirestore() {
       document.getElementById('editModal').showModal();
     }
 
-    function doDelete(r) {
+    async function doDelete(r) {
       if (!confirm('¿Eliminar esta encuesta? Esta acción no se puede deshacer.')) return;
+      
+      // Eliminar de localStorage
       const all = DataManager.readAll();
-      const pos = all.indexOf(r);
-      // Si no encontró por referencia (por recreación), hacemos match por ts+encuestador_id
       let removed = false;
-      if (pos >= 0) {
-        all.splice(pos, 1);
-        removed = true;
-      } else {
-        const idx = all.findIndex(x => x.ts === r.ts && x.encuestador_id === r.encuestador_id);
-        if (idx >= 0) { all.splice(idx, 1); removed = true; }
+      
+      // Intentar encontrar por múltiples criterios
+      let idx = all.indexOf(r);
+      if (idx < 0) {
+        idx = all.findIndex(x => x.ts === r.ts && x.encuestador_id === r.encuestador_id);
       }
-      if (removed) {
+      if (idx < 0 && r._createdAt) {
+        idx = all.findIndex(x => x._createdAt === r._createdAt);
+      }
+      // Último recurso: buscar por coincidencia de varios campos
+      if (idx < 0) {
+        idx = all.findIndex(x => 
+          JSON.stringify(x) === JSON.stringify(r)
+        );
+      }
+      
+      if (idx >= 0) {
+        all.splice(idx, 1);
         DataManager.writeAll(all);
-        loadData(); // refrescar
-        alert('Encuesta eliminada.');
-      } else {
-        alert('No se pudo eliminar (no encontrada).');
+        removed = true;
       }
+  
+  // Intentar eliminar de Firestore también
+  if (window.db && r._createdAt) {
+    try {
+      const snap = await window.db.collection('surveys')
+        .where('_createdAt', '==', r._createdAt)
+        .limit(1)
+        .get();
+      
+      if (!snap.empty) {
+        await snap.docs[0].ref.delete();
+        console.log('Eliminado de Firestore');
+      }
+    } catch (e) {
+      console.warn('No se pudo eliminar de Firestore:', e);
     }
+  }
+  
+  if (removed) {
+    loadData(); // refrescar
+    alert('Encuesta eliminada.');
+  } else {
+    alert('No se pudo eliminar (no encontrada en localStorage).');
+  }
+}
 
-    function saveEdit() {
+
+function saveEdit() {
       const idx = state.editIndex;
       if (idx == null || idx < 0) { document.getElementById('editModal').close(); return; }
       const all = DataManager.readAll();
@@ -531,46 +563,39 @@ async function fetchFromFirestore() {
 
     document.getElementById('saveEdit').addEventListener('click', saveEdit);
 
-
     function watchRoleReady() {
-  let tries = 0;
-  const iv = setInterval(() => {
-    const prev = state.role;
-    loadSession();            // vuelve a leer AuthSystem.getSession()
-    if (state.role !== prev) {
-      render();               // re-dibuja acciones según nuevo rol
-    }
-    // corta si ya resolvió o tras ~3s (10*300ms)
-    if (state.role === 'admin' || state.role === 'supervisor' || ++tries >= 10) {
-      clearInterval(iv);
-    }
-  }, 300);
-}
-
-
-  // Inicialización
-  document.addEventListener('DOMContentLoaded', () => {
-    // 1) Enforce auth/role mapping (redirige si no puede entrar)
-    if (window.AuthSystem && typeof AuthSystem.checkAuthOnProtectedPages === 'function') {
-      AuthSystem.checkAuthOnProtectedPages();
+      let tries = 0;
+      const iv = setInterval(() => {
+        const prev = state.role;
+        loadSession();
+        if (state.role !== prev) {
+          render();
+        }
+        if (state.role === 'admin' || state.role === 'supervisor' || ++tries >= 10) {
+          clearInterval(iv);
+        }
+      }, 300);
     }
 
-    // 2) Cargar sesión/tabla/eventos
-    loadSession();
-    loadData();
-    wireEvents();
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.AuthSystem && typeof AuthSystem.checkAuthOnProtectedPages === 'function') {
+        AuthSystem.checkAuthOnProtectedPages();
+      }
 
-    // 3) Observa actualización de rol hasta que esté listo (por si la sesión llega tarde)
-    watchRoleReady();
+      loadSession();
+      loadData();
+      wireEvents();
+      watchRoleReady();
 
-    // 4) Defensa extra (si no puede ver, salir)
-    if (!canView(state.role)) {
-      alert('No tienes permisos para acceder.');
-      window.location.href = 'login.html';
-    }
-  });
-})();
+      if (!canView(state.role)) {
+        alert('No tienes permisos para acceder.');
+        window.location.href = 'login.html';
+      }
+    });
+  })();
   </script>
+  
   <script>
     (function firebaseStatusBadge(){
       function ensureBadge() {
