@@ -527,7 +527,8 @@
     
     <!-- Utilidades y manejadores -->
     <script src="data-manager.js?v=20251009"></script>
-    <script src="form-handler.js?v=20251009b"></script>
+    <script src="sync-manager.js"></script>
+    <script src="form-handler.js?v=20251009c"></script>
     <script src="script-mobile.js?v=20251009"></script>
     <script src="script.js?v=20251009"></script>
     
@@ -574,6 +575,16 @@
           }
         })();
       })();
+    </script>
+    <script>
+      // Iniciar sincronización automática cuando Firebase esté listo
+      if (window.fbAuth) {
+        window.fbAuth.onAuthStateChanged((user) => {
+          if (user && window.SyncManager) {
+            SyncManager.startAutoSync(30000); // cada 30 segundos
+          }
+        });
+      }
     </script>
   </body>
 </html>
