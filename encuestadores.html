@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Equipo de Encuestadores — Omomobility</title>
+  <link rel="icon" href="logcho.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    
+    .encuestadores-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+    }
+    
+    .encuestador-card {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .encuestador-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    
+    .foto-perfil {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 16px;
+      display: block;
+      border: 4px solid #f0f0f0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .encuestador-card h3 {
+      text-align: center;
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .email {
+      text-align: center;
+      color: #667eea;
+      font-size: 13px;
+      margin: 0 0 4px 0;
+      font-weight: 500;
+    }
+    
+    .profesion {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 4px 0;
+    }
+    
+    .edad {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin: 0 0 16px 0;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+      padding: 16px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat .number {
+      display: block;
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 4px;
+    }
+    
+    .stat .label {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .device-info {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    
+    .device-info p {
+      margin: 4px 0;
+      color: var(--text);
+    }
+    
+    .device-info strong {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+    }
+    
+    .badge.active {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .badge.inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .placeholder-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <img class="logo" src="logcho.png" alt="Omomobility" onerror="this.onerror=null; this.src='logch.png'"/>
+      <div>
+        <h1>Equipo de Encuestadores</h1>
+        <p class="lead">Profesionales capacitados para el estudio de mercado de motocicletas eléctricas en Villahermosa, Tabasco.</p>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="btn outline">← Inicio</a>
+        <a href="listadeencuestas.html" class="btn">Ver encuestas</a>
+      </div>
+    </header>
+
+    <div class="encuestadores-grid" id="encuestadoresGrid">
+      <!-- Encuestador 1: Máximo García Dorame -->
+      <div class="encuestador-card">
+        <div class="placeholder-avatar">MG</div>
+        <h3>Máximo García Dorame</h3>
+        <p class="email">encuestador@omobility.com</p>
+        <p class="profesion">Estudiante de Contaduría</p>
+        <p class="edad">21 años</p>
+        <span class="badge active">● Activo</span>
+        
+        <div class="stats">
+          <div class="stat">
+            <span class="number" id="enc1-total">0</span>
+            <span class="label">Encuestas</span>
+          </div>
+          <div class="stat">
+            <span class="number" id="enc1-precision">--</span>
+            <span class="label">Precisión GPS</span>
+          </div>
+          <div class="stat">
+            <span class="number" id="enc1-zonas">0</span>
+            <span class="label">Zonas</span>
+          </div>
+        </div>
+        
+        <div class="device-info">
+          <p><strong>Dispositivo:</strong> <span id="enc1-device">Detectando...</span></p>
+          <p><strong>Última actividad:</strong> <span id="enc1-lastActivity">--</span></p>
+        </div>
+      </div>
+
+      <!-- Encuestador 2: Placeholder -->
+      <div class="encuestador-card">
+        <div class="placeholder-avatar">E2</div>
+        <h3>Encuestador 2</h3>
+        <p class="email">encuestador2@omobility.com</p>
+        <p class="profesion">Por asignar</p>
+        <p class="edad">-- años</p>
+        <span class="badge inactive">● Inactivo</span>
+        
+        <div class="stats">
+          <div class="stat">
+            <span class="number" id="enc2-total">0</span>
+            <span class="label">Encuestas</span>
+          </div>
+          <div class="stat">
+            <span class="number" id="enc2-precision">--</span>
+            <span class="label">Precisión GPS</span>
+          </div>
+          <div class="stat">
+            <span class="number" id="enc2-zonas">0</span>
+            <span class="label">Zonas</span>
+          </div>
+        </div>
+        
+        <div class="device-info">
+          <p><strong>Dispositivo:</strong> <span id="enc2-device">--</span></p>
+          <p><strong>Última actividad:</strong> <span id="enc2-lastActivity">--</span></p>
+        </div>
+      </div>
+
+      <!-- Encuestador 3: Placeholder -->
+      <div class="encuestador-card">
+        <div class="placeholder-avatar">E3</div>
+        <h3>Encuestador 3</h3>
+        <p class="email">encuestador3@omobility.com</p>
+        <p class="profesion">Por asignar</p>
+        <p class="edad">-- años</p>
+        <span class="badge inactive">● Inactivo</span>
+        
+        <div class="stats">
+          <div class="stat">
+            <span class="number" id="enc3-total">0</span>
+            <span class="label">Encuestas</span>
+          </div>
+          <div class="stat">
+            <span class="number" id="enc3-precision">--</span>
+            <span class="label">Precisión GPS</span>
+          </div>
+          <div class="stat">
+            <span class="number" id="enc3-zonas">0</span>
+            <span class="label">Zonas</span>
+          </div>
+        </div>
+        
+        <div class="device-info">
+          <p><strong>Dispositivo:</strong> <span id="enc3-device">--</span></p>
+          <p><strong>Última actividad:</strong> <span id="enc3-lastActivity">--</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data-manager.js"></script>
+  <script>
+    // Calcular estadísticas de encuestadores desde los datos
+    async function loadEncuestadorStats() {
+      try {
+        // Intentar cargar desde Firestore primero
+        let surveys = [];
+        if (window.db) {
+          const snap = await window.db.collection('surveys').get();
+          surveys = snap.docs.map(doc => doc.data());
+          console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde Firestore`);
+        } else {
+          // Fallback a localStorage
+          surveys = DataManager.readAll();
+          console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde localStorage`);
+        }
+
+        // Función para identificar encuestador de forma flexible
+        function identifyEncuestador(encuestadorId) {
+          if (!encuestadorId) return null;
+          
+          const id = String(encuestadorId).toLowerCase().trim();
+          
+          // Encuestador 1 (Máximo García)
+          if (id.includes('encuestador@') || 
+              id === 'encuestador' || 
+              id === 'encuestador 1' ||
+              id === 'encuestador1' ||
+              id.includes('maximo') ||
+              id.includes('máximo')) {
+            return 'enc1';
+          }
+          
+          // Encuestador 2
+          if (id.includes('encuestador2@') || 
+              id === 'encuestador2' || 
+              id === 'encuestador 2') {
+            return 'enc2';
+          }
+          
+          // Encuestador 3
+          if (id.includes('encuestador3@') || 
+              id === 'encuestador3' || 
+              id === 'encuestador 3') {
+            return 'enc3';
+          }
+          
+          return null;
+        }
+
+        // Agrupar por encuestador
+        const stats = {
+          enc1: { total: 0, zonas: new Set(), precisions: [], lastActivity: null },
+          enc2: { total: 0, zonas: new Set(), precisions: [], lastActivity: null },
+          enc3: { total: 0, zonas: new Set(), precisions: [], lastActivity: null }
+        };
+
+        surveys.forEach(s => {
+          const encId = identifyEncuestador(s.encuestador_id);
+          if (!encId) {
+            console.log('[Encuestadores] No identificado:', s.encuestador_id);
+            return;
+          }
+
+          stats[encId].total++;
+          if (s.zona) stats[encId].zonas.add(s.zona);
+          if (s.geo_accuracy != null) stats[encId].precisions.push(s.geo_accuracy);
+          
+          const ts = new Date(s.ts || s._createdAt);
+          if (!stats[encId].lastActivity || ts > stats[encId].lastActivity) {
+            stats[encId].lastActivity = ts;
+          }
+        });
+
+        // Actualizar UI
+        Object.keys(stats).forEach(encId => {
+          const data = stats[encId];
+          
+          // Total encuestas
+          document.getElementById(`${encId}-total`).textContent = data.total;
+          
+          // Zonas cubiertas
+          document.getElementById(`${encId}-zonas`).textContent = data.zonas.size;
+          
+          // Precisión GPS promedio
+          if (data.precisions.length > 0) {
+            const avgPrecision = data.precisions.reduce((a, b) => a + b, 0) / data.precisions.length;
+            document.getElementById(`${encId}-precision`).textContent = `±${Math.round(avgPrecision)}m`;
+          }
+          
+          // Última actividad
+          if (data.lastActivity) {
+            const now = new Date();
+            const diff = now - data.lastActivity;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const days = Math.floor(hours / 24);
+            
+            let timeStr;
+            if (days > 0) timeStr = `Hace ${days} día${days > 1 ? 's' : ''}`;
+            else if (hours > 0) timeStr = `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
+            else timeStr = 'Hace menos de 1 hora';
+            
+            document.getElementById(`${encId}-lastActivity`).textContent = timeStr;
+          }
+        });
+
+        console.log('[Encuestadores] Estadísticas:', stats);
+      } catch (e) {
+        console.error('[Encuestadores] Error cargando estadísticas:', e);
+      }
+    }
+
+    // Detectar dispositivo del navegador actual
+    function detectDevice() {
+      const ua = navigator.userAgent;
+      let device = 'Desconocido';
+      
+      if (/iPhone/.test(ua)) device = 'iPhone';
+      else if (/iPad/.test(ua)) device = 'iPad';
+      else if (/Android/.test(ua)) {
+        if (/Mobile/.test(ua)) device = 'Android Phone';
+        else device = 'Android Tablet';
+      } else if (/Windows/.test(ua)) device = 'PC Windows';
+      else if (/Mac/.test(ua)) device = 'Mac';
+      else if (/Linux/.test(ua)) device = 'Linux';
+      
+      // Solo actualizar para el encuestador actual si está logueado
+      // Por ahora mostramos el dispositivo actual como ejemplo
+      document.getElementById('enc1-device').textContent = device;
+    }
+
+    // Cargar al inicio
+    document.addEventListener('DOMContentLoaded', () => {
+      detectDevice();
+      loadEncuestadorStats();
+      
+      // Recargar cada 30 segundos
+      setInterval(loadEncuestadorStats, 30000);
+    });
+  </script>
+
+  <!-- Config e inicialización de Firebase -->
+  <script src="firebase-config.js"></script>
+</body>
+</html>
