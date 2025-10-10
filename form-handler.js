@@ -506,9 +506,6 @@ const FormHandler = {
   },
 
 
-
-  
-
   setupConditionalFields() {
     const ocupacionSelect = document.getElementById('ocupacion');
     if (ocupacionSelect) {
