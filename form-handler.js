@@ -336,40 +336,33 @@ const FormHandler = {
     const formEncuestaEl = document.getElementById('formEncuesta');
     if (!formEncuestaEl) return;
   
-    // Ajusta el botón según permisos (supervisor deshabilitado)
+    // Ajusta el botón según permisos
     enforceSurveyPermissions();
   
     formEncuestaEl.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      // Forzar ID de encuestador y validar requeridos antes de continuar
-    forceFillInterviewerId();
-
-    // Si faltan requeridos, mostrar al usuario qué falta y no seguir
-    if (!formEncuestaEl.checkValidity()) {
-      formEncuestaEl.reportValidity();
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
-      return;
-    }
-
-    const submitBtnEl = formEncuestaEl.querySelector('button[type="submit"]');
-    if (submitBtnEl && !submitBtnEl.__omoBound) {
-      submitBtnEl.__omoBound = true;
-      submitBtnEl.addEventListener('click', () => {
-        forceFillInterviewerId();
-        // Si algo falta, el navegador marcará el campo que falta
-        formEncuestaEl.reportValidity();
-      });
-    }
+      console.log('[FormHandler] Submit iniciado');
   
-      // Defensa adicional si el estado de sesión cambia tarde
+      // Definir botón y texto original PRIMERO
+      const submitBtn = formEncuestaEl.querySelector('button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.textContent : '';
+  
+      // Forzar ID de encuestador
+      forceFillInterviewerId();
+  
+      // Validar campos requeridos
+      if (!formEncuestaEl.checkValidity()) {
+        formEncuestaEl.reportValidity();
+        return;
+      }
+  
+      // Verificar permisos
       if (!userCanSubmitSurvey()) {
         alert('No tienes permiso para enviar esta encuesta.');
         return;
       }
   
-      const submitBtn = formEncuestaEl.querySelector('button[type="submit"]');
-      const originalText = submitBtn ? submitBtn.textContent : '';
+      // Deshabilitar botón
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Guardando...';
@@ -378,8 +371,10 @@ const FormHandler = {
       try {
         // 1) Serializar datos del formulario
         const row = this.serializeForm(e.target);
+        console.log('[FormHandler] Datos serializados:', row);
+        console.log('[FormHandler] Campos principales - edad:', row.edad, 'zona:', row.zona, 'intencion:', row.intencion);
   
-        // 2) Capturar geolocalización (no bloquea si falla)
+        // 2) Capturar geolocalización
         const geo = await getGeolocation();
         row.geo_lat = geo.lat;
         row.geo_lng = geo.lng;
@@ -396,49 +391,57 @@ const FormHandler = {
           geo_accuracy: row.geo_accuracy
         };
   
-        // 4) Generar imagen de evidencia (JPEG base64) con overlay de metadatos
+        // 4) Generar imagen de evidencia
         let imageDataUrl = null;
         try {
           imageDataUrl = await generateSurveyImage(formEncuestaEl, metadata);
         } catch (_) {
-          imageDataUrl = null; // No bloquear si la generación falla
+          imageDataUrl = null;
         }
         if (imageDataUrl) {
           row.image_proof_png = imageDataUrl;
         }
   
+        console.log('[FormHandler] Datos finales antes de guardar:', {
+          encuestador_id: row.encuestador_id,
+          edad: row.edad,
+          zona: row.zona,
+          intencion: row.intencion,
+          tieneImagen: !!imageDataUrl
+        });
+  
         // 5) Guardar en localStorage
         const all = DataManager.readAll();
         all.push(row);
         DataManager.writeAll(all);
-
-        // 5.1) Intentar guardar en Firestore (no bloquea si falla)
-        // 5.1) Intentar guardar en Firestore (no bloquea si falla)
+        console.log('[FormHandler] Guardado en localStorage OK');
+  
+        // 6) Intentar guardar en Firestore
         try {
           const res = await saveSurveyToFirestore(row);
           if (!res.ok) {
             const reason = res.reason || 'error';
             const msg = `Guardado local OK. Firestore falló: ${reason}`;
-            console.warn('No se guardó en Firestore:', reason);
+            console.warn('[FormHandler] Firestore falló:', reason);
             if (window.mobileSurvey && typeof window.mobileSurvey.showToast === 'function') {
               window.mobileSurvey.showToast(msg, 'error');
             } else {
               alert(msg);
             }
+          } else {
+            console.log('[FormHandler] Guardado en Firestore OK');
           }
         } catch (e) {
           const msg = `Guardado local OK. Firestore falló: ${e?.message || 'error'}`;
-          console.warn('No se guardó en Firestore (ex):', e);
+          console.warn('[FormHandler] Firestore error:', e);
           if (window.mobileSurvey && typeof window.mobileSurvey.showToast === 'function') {
             window.mobileSurvey.showToast(msg, 'error');
           } else {
             alert(msg);
           }
         }
-
-        
   
-        // 6) Limpiar y feedback
+        // 7) Limpiar formulario y feedback
         e.target.reset();
   
         if (window.mobileSurvey) {
@@ -447,7 +450,7 @@ const FormHandler = {
           alert('¡Gracias! Respuesta registrada con evidencia.');
         }
       } catch (err) {
-        console.error('Error al guardar encuesta:', err);
+        console.error('[FormHandler] Error al guardar encuesta:', err);
         if (window.mobileSurvey) {
           window.mobileSurvey.showToast('Error al guardar. Intenta nuevamente.', 'error');
         } else {
