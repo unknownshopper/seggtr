@@ -505,33 +505,7 @@ const FormHandler = {
     remember.addEventListener('change', () => this.setRememberFlag(remember.checked));
   },
 
-ensureRememberUI() {
-  const form = document.getElementById('loginForm');
-  if (!form) return;
-  let remember = form.querySelector('#rememberMe');
-  if (!remember) {
-    // Insertar UI simple
-    const holder = document.createElement('div');
-    holder.style.cssText = 'margin:6px 0; display:flex; align-items:center; gap:6px; font-size:12px;';
-    holder.innerHTML = `
-      <input type="checkbox" id="rememberMe" />
-      <label for="rememberMe">Recordarme en este dispositivo</label>
-    `;
-    form.appendChild(holder);
-    remember = holder.querySelector('#rememberMe');
-  }
-  remember.checked = this.getRememberFlag();
 
-  // Prefill username
-  const userInput = document.getElementById('username');
-  if (userInput) {
-    const last = this.getRememberedUsername();
-    if (last && !userInput.value) userInput.value = last;
-  }
-
-  // Persistir cambio de la casilla
-  remember.addEventListener('change', () => this.setRememberFlag(remember.checked));
-},
 
   
 
