@@ -328,9 +328,22 @@ async function fetchFromFirestore() {
     }
 
     function fmtGeo(r) {
-      if (r.geo_lat == null || r.geo_lng == null) return '<span class=\"muted\">N/A</span>';
+      if (r.geo_lat == null || r.geo_lng == null) return '<span class="muted">N/A</span>';
+      const lat = Number(r.geo_lat).toFixed(5);
+      const lng = Number(r.geo_lng).toFixed(5);
       const acc = (r.geo_accuracy != null) ? ` ±${Math.round(r.geo_accuracy)}m` : '';
-      return `${Number(r.geo_lat).toFixed(5)}, ${Number(r.geo_lng).toFixed(5)}${acc}`;
+      const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+      
+      return `
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="user-select: text;">${lat}, ${lng}${acc}</span>
+          <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" 
+             class="btn outline small" 
+             style="font-size: 11px; padding: 3px 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; width: fit-content;">
+            🗺️ Ver en mapa
+          </a>
+        </div>
+      `;
     }
 
     function render() {
@@ -371,7 +384,7 @@ async function fetchFromFirestore() {
             <span>${r.intencion ?? ''}</span>
           </div>
         </td>
-        <td class="nowrap" style="user-select: text; cursor: text;"><span class="geo" style="user-select: text;">${fmtGeo(r)}</span></td>
+        <td class="nowrap">${fmtGeo(r)}</td>
 <td>
   ${r.image_proof_png
     ? `<img class="thumb" src="${r.image_proof_png}" alt="evidencia" data-action="evidence" data-idx="${idx}" />`
@@ -595,7 +608,7 @@ function saveEdit() {
     });
   })();
   </script>
-  
+
   <script>
     (function firebaseStatusBadge(){
       function ensureBadge() {

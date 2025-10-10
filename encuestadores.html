@@ -263,22 +263,30 @@
   </div>
 
   <!-- Scripts -->
+   <!-- Sistema de autenticación -->
+  <script src="auth.js"></script>
   <script src="data-manager.js"></script>
   <script>
     // Calcular estadísticas de encuestadores desde los datos
     async function loadEncuestadorStats() {
-      try {
-        // Intentar cargar desde Firestore primero
-        let surveys = [];
-        if (window.db) {
-          const snap = await window.db.collection('surveys').get();
-          surveys = snap.docs.map(doc => doc.data());
-          console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde Firestore`);
-        } else {
-          // Fallback a localStorage
-          surveys = DataManager.readAll();
-          console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde localStorage`);
-        }
+  try {
+    // Esperar a que Firebase esté listo
+    if (!window.fbAuth || !window.fbAuth.currentUser) {
+      console.log('[Encuestadores] Esperando autenticación...');
+      return;
+    }
+
+    // Intentar cargar desde Firestore primero
+    let surveys = [];
+    if (window.db) {
+      const snap = await window.db.collection('surveys').get();
+      surveys = snap.docs.map(doc => doc.data());
+      console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde Firestore`);
+    } else {
+      // Fallback a localStorage
+      surveys = DataManager.readAll();
+      console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde localStorage`);
+    }
 
         // Función para identificar encuestador de forma flexible
         function identifyEncuestador(encuestadorId) {
