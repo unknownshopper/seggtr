@@ -172,11 +172,11 @@
     <div class="encuestadores-grid" id="encuestadoresGrid">
       <!-- Encuestador 1: Máximo García Dorame -->
       <div class="encuestador-card">
-        <div class="placeholder-avatar">MG</div>
+        <img src="encuestadores/maximo.png" alt="Máximo García Dorame" class="foto-perfil" />        
         <h3>Máximo García Dorame</h3>
         <p class="email">encuestador@omobility.com</p>
         <p class="profesion">Estudiante de Contaduría</p>
-        <p class="edad">21 años</p>
+        <p class="edad">20 años</p>
         <span class="badge active">● Activo</span>
         
         <div class="stats">
@@ -202,12 +202,11 @@
 
       <!-- Encuestador 2: Placeholder -->
       <div class="encuestador-card">
-        <div class="placeholder-avatar">E2</div>
-        <h3>Encuestador 2</h3>
+        <img src="encuestadores/humberto.png" alt="Humberto Castillo" class="foto-perfil" />        
+        <h3>Humberto Castillo</h3>
         <p class="email">encuestador2@omobility.com</p>
-        <p class="profesion">Por asignar</p>
-        <p class="edad">-- años</p>
-        <span class="badge inactive">● Inactivo</span>
+        <p class="profesion">Estudiante de Administración</p>        <p class="edad">23 años</p>
+        <span class="badge active">● Activo</span>
         
         <div class="stats">
           <div class="stat">
@@ -232,12 +231,12 @@
 
       <!-- Encuestador 3: Placeholder -->
       <div class="encuestador-card">
-        <div class="placeholder-avatar">E3</div>
-        <h3>Encuestador 3</h3>
+        <img src="encuestadores/aristides.png" alt="Arístides Prats" class="foto-perfil" />        
+        <h3>Arístides Prats</h3>
         <p class="email">encuestador3@omobility.com</p>
-        <p class="profesion">Por asignar</p>
-        <p class="edad">-- años</p>
-        <span class="badge inactive">● Inactivo</span>
+        <p class="profesion">Estudiante de Políticas Públicas</p>
+        <p class="edad">24 años</p>
+        <span class="badge active">● Activo</span>
         
         <div class="stats">
           <div class="stat">
@@ -304,18 +303,23 @@
             return 'enc1';
           }
           
-          // Encuestador 2
+          // Encuestador 2 (Humberto Castillo)
           if (id.includes('encuestador2@') || 
               id === 'encuestador2' || 
-              id === 'encuestador 2') {
+              id === 'encuestador 2' ||
+              id.includes('humberto') ||
+              id.includes('castillo')) {
             return 'enc2';
           }
-          
-          // Encuestador 3
+
+          // Encuestador 3 (Arístides Prats)
           if (id.includes('encuestador3@') || 
               id === 'encuestador3' || 
-              id === 'encuestador 3') {
-            return 'enc3';
+              id === 'encuestador 3' ||
+              id.includes('aristides') ||
+              id.includes('arístides') ||
+              id.includes('prats')) {
+                return 'enc3';
           }
           
           return null;
