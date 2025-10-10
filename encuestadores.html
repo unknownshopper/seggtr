@@ -160,8 +160,8 @@
     <header class="header">
       <img class="logo" src="logcho.png" alt="Omomobility" onerror="this.onerror=null; this.src='logch.png'"/>
       <div>
-        <h1>Equipo de Encuestadores</h1>
-        <p class="lead">Profesionales capacitados para el estudio de mercado de motocicletas eléctricas en Villahermosa, Tabasco.</p>
+        <h1 id="pageTitle">Equipo de Encuestadores</h1>
+        <p class="lead" id="pageSubtitle">Profesionales capacitados para el estudio de mercado de motocicletas eléctricas en Villahermosa, Tabasco.</p>
       </div>
       <div class="header-actions">
         <a href="index.html" class="btn outline">← Inicio</a>
@@ -171,7 +171,8 @@
 
     <div class="encuestadores-grid" id="encuestadoresGrid">
       <!-- Encuestador 1: Máximo García Dorame -->
-      <div class="encuestador-card">
+      <div class="encuestador-card" data-encuestador="encuestador" data-email="encuestador@omobility.com">
+        <div class="gafete-badge hidden">🎫 Gafete Digital</div>
         <img src="encuestadores/maximo.png" alt="Máximo García Dorame" class="foto-perfil" />        
         <h3>Máximo García Dorame</h3>
         <p class="email">encuestador@omobility.com</p>
@@ -200,12 +201,14 @@
         </div>
       </div>
 
-      <!-- Encuestador 2: Placeholder -->
-      <div class="encuestador-card">
+      <!-- Encuestador 2: Humberto Castillo -->
+      <div class="encuestador-card" data-encuestador="encuestador2" data-email="encuestador2@omobility.com">
+        <div class="gafete-badge hidden">🎫 Gafete Digital</div>
         <img src="encuestadores/humberto.png" alt="Humberto Castillo" class="foto-perfil" />        
         <h3>Humberto Castillo</h3>
         <p class="email">encuestador2@omobility.com</p>
-        <p class="profesion">Estudiante de Administración</p>        <p class="edad">23 años</p>
+        <p class="profesion">Estudiante de Administración</p>
+        <p class="edad">23 años</p>
         <span class="badge active">● Activo</span>
         
         <div class="stats">
@@ -229,8 +232,9 @@
         </div>
       </div>
 
-      <!-- Encuestador 3: Placeholder -->
-      <div class="encuestador-card">
+      <!-- Encuestador 3: Arístides Prats -->
+      <div class="encuestador-card" data-encuestador="encuestador3" data-email="encuestador3@omobility.com">
+        <div class="gafete-badge hidden">🎫 Gafete Digital</div>
         <img src="encuestadores/aristides.png" alt="Arístides Prats" class="foto-perfil" />        
         <h3>Arístides Prats</h3>
         <p class="email">encuestador3@omobility.com</p>
@@ -266,26 +270,84 @@
   <script src="auth.js"></script>
   <script src="data-manager.js"></script>
   <script>
-    // Calcular estadísticas de encuestadores desde los datos
-    async function loadEncuestadorStats() {
-  try {
-    // Esperar a que Firebase esté listo
-    if (!window.fbAuth || !window.fbAuth.currentUser) {
-      console.log('[Encuestadores] Esperando autenticación...');
-      return;
+    // Función para mostrar gafete según usuario logueado
+    function setupGafeteView() {
+      const session = AuthSystem.getSession();
+      if (!session) {
+        console.log('[Gafete] No hay sesión activa');
+        return;
+      }
+
+      const username = (session.username || '').toLowerCase();
+      const role = (session.role || '').toLowerCase();
+      const grid = document.getElementById('encuestadoresGrid');
+      const cards = document.querySelectorAll('.encuestador-card');
+      const pageTitle = document.getElementById('pageTitle');
+      const pageSubtitle = document.getElementById('pageSubtitle');
+
+      console.log('[Gafete] Usuario:', username, 'Rol:', role);
+
+      // Si es admin, mostrar todos
+      if (role === 'admin') {
+        console.log('[Gafete] Admin - mostrando todos los encuestadores');
+        cards.forEach(card => card.classList.remove('hidden'));
+        grid.classList.remove('modo-gafete');
+        pageTitle.textContent = 'Equipo de Encuestadores';
+        pageSubtitle.textContent = 'Profesionales capacitados para el estudio de mercado de motocicletas eléctricas en Villahermosa, Tabasco.';
+        return;
+      }
+
+      // Para encuestadores, mostrar solo su gafete
+      let found = false;
+      cards.forEach(card => {
+        const cardEncuestador = card.getAttribute('data-encuestador');
+        const cardEmail = card.getAttribute('data-email');
+        
+        // Verificar si coincide con el usuario actual
+        const isMatch = 
+          cardEncuestador === username ||
+          cardEmail === session.email ||
+          cardEmail === `${username}@omobility.com`;
+
+        if (isMatch) {
+          card.classList.remove('hidden');
+          card.querySelector('.gafete-badge').classList.remove('hidden');
+          found = true;
+          console.log('[Gafete] Mostrando gafete para:', cardEncuestador);
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      if (found) {
+        grid.classList.add('modo-gafete');
+        pageTitle.textContent = 'Mi Gafete Digital';
+        pageSubtitle.textContent = 'Credencial de encuestador - Proyecto Omomobility';
+      } else {
+        console.warn('[Gafete] No se encontró tarjeta para usuario:', username);
+      }
     }
 
-    // Intentar cargar desde Firestore primero
-    let surveys = [];
-    if (window.db) {
-      const snap = await window.db.collection('surveys').get();
-      surveys = snap.docs.map(doc => doc.data());
-      console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde Firestore`);
-    } else {
-      // Fallback a localStorage
-      surveys = DataManager.readAll();
-      console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde localStorage`);
-    }
+    // Calcular estadísticas de encuestadores desde los datos
+    async function loadEncuestadorStats() {
+      try {
+        // Esperar a que Firebase esté listo
+        if (!window.fbAuth || !window.fbAuth.currentUser) {
+          console.log('[Encuestadores] Esperando autenticación...');
+          return;
+        }
+
+        // Intentar cargar desde Firestore primero
+        let surveys = [];
+        if (window.db) {
+          const snap = await window.db.collection('surveys').get();
+          surveys = snap.docs.map(doc => doc.data());
+          console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde Firestore`);
+        } else {
+          // Fallback a localStorage
+          surveys = DataManager.readAll();
+          console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde localStorage`);
+        }
 
         // Función para identificar encuestador de forma flexible
         function identifyEncuestador(encuestadorId) {
@@ -319,7 +381,7 @@
               id.includes('aristides') ||
               id.includes('arístides') ||
               id.includes('prats')) {
-                return 'enc3';
+            return 'enc3';
           }
           
           return null;
@@ -353,20 +415,27 @@
         Object.keys(stats).forEach(encId => {
           const data = stats[encId];
           
+          const totalEl = document.getElementById(`${encId}-total`);
+          const zonasEl = document.getElementById(`${encId}-zonas`);
+          const precisionEl = document.getElementById(`${encId}-precision`);
+          const activityEl = document.getElementById(`${encId}-lastActivity`);
+          
+          if (!totalEl) return; // Skip si el elemento no existe (card oculta)
+          
           // Total encuestas
-          document.getElementById(`${encId}-total`).textContent = data.total;
+          totalEl.textContent = data.total;
           
           // Zonas cubiertas
-          document.getElementById(`${encId}-zonas`).textContent = data.zonas.size;
+          if (zonasEl) zonasEl.textContent = data.zonas.size;
           
           // Precisión GPS promedio
-          if (data.precisions.length > 0) {
+          if (precisionEl && data.precisions.length > 0) {
             const avgPrecision = data.precisions.reduce((a, b) => a + b, 0) / data.precisions.length;
-            document.getElementById(`${encId}-precision`).textContent = `±${Math.round(avgPrecision)}m`;
+            precisionEl.textContent = `±${Math.round(avgPrecision)}m`;
           }
           
           // Última actividad
-          if (data.lastActivity) {
+          if (activityEl && data.lastActivity) {
             const now = new Date();
             const diff = now - data.lastActivity;
             const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -377,7 +446,7 @@
             else if (hours > 0) timeStr = `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
             else timeStr = 'Hace menos de 1 hora';
             
-            document.getElementById(`${encId}-lastActivity`).textContent = timeStr;
+            activityEl.textContent = timeStr;
           }
         });
 
@@ -401,13 +470,24 @@
       else if (/Mac/.test(ua)) device = 'Mac';
       else if (/Linux/.test(ua)) device = 'Linux';
       
-      // Solo actualizar para el encuestador actual si está logueado
-      // Por ahora mostramos el dispositivo actual como ejemplo
-      document.getElementById('enc1-device').textContent = device;
+      // Actualizar dispositivo para todas las tarjetas visibles
+      const session = AuthSystem.getSession();
+      if (session) {
+        const username = (session.username || '').toLowerCase();
+        
+        // Mapear username a ID de encuestador
+        let encId = 'enc1'; // default
+        if (username === 'encuestador2') encId = 'enc2';
+        else if (username === 'encuestador3') encId = 'enc3';
+        
+        const deviceEl = document.getElementById(`${encId}-device`);
+        if (deviceEl) deviceEl.textContent = device;
+      }
     }
 
     // Cargar al inicio
     document.addEventListener('DOMContentLoaded', () => {
+      setupGafeteView();
       detectDevice();
       loadEncuestadorStats();
       

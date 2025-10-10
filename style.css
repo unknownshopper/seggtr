@@ -9,6 +9,57 @@ body{ margin:0; background:var(--bg); color:var(--ink); font:400 16px/1.6 "Inter
 .titles p{ margin:6px 0 0; color:var(--muted); font-size:14px }
 .meta{ color:var(--muted); font-size:13px; text-align:right }
 .section-title{ font:600 16px/1.3 "Inter",sans-serif; letter-spacing:.3px; text-transform:uppercase; color:var(--primary); margin:24px 0 12px }
+/* Modo gafete individual - centrado */
+.encuestadores-grid.modo-gafete {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.encuestador-card.hidden {
+  display: none;
+}
+
+/* Gafete individual más grande y destacado */
+.modo-gafete .encuestador-card {
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+  border: 2px solid #667eea;
+}
+
+/* Foto más grande en modo gafete */
+.modo-gafete .foto-perfil {
+  width: 150px;
+  height: 150px;
+  border: 5px solid #667eea;
+}
+
+.modo-gafete .encuestador-card h3 {
+  font-size: 24px;
+}
+
+/* Badge de gafete digital */
+.gafete-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 16px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.modo-gafete .gafete-badge {
+  display: block;
+}
+
+.gafete-badge.hidden {
+  display: none;
+}
 .grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px }
 @media (max-width:900px){ .grid{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
 @media (max-width:640px){ .grid{ grid-template-columns:1fr } .hero{ grid-template-columns:1fr; text-align:left } .meta{ text-align:left } }
@@ -113,6 +164,7 @@ input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--prim
   opacity: 0;
   transition: opacity 0.3s ease;
 }
+
 
 .toast.show { opacity: 1; }
 .toast.success { background: #38a169; }

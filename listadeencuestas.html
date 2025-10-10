@@ -348,6 +348,41 @@ async function fetchFromFirestore() {
       `;
     }
 
+    function getEncuestadorBadge(encuestadorId) {
+  if (!encuestadorId) return { badge: 'NA', class: '' };
+  
+  const id = encuestadorId.toString().toLowerCase().trim();
+  
+  // Admin
+  if (id === 'admin' || id.includes('admin')) {
+    return { badge: 'AD', class: 'admin' };
+  }
+  
+  // Supervisor
+  if (id === 'supervisor' || id.includes('supervisor')) {
+    return { badge: 'SU', class: 'supervisor' };
+  }
+  
+  // Encuestadores (Máximo, Humberto, Arístides)
+  if (id === 'encuestador' || 
+      id === 'encuestador@omobility.com' ||
+      id === 'encuestador2' || 
+      id === 'encuestador2@omobility.com' ||
+      id === 'encuestador3' || 
+      id === 'encuestador3@omobility.com' ||
+      id.includes('maximo') ||
+      id.includes('máximo') ||
+      id.includes('humberto') ||
+      id.includes('castillo') ||
+      id.includes('aristides') ||
+      id.includes('arístides') ||
+      id.includes('prats')) {
+    return { badge: 'EN', class: 'encuestador' };
+  }
+  
+  // Default
+  return { badge: id.slice(0, 2).toUpperCase(), class: '' };
+}
     function render() {
       const total = state.filtered.length;
       const pages = Math.max(1, Math.ceil(total / state.pageSize));
@@ -368,13 +403,13 @@ async function fetchFromFirestore() {
         actions.push(`<button class="btn outline small" data-action="view" data-idx="${idx}">Ver</button>`);
         if (canEdit(state.role)) actions.push(`<button class="btn outline small" data-action="edit" data-idx="${idx}">Editar</button>`);
         if (canDelete(state.role)) actions.push(`<button class="btn outline small" style="color:#e53e3e;border-color:#e53e3e" data-action="delete" data-idx="${idx}">Eliminar</button>`);
-
+        const encBadge = getEncuestadorBadge(r.encuestador_id);
         const tr = document.createElement('tr');
         tr.innerHTML = `
         <td class="nowrap">${fmtDate(r.ts)}</td>
         <td>
           <div class="cell-user">
-            <span class="avatar">${(r.encuestador_id || 'NA').toString().trim().slice(0,2).toUpperCase()}</span>
+           <span class="avatar ${encBadge.class}">${encBadge.badge}</span>
             <span>${r.encuestador_id || '<span class="muted">N/A</span>'}</span>
           </div>
         </td>
