@@ -639,3 +639,7 @@ const FormHandler = {
     start();
   }
 })();
+
+
+// Exportar al scope global para que sea accesible desde otros scripts
+window.FormHandler = FormHandler;
