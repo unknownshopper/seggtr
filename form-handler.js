@@ -409,37 +409,27 @@ const FormHandler = {
           intencion: row.intencion,
           tieneImagen: !!imageDataUrl
         });
-  
-                // 5) Intentar guardar en Firestore PRIMERO
-                let savedToFirestore = false;
+
+
+                // 5) Guardar SOLO en Firestore (sin localStorage)
                 try {
-                  if (window.db && window.fbAuth && window.fbAuth.currentUser) {
-                    const res = await saveSurveyToFirestore(row);
-                    if (res.ok) {
-                      console.log('[FormHandler] ✓ Guardado en Firestore');
-                      savedToFirestore = true;
-                    } else {
-                      throw new Error(res.reason || 'Firestore falló');
-                    }
-                  } else {
-                    throw new Error('Firebase no disponible');
+                  if (!window.db || !window.fbAuth || !window.fbAuth.currentUser) {
+                    throw new Error('Firebase no disponible. Verifica tu conexión a internet y que hayas iniciado sesión.');
                   }
+                  
+                  const res = await saveSurveyToFirestore(row);
+                  if (!res.ok) {
+                    throw new Error(res.reason || 'Error al guardar en Firestore');
+                  }
+                  
+                  console.log('[FormHandler] ✓ Encuesta guardada en Firestore exitosamente');
                 } catch (e) {
-                  console.warn('[FormHandler] No se pudo guardar en Firestore:', e.message);
-                  savedToFirestore = false;
+                  console.error('[FormHandler] Error crítico al guardar:', e.message);
+                  throw e; // Re-lanzar para que el catch externo lo maneje
                 }
-                
-                // 6) Guardar en localStorage (siempre como respaldo)
-                const all = DataManager.readAll();
-                all.push(row);
-                DataManager.writeAll(all);
-                console.log('[FormHandler] ✓ Guardado en localStorage');
-                
-                // 7) Si no se guardó en Firestore, marcar para sincronización
-                if (!savedToFirestore && window.SyncManager) {
-                  SyncManager.markPending(row);
-                  console.log('[FormHandler] ⏳ Marcado para sincronización posterior');
-                }
+ 
+        
+        
   
         // 7) Limpiar formulario y feedback
         e.target.reset();

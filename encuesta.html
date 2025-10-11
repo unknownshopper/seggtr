@@ -9,6 +9,166 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Botón flotante "Mi ID" */
+    .btn-mi-id {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .btn-mi-id:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+    }
+    
+    .btn-mi-id.visible {
+      display: flex;
+    }
+    
+    /* Modal de gafete */
+    .modal-gafete {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .modal-gafete.active {
+      display: flex;
+    }
+    
+    .modal-gafete-content {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-gafete-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #f3f4f6;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+    
+    .modal-gafete-close:hover {
+      background: #e5e7eb;
+    }
+    
+    .gafete-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .gafete-badge-modal {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    
+    .gafete-foto {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 16px;
+      display: block;
+      border: 5px solid #667eea;
+    }
+    
+    .gafete-nombre {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 8px 0;
+      text-align: center;
+    }
+    
+    .gafete-email {
+      color: #667eea;
+      font-size: 14px;
+      margin: 0 0 4px 0;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    .gafete-profesion {
+      color: #6b7280;
+      font-size: 14px;
+      margin: 0 0 4px 0;
+      text-align: center;
+    }
+    
+    .gafete-edad {
+      color: #9ca3af;
+      font-size: 13px;
+      margin: 0 0 16px 0;
+      text-align: center;
+    }
+    
+    .gafete-footer {
+      text-align: center;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+      color: #9ca3af;
+      font-size: 12px;
+    }
+  </style>
 </head>
 <body>
   <div class="page">
@@ -510,7 +670,27 @@
       </div>
     </div>
   </div>
+<!-- Botón flotante "Mi ID" -->
+<button id="btnMiId" class="btn-mi-id">
+  <span>🎫</span>
+  <span>Mi ID</span>
+</button>
 
+<!-- Modal de gafete -->
+<div id="modalGafete" class="modal-gafete">
+  <div class="modal-gafete-content">
+    <button class="modal-gafete-close" onclick="cerrarModalGafete()">×</button>
+    <div class="gafete-header">
+      <div class="gafete-badge-modal">🎫 Gafete Digital</div>
+    </div>
+    <div id="gafeteContent">
+      <!-- Contenido dinámico -->
+    </div>
+    <div class="gafete-footer">
+      Proyecto Omomobility - Villahermosa, Tabasco
+    </div>
+  </div>
+</div>
     <!-- Firebase SDKs (compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -543,7 +723,7 @@
             el = document.createElement('div');
             el.id = 'fb-status-badge';
             el.style.cssText = `
-              position:absolute; top:10px; right:20px; z-index:9999;
+              position:absolute; top:70px; right:20px; z-index:9998;
               display:flex; align-items:center; gap:8px;
               background: rgba(255,255,255,0.95); border:1px solid #e5e7eb;
               padding:6px 10px; border-radius:999px; font: 12px Inter, sans-serif;
@@ -586,5 +766,136 @@
         });
       }
     </script>
+      <script>
+        // Sistema de gafete digital para encuestadores
+        const encuestadoresData = {
+          'encuestador': {
+            nombre: 'Máximo García Dorame',
+            email: 'encuestador@omobility.com',
+            profesion: 'Estudiante de Contaduría',
+            edad: '20 años',
+            foto: 'encuestadores/maximo.png'
+          },
+          'encuestador2': {
+            nombre: 'Humberto Castillo',
+            email: 'encuestador2@omobility.com',
+            profesion: 'Estudiante de Administración',
+            edad: '23 años',
+            foto: 'encuestadores/humberto.png'
+          },
+          'encuestador3': {
+            nombre: 'Arístides Prats',
+            email: 'encuestador3@omobility.com',
+            profesion: 'Estudiante de Política',
+            edad: '24 años',
+            foto: 'encuestadores/aristides.png'
+          }
+        };
+    
+  
+        function mostrarBotonMiId() {
+  console.log('[Gafete] Iniciando mostrarBotonMiId()');
+  
+  const session = AuthSystem.getSession();
+  console.log('[Gafete] Sesión:', session);
+  
+  if (!session) {
+    console.warn('[Gafete] No hay sesión activa');
+    return;
+  }
+  
+  const username = (session.username || '').toLowerCase();
+  const role = (session.role || '').toLowerCase();
+  
+  console.log('[Gafete] Username:', username, 'Role:', role);
+  console.log('[Gafete] Datos disponibles:', Object.keys(encuestadoresData));
+  console.log('[Gafete] ¿Existe en datos?', encuestadoresData[username]);
+  
+  const btn = document.getElementById('btnMiId');
+  console.log('[Gafete] Botón encontrado:', btn);
+  
+  // Solo mostrar para encuestadores (cualquier encuestador)
+  if (role === 'encuestador' && encuestadoresData[username]) {
+    if (btn) {
+      btn.classList.add('visible');
+      console.log('[Gafete] ✅ Botón Mi ID activado para:', username);
+    } else {
+      console.error('[Gafete] ❌ No se encontró el botón btnMiId en el DOM');
+    }
+  } else {
+    console.log('[Gafete] ❌ No se muestra botón. Role:', role, 'Username:', username, 'En datos:', !!encuestadoresData[username]);
+  }
+}
+
+        function abrirModalGafete() {
+          const session = AuthSystem.getSession();
+          if (!session) return;
+          
+          const username = (session.username || '').toLowerCase();
+          const data = encuestadoresData[username];
+          
+          if (!data) {
+            alert('No se encontró información del encuestador');
+            return;
+          }
+          
+          const content = document.getElementById('gafeteContent');
+          content.innerHTML = `
+            <img src="${data.foto}" alt="${data.nombre}" class="gafete-foto" onerror="this.style.display='none'" />
+            <h2 class="gafete-nombre">${data.nombre}</h2>
+            <p class="gafete-email">${data.email}</p>
+            <p class="gafete-profesion">${data.profesion}</p>
+            <p class="gafete-edad">${data.edad}</p>
+          `;
+          
+          document.getElementById('modalGafete').classList.add('active');
+        }
+    
+        function cerrarModalGafete() {
+          document.getElementById('modalGafete').classList.remove('active');
+        }
+    
+        // Event listeners
+        document.getElementById('btnMiId').addEventListener('click', abrirModalGafete);
+        
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalGafete').addEventListener('click', function(e) {
+          if (e.target === this) {
+            cerrarModalGafete();
+          }
+        });
+    
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') {
+            cerrarModalGafete();
+          }
+        });
+    
+        // Inicializar al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+          console.log('[Gafete] DOMContentLoaded disparado');
+          
+          // Verificar que el botón existe
+          const btn = document.getElementById('btnMiId');
+          console.log('[Gafete] Botón en DOM:', btn);
+          
+          // Intentar múltiples veces con diferentes delays
+          setTimeout(() => {
+            console.log('[Gafete] Intento 1 (500ms)');
+            mostrarBotonMiId();
+          }, 500);
+          
+          setTimeout(() => {
+            console.log('[Gafete] Intento 2 (1500ms)');
+            mostrarBotonMiId();
+          }, 1500);
+          
+          setTimeout(() => {
+            console.log('[Gafete] Intento 3 (3000ms)');
+            mostrarBotonMiId();
+          }, 3000);
+        });
+      </script>
   </body>
 </html>

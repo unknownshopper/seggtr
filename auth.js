@@ -284,7 +284,8 @@ canAccess(page, role) {
   // Páginas permitidas por rol
   const encuestadorAllowed = new Set([
     'encuesta.html',
-    'listadeencuestas.html'
+    'listadeencuestas.html',
+    'encuestadores.html'
   ]);
 
   const supervisorAllowed = new Set([

@@ -61,6 +61,94 @@
       height: 100%; background: linear-gradient(90deg, #34d399, #10b981);
       width: 0%;
     }
+    /* Encabezados ordenables */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+th.sortable:hover {
+  background: #e5e7eb;
+}
+th.sortable::after {
+  content: ' ↕';
+  opacity: 0.3;
+  font-size: 12px;
+}
+th.sortable.sort-asc::after {
+  content: ' ↑';
+  opacity: 1;
+  color: #4f46e5;
+}
+th.sortable.sort-desc::after {
+  content: ' ↓';
+  opacity: 1;
+  color: #4f46e5;
+}
+    /* Panel de estadísticas de Firebase */
+    .stats-panel {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .stats-panel h3 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .stat-subtext {
+      font-size: 11px;
+      opacity: 0.8;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #34d399, #10b981);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+    .progress-fill.warning {
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    }
+    .progress-fill.danger {
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+    }
   </style>
 </head>
 <body>
@@ -72,6 +160,42 @@
         <p class="lead">Consulta y gestiona hasta 250 encuestas desde Firebase (fallback: este dispositivo).</p>      </div>
       <div id="roleBadge" class="header-actions"></div>
     </header>
+
+        <!-- Panel de estadísticas de Firebase -->
+        <div class="stats-panel">
+          <h3>📊 Uso de Firebase</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Total de encuestas</div>
+              <div class="stat-value" id="stat-total">0</div>
+              <div class="stat-subtext">Límite: 250</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-surveys" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-label">Almacenamiento usado</div>
+              <div class="stat-value" id="stat-storage">0 MB</div>
+              <div class="stat-subtext">Límite gratuito: 1 GB</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-storage" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-label">Con evidencia fotográfica</div>
+              <div class="stat-value" id="stat-images">0</div>
+              <div class="stat-subtext" id="stat-images-percent">0% del total</div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-label">Última actualización</div>
+              <div class="stat-value" style="font-size: 16px;" id="stat-updated">—</div>
+              <div class="stat-subtext">Tiempo real</div>
+            </div>
+          </div>
+        </div>
 
     <div class="toolbar">
       <input id="search" class="search" type="text" placeholder="Buscar por encuestador, zona, comentarios..." />
@@ -97,11 +221,11 @@
       <table>
         <thead>
           <tr>
-            <th class="w160">Fecha</th>
-            <th>Encuestador</th>
-            <th>Zona</th>
-            <th class="w100">Edad</th>
-            <th class="w100">Intención</th>
+            <th class="w160 sortable" data-sort="ts">Fecha</th>
+            <th class="sortable" data-sort="encuestador_id">Encuestador</th>
+            <th class="sortable" data-sort="zona">Zona</th>
+            <th class="w100 sortable" data-sort="edad">Edad</th>
+            <th class="w100 sortable" data-sort="intencion">Intención</th>
             <th class="w120">Ubicación</th>
             <th>Evidencia</th>
             <th class="w160">Acciones</th>
@@ -194,7 +318,9 @@
       pageSize: 50,
       filtered: [],
       all: [],
-      editIndex: null
+      editIndex: null,
+      sortColumn: 'ts',
+      sortDirection: 'desc' // desc = más reciente primero
     };
 
     function getRoleBadge(role) {
@@ -243,33 +369,36 @@
 }
 
 function loadData() {
-  const fallback = () => {
-    const rows = DataManager.readAll() || [];
-    state.all = rows.slice(0, MAX);
+  if (!window.db) {
+    console.error('[Dashboard] Firebase no disponible');
+    alert('Firebase no está disponible. Verifica tu conexión a internet.');
+    state.all = [];
     applyFilter();
-  };
-
-  if (window.db) {
-    fetchFromFirestore().then(rows => {
-      if (Array.isArray(rows) && rows.length) {
-        state.all = rows.slice(0, MAX);
-        applyFilter();
-      } else {
-        fallback();
-      }
-    }).catch(() => {
-      fallback();
-    });
-  } else {
-    fallback();
+    return;
   }
+
+  fetchFromFirestore().then(rows => {
+    if (Array.isArray(rows)) {
+      state.all = rows.slice(0, MAX);
+      applyFilter();
+      updateFirebaseStats(); // ← AGREGAR ESTA LÍNEA
+      console.log(`[Dashboard] Cargadas ${rows.length} encuestas desde Firestore`);
+    } else {
+      state.all = [];
+      applyFilter();
+    }
+  }).catch((err) => {
+    console.error('[Dashboard] Error cargando desde Firestore:', err);
+    alert('Error al cargar encuestas desde Firebase. Verifica tu conexión.');
+    state.all = [];
+    applyFilter();
+  });
 }
+
 
 async function fetchFromFirestore() {
   try {
     const colRef = window.db.collection('surveys');
-    // Si tienes _createdAt puedes ordenar (creará índice si lo pide):
-    // const snap = await colRef.orderBy('_createdAt', 'desc').limit(250).get();
     const snap = await colRef.limit(250).get();
     const rows = [];
     snap.forEach(doc => {
@@ -277,6 +406,8 @@ async function fetchFromFirestore() {
       if (d._probe) return; // omitir registros de prueba
 
       rows.push({
+        // CRÍTICO: Guardar el ID del documento de Firestore
+        _firestoreId: doc.id,
         // fecha normalizada
         ts: d.ts || d._createdAt || d.when || null,
         // campos estándar del formulario
@@ -303,7 +434,62 @@ async function fetchFromFirestore() {
   }
 }
 
-    function applyFilter() {
+
+function updateFirebaseStats() {
+  const total = state.all.length;
+  const maxSurveys = 250;
+  
+  // Calcular encuestas con imágenes
+  const withImages = state.all.filter(r => r.image_proof_png).length;
+  
+  // Estimar tamaño de almacenamiento
+  let estimatedSize = 0;
+  state.all.forEach(r => {
+    // Tamaño base del documento (campos de texto): ~2KB
+    estimatedSize += 2;
+    
+    // Si tiene imagen, agregar tamaño estimado de la imagen
+    if (r.image_proof_png) {
+      // Base64 image: aproximadamente 100-150KB por imagen
+      const base64Length = r.image_proof_png.length;
+      const sizeInKB = (base64Length * 0.75) / 1024; // Convertir base64 a KB real
+      estimatedSize += sizeInKB;
+    }
+  });
+  
+  const estimatedMB = (estimatedSize / 1024).toFixed(2);
+  const storagePercent = ((estimatedSize / 1024) / 1024 * 100).toFixed(1); // % de 1GB
+  
+  // Actualizar UI
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-storage').textContent = `${estimatedMB} MB`;
+  document.getElementById('stat-images').textContent = withImages;
+  document.getElementById('stat-images-percent').textContent = 
+    total > 0 ? `${Math.round((withImages / total) * 100)}% del total` : '0% del total';
+  document.getElementById('stat-updated').textContent = 
+    new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  
+  // Actualizar barras de progreso
+  const surveyPercent = Math.min((total / maxSurveys) * 100, 100);
+  const surveyBar = document.getElementById('progress-surveys');
+  surveyBar.style.width = `${surveyPercent}%`;
+  
+  // Cambiar color según porcentaje
+  surveyBar.className = 'progress-fill';
+  if (surveyPercent > 80) surveyBar.classList.add('danger');
+  else if (surveyPercent > 60) surveyBar.classList.add('warning');
+  
+  const storageBar = document.getElementById('progress-storage');
+  storageBar.style.width = `${Math.min(storagePercent, 100)}%`;
+  storageBar.className = 'progress-fill';
+  if (storagePercent > 80) storageBar.classList.add('danger');
+  else if (storagePercent > 60) storageBar.classList.add('warning');
+  
+  console.log(`[Stats] Total: ${total}, Storage: ${estimatedMB}MB, Images: ${withImages}`);
+}
+
+
+function applyFilter() {
       const q = (document.getElementById('search').value || '').toLowerCase().trim();
       const list = state.all.filter(r => {
         const hay = (v) => (v ?? '').toString().toLowerCase().includes(q);
@@ -314,6 +500,60 @@ async function fetchFromFirestore() {
           hay(r.ts);
       });
       state.filtered = list;
+      sortData(); // Ordenar después de filtrar
+      state.page = 1;
+      render();
+      updateFirebaseStats(); // ← AGREGAR ESTA LÍNEA
+    }
+
+
+
+        // Función para ordenar los datos
+        function sortData() {
+      const col = state.sortColumn;
+      const dir = state.sortDirection;
+      
+      state.filtered.sort((a, b) => {
+        let valA = a[col];
+        let valB = b[col];
+        
+        // Manejar valores nulos/undefined
+        if (valA == null) valA = '';
+        if (valB == null) valB = '';
+        
+        // Convertir a números si es edad o intención
+        if (col === 'edad' || col === 'intencion') {
+          valA = Number(valA) || 0;
+          valB = Number(valB) || 0;
+        }
+        
+        // Comparación para fechas
+        if (col === 'ts') {
+          valA = new Date(valA).getTime() || 0;
+          valB = new Date(valB).getTime() || 0;
+        }
+        
+        // Comparación
+        let comparison = 0;
+        if (valA > valB) comparison = 1;
+        if (valA < valB) comparison = -1;
+        
+        return dir === 'asc' ? comparison : -comparison;
+      });
+    }
+    
+    // Función para cambiar columna de ordenamiento
+    function setSortColumn(column) {
+      if (state.sortColumn === column) {
+        // Alternar dirección si es la misma columna
+        state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        // Nueva columna, empezar descendente
+        state.sortColumn = column;
+        state.sortDirection = 'desc';
+      }
+      
+      sortData();
       state.page = 1;
       render();
     }
@@ -388,6 +628,15 @@ async function fetchFromFirestore() {
       const pages = Math.max(1, Math.ceil(total / state.pageSize));
       state.page = Math.min(state.page, pages);
 
+
+      // Actualizar indicadores visuales de ordenamiento
+      document.querySelectorAll('th.sortable').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.getAttribute('data-sort') === state.sortColumn) {
+          th.classList.add(`sort-${state.sortDirection}`);
+        }
+      });
+
       const tbody = document.getElementById('rows');
       tbody.innerHTML = '';
 
@@ -449,6 +698,14 @@ async function fetchFromFirestore() {
         const pages = Math.max(1, Math.ceil(total / state.pageSize));
         state.page = Math.min(pages, state.page + 1);
         render();
+      });  // ← Este cierra el listener de 'next'
+
+      // Event listeners para ordenamiento de columnas
+      document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const column = th.getAttribute('data-sort');
+          if (column) setSortColumn(column);
+        });
       });
 
       document.getElementById('rows').addEventListener('click', (e) => {
@@ -538,78 +795,129 @@ async function fetchFromFirestore() {
     }
 
     async function doDelete(r) {
-      if (!confirm('¿Eliminar esta encuesta? Esta acción no se puede deshacer.')) return;
-      
-      // Eliminar de localStorage
-      const all = DataManager.readAll();
-      let removed = false;
-      
-      // Intentar encontrar por múltiples criterios
-      let idx = all.indexOf(r);
-      if (idx < 0) {
-        idx = all.findIndex(x => x.ts === r.ts && x.encuestador_id === r.encuestador_id);
-      }
-      if (idx < 0 && r._createdAt) {
-        idx = all.findIndex(x => x._createdAt === r._createdAt);
-      }
-      // Último recurso: buscar por coincidencia de varios campos
-      if (idx < 0) {
-        idx = all.findIndex(x => 
-          JSON.stringify(x) === JSON.stringify(r)
-        );
-      }
-      
-      if (idx >= 0) {
-        all.splice(idx, 1);
-        DataManager.writeAll(all);
-        removed = true;
-      }
+  if (!confirm('¿Eliminar esta encuesta? Esta acción no se puede deshacer.')) return;
   
-  // Intentar eliminar de Firestore también
-  if (window.db && r._createdAt) {
+  // LOGGING DETALLADO PARA DIAGNÓSTICO
+  console.group('🗑️ Intentando eliminar encuesta');
+  console.log('Registro a eliminar:', r);
+  console.log('Tiene _firestoreId?', r._firestoreId);
+  console.log('Tiene _createdAt?', r._createdAt);
+  console.log('Tiene ts?', r.ts);
+  console.log('Tiene encuestador_id?', r.encuestador_id);
+  console.log('Firebase disponible?', !!window.db);
+  
+   // Ya no usamos localStorage, solo Firestore
+   let removedFromFirestore = false;
+
+// Eliminar de Firestore
+  if (window.db) {
     try {
-      const snap = await window.db.collection('surveys')
-        .where('_createdAt', '==', r._createdAt)
-        .limit(1)
-        .get();
-      
-      if (!snap.empty) {
-        await snap.docs[0].ref.delete();
-        console.log('Eliminado de Firestore');
+      // Método 1: Usar el ID del documento si está disponible (más eficiente)
+      if (r._firestoreId) {
+        console.log('Usando _firestoreId:', r._firestoreId);
+        await window.db.collection('surveys').doc(r._firestoreId).delete();
+        removedFromFirestore = true;
+        console.log('✓ Eliminado de Firestore usando document ID');
+      } 
+      // Método 2: Buscar por _createdAt (fallback)
+      else if (r._createdAt) {
+        console.log('Buscando por _createdAt:', r._createdAt);
+        const snap = await window.db.collection('surveys')
+          .where('_createdAt', '==', r._createdAt)
+          .limit(1)
+          .get();
+        
+        console.log('Resultados encontrados:', snap.size);
+        if (!snap.empty) {
+          await snap.docs[0].ref.delete();
+          removedFromFirestore = true;
+          console.log('✓ Eliminado de Firestore usando query');
+        } else {
+          console.warn('⚠ No encontrado en Firestore');
+        }
+      }
+      // Método 3: Buscar por timestamp y encuestador (último recurso)
+      else if (r.ts && r.encuestador_id) {
+        console.log('Buscando por ts+encuestador_id');
+        const snap = await window.db.collection('surveys')
+          .where('ts', '==', r.ts)
+          .where('encuestador_id', '==', r.encuestador_id)
+          .limit(1)
+          .get();
+        
+        console.log('Resultados encontrados:', snap.size);
+        if (!snap.empty) {
+          await snap.docs[0].ref.delete();
+          removedFromFirestore = true;
+          console.log('✓ Eliminado de Firestore usando ts+encuestador_id');
+        } else {
+          console.warn('⚠ No encontrado en Firestore');
+        }
+      } else {
+        console.warn('⚠ No hay suficientes datos para buscar en Firestore');
       }
     } catch (e) {
-      console.warn('No se pudo eliminar de Firestore:', e);
+      console.error('Error eliminando de Firestore:', e);
+      alert(`Error al eliminar de Firestore: ${e.message}`);
     }
+  } else {
+    console.warn('⚠ Firebase no disponible');
   }
   
-  if (removed) {
+  console.groupEnd();
+  
+  // 3. Mostrar resultado y refrescar
+  if (removedFromFirestore) {
     loadData(); // refrescar
-    alert('Encuesta eliminada.');
+    alert('Encuesta eliminada de Firestore exitosamente');
   } else {
-    alert('No se pudo eliminar (no encontrada en localStorage).');
+    alert('No se pudo eliminar la encuesta (no encontrada).');
   }
 }
 
+async function saveEdit() {
+  const idx = state.editIndex;
+  if (idx == null || idx < 0) { 
+    document.getElementById('editModal').close(); 
+    return; 
+  }
+  
+  const ref = state.all[idx];
+  if (!ref || !ref._firestoreId) {
+    alert('No se pudo identificar la encuesta para editar.');
+    return;
+  }
 
-function saveEdit() {
-      const idx = state.editIndex;
-      if (idx == null || idx < 0) { document.getElementById('editModal').close(); return; }
-      const all = DataManager.readAll();
-      // Buscar por ts+encuestador_id para mayor robustez
-      const ref = state.all[idx];
-      const real = all.find(x => x.ts === ref.ts && x.encuestador_id === ref.encuestador_id);
-      if (!real) { alert('No se pudo guardar, registro no encontrado.'); return; }
+  try {
+    // Obtener valores del formulario
+    const edad = Number(document.getElementById('edit_edad').value);
+    const intencion = Number(document.getElementById('edit_intencion').value);
+    const zona = document.getElementById('edit_zona').value;
+    const comentarios = document.getElementById('edit_comentarios').value;
 
-      real.edad = Number(document.getElementById('edit_edad').value) || real.edad;
-      real.intencion = Number(document.getElementById('edit_intencion').value) || real.intencion;
-      real.zona = document.getElementById('edit_zona').value || real.zona;
-      real.comentarios = document.getElementById('edit_comentarios').value || real.comentarios;
-
-      DataManager.writeAll(all);
-      document.getElementById('editModal').close();
-      loadData();
-      alert('Cambios guardados.');
+    // Actualizar en Firestore
+    if (!window.db) {
+      throw new Error('Firebase no disponible');
     }
+
+    await window.db.collection('surveys').doc(ref._firestoreId).update({
+      edad: edad || ref.edad,
+      intencion: intencion || ref.intencion,
+      zona: zona || ref.zona,
+      comentarios: comentarios || ref.comentarios,
+      _updatedAt: new Date().toISOString()
+    });
+
+    console.log('✓ Encuesta actualizada en Firestore');
+    document.getElementById('editModal').close();
+    loadData();
+    alert('Cambios guardados exitosamente.');
+  } catch (err) {
+    console.error('Error al actualizar encuesta:', err);
+    alert(`Error al guardar cambios: ${err.message}`);
+  }
+}
+
 
     document.getElementById('saveEdit').addEventListener('click', saveEdit);
 
