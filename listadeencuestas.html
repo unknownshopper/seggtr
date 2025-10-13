@@ -620,10 +620,15 @@ function applyFilter() {
       `;
     }
 
-    function getEncuestadorBadge(encuestadorId) {
-  if (!encuestadorId) return { badge: 'NA', class: '' };
+    function getEncuestadorBadge(encuestadorId, createdEmail) {
+  // Priorizar _createdEmail si encuestador_id es genérico
+  const emailToUse = (encuestadorId === 'Encuestador' || encuestadorId === 'encuestador') 
+    ? createdEmail 
+    : encuestadorId;
   
-  const id = encuestadorId.toString().toLowerCase().trim();
+  if (!emailToUse) return { badge: 'NA', class: '' };
+  
+  const id = emailToUse.toString().toLowerCase().trim();
   
   // Admin
   if (id === 'admin' || id.includes('admin')) {
@@ -695,9 +700,8 @@ function applyFilter() {
         actions.push(`<button class="btn outline small" data-action="view" data-idx="${idx}">Ver</button>`);
         if (canEdit(state.role)) actions.push(`<button class="btn outline small" data-action="edit" data-idx="${idx}">Editar</button>`);
         if (canDelete(state.role)) actions.push(`<button class="btn outline small" style="color:#e53e3e;border-color:#e53e3e" data-action="delete" data-idx="${idx}">Eliminar</button>`);
-        const encBadge = getEncuestadorBadge(r.encuestador_id);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+        const encBadge = getEncuestadorBadge(r.encuestador_id, r._createdEmail);
+        const tr = document.createElement('tr');        tr.innerHTML = `
         <td class="nowrap">${fmtDate(r.ts)}</td>
         <td>
             <div class="cell-user">
