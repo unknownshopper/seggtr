@@ -444,13 +444,19 @@ async function fetchFromFirestore() {
       });
     });
     
-    // DEBUGGING: Ver qué encuestadores están en Firebase
-    const uniqueEncuestadores = [...new Set(rows.map(r => r.encuestador_id))];
-    console.log('🔍 Encuestadores únicos en Firebase:', uniqueEncuestadores);
-    console.log('📊 Distribución:', uniqueEncuestadores.map(enc => ({
-      encuestador: enc,
-      cantidad: rows.filter(r => r.encuestador_id === enc).length
-    })));
+// DEBUGGING: Ver qué encuestadores están en Firebase
+const uniqueEncuestadores = [...new Set(rows.map(r => r.encuestador_id))];
+console.log('🔍 Encuestadores únicos en Firebase:', uniqueEncuestadores);
+console.log('📊 Distribución:', uniqueEncuestadores.map(enc => ({
+  encuestador: enc,
+  cantidad: rows.filter(r => r.encuestador_id === enc).length
+})));
+
+// NUEVO: Ver si hay emails o createdBy
+const uniqueEmails = [...new Set(rows.map(r => r._createdEmail).filter(Boolean))];
+const uniqueCreatedBy = [...new Set(rows.map(r => r._createdBy).filter(Boolean))];
+console.log('📧 Emails únicos (_createdEmail):', uniqueEmails);
+console.log('👤 CreatedBy únicos (_createdBy):', uniqueCreatedBy);
     
     console.log('[Dashboard] Firestore rows:', rows.length, rows[0] ? Object.keys(rows[0]) : 'no rows');
     return rows;
