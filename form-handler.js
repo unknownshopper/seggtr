@@ -543,6 +543,22 @@ const FormHandler = {
         }
       });
     }
+    // Manejo del campo condicional para redes sociales
+const fuenteRedesCheckbox = document.getElementById('fuente_redes');
+if (fuenteRedesCheckbox) {
+  fuenteRedesCheckbox.addEventListener('change', function() {
+    const redesDetalleField = document.getElementById('redes_sociales_detalle');
+    if (this.checked) {
+      redesDetalleField.style.display = 'block';
+    } else {
+      redesDetalleField.style.display = 'none';
+      // Limpiar campos cuando se desmarca
+      const checkboxes = redesDetalleField.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => cb.checked = false);
+      document.getElementById('redes_otra').value = '';
+    }
+  });
+}
   },
 
   init() {

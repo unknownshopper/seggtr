@@ -109,6 +109,8 @@ class DashboardManagerSimulated {
       this.updateLastUpdateTime();
       this.showToast('Datos simulados regenerados', 'success');
     }
+
+    
     
     renderDashboard() {
       if (this.data.length === 0) {

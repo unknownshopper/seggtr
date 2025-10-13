@@ -371,13 +371,28 @@
 <div style="margin-top:10px">
   <label>¿Dónde escuchaste de Omomobility? (puedes elegir varias)</label>
   <div class="group">
-    <label><input type="checkbox" name="fuente_conocimiento" value="Redes sociales" /> Redes sociales</label>
+    <label><input type="checkbox" id="fuente_redes" name="fuente_conocimiento" value="Redes sociales" /> Redes sociales</label>
     <label><input type="checkbox" name="fuente_conocimiento" value="Amigos/Familia" /> Amigos/Familia</label>
     <label><input type="checkbox" name="fuente_conocimiento" value="YouTube" /> YouTube</label>
     <label><input type="checkbox" name="fuente_conocimiento" value="Publicidad" /> Publicidad</label>
     <label><input type="checkbox" name="fuente_conocimiento" value="Tienda física" /> Tienda física</label>
     <label><input type="checkbox" name="fuente_conocimiento" value="Eventos/Prensa" /> Eventos/Prensa</label>
     <label><input type="checkbox" name="fuente_conocimiento" value="No la he escuchado" /> No la he escuchado</label>
+  </div>
+  
+  <!-- Campo condicional para redes sociales -->
+  <div id="redes_sociales_detalle" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-left: 3px solid #1e88e5; border-radius: 4px;">
+    <label style="font-weight: 600; color: #1e88e5; margin-bottom: 10px; display: block;">¿En qué redes sociales?</label>
+    <div class="group">
+      <label><input type="checkbox" name="redes_sociales_especificas" value="Facebook" /> Facebook</label>
+      <label><input type="checkbox" name="redes_sociales_especificas" value="Instagram" /> Instagram</label>
+      <label><input type="checkbox" name="redes_sociales_especificas" value="X (Twitter)" /> X (Twitter)</label>
+      <label><input type="checkbox" name="redes_sociales_especificas" value="TikTok" /> TikTok</label>
+    </div>
+    <div style="margin-top: 10px;">
+      <label for="redes_otra">Otra red social:</label>
+      <input type="text" id="redes_otra" name="redes_otra" placeholder="Especifica otra red social" style="width: 100%; margin-top: 5px;" />
+    </div>
   </div>
 </div>
       </fieldset>

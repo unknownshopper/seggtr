@@ -107,6 +107,58 @@ input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--prim
 .foot a{ color:var(--primary); text-decoration:none }
 .foot a:hover{ text-decoration:underline }
 
+/* Estilos para impresión/PDF */
+@media print {
+  body { margin: 0; padding: 0 }
+  
+  .page { max-width: 100%; padding: 10mm }
+  
+  .no-print, .controls { display: none !important }
+  
+  .header { margin-bottom: 10mm; page-break-after: avoid }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5mm;
+    margin-bottom: 10mm;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+  
+  .stat-card { border: 1px solid #ddd; padding: 5mm; page-break-inside: avoid }
+  
+  .dashboard-grid { display: block }
+  
+  .chart-container {
+    page-break-inside: avoid;
+    page-break-after: auto;
+    margin-bottom: 15mm;
+    border: 1px solid #ddd;
+    padding: 5mm;
+  }
+  
+  .chart-container:nth-child(2n) { page-break-after: always }
+  
+  .chart-title { font-size: 14pt; margin-bottom: 5mm; color: #1e88e5 }
+  
+  canvas { max-width: 100% !important; height: auto !important; display: block; margin: 0 auto }
+  
+  .sources-list {
+    font-size: 10pt;
+    margin-top: 5mm;
+    padding: 3mm;
+    background: #f5f5f5;
+    border-radius: 2mm;
+    page-break-inside: avoid;
+  }
+  
+  .foot { display: none }
+  
+  @page { size: A4; margin: 15mm }
+}
+
+
 /* Optimizaciones móviles para encuestadores - AGREGADO */
 @media (max-width: 768px) {
   /* Campos más grandes para toque fácil */
