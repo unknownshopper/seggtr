@@ -451,43 +451,104 @@ class DashboardManager {
   }
 
   renderAwarenessChart() {
-    const canvas = document.getElementById('awarenessChart');
-    if (!canvas) return;
-
-    // Forzar tamaño fijo del canvas
-    canvas.width = 400;
-    canvas.height = 300;
-    canvas.style.width = '400px';
-    canvas.style.height = '300px';
-    canvas.style.maxWidth = '400px';
-    canvas.style.maxHeight = '300px';
-
-    const ctx = canvas.getContext('2d');
-
-    const awarenessCounts = {};
-    this.data.forEach(item => {
-      const awareness = (item.awareness_omo || 'Sin respuesta').toString();
-      awarenessCounts[awareness] = (awarenessCounts[awareness] || 0) + 1;
-    });
-
-    if (this.charts.awareness) this.charts.awareness.destroy();
-
-    this.charts.awareness = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: Object.keys(awarenessCounts),
-        datasets: [{
-          data: Object.values(awarenessCounts),
-          backgroundColor: ['#6366f1', '#8b5cf6', '#a855f7', '#c084fc', '#d8b4fe']
-        }]
-      },
-      options: {
-        responsive: false,
-        maintainAspectRatio: false,
-        animation: false
+    try {
+      const canvas = document.getElementById('awarenessChart');
+      if (!canvas) return;
+      
+      canvas.width = 400;
+      canvas.height = 300;
+      canvas.style.width = '400px';
+      canvas.style.height = '300px';
+      canvas.style.maxWidth = '400px';
+      canvas.style.maxHeight = '300px';
+      
+      const ctx = canvas.getContext('2d');
+      
+      // Contar awareness
+      const awarenessCounts = {};
+      const sourceCounts = {};
+      
+      this.data.forEach(item => {
+        const awareness = (item.awareness_omo || 'Sin respuesta').toString();
+        awarenessCounts[awareness] = (awarenessCounts[awareness] || 0) + 1;
+        
+        // Si conoce la marca, contar fuentes
+        if (awareness !== 'No la conozco' && item.fuente_conocimiento) {
+          const sources = String(item.fuente_conocimiento).split('|').filter(s => s.trim() && s !== 'No la he escuchado');
+          sources.forEach(source => {
+            sourceCounts[source] = (sourceCounts[source] || 0) + 1;
+          });
+        }
+      });
+      
+      if (this.charts.awareness) {
+        this.charts.awareness.destroy();
+        this.charts.awareness = null;
       }
-    });
+      
+      // Crear labels con información de fuentes
+      const labels = Object.keys(awarenessCounts);
+      const tooltipLabels = labels.map(label => {
+        if (label === 'No la conozco') return label;
+        
+        // Agregar top 3 fuentes para este grupo
+        const topSources = Object.entries(sourceCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 3)
+          .map(([source, count]) => `${source}: ${count}`)
+          .join(', ');
+        
+        return topSources ? `${label}\nFuentes: ${topSources}` : label;
+      });
+      
+      this.charts.awareness = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: Object.values(awarenessCounts),
+            backgroundColor: ['#6366f1', '#8b5cf6', '#a855f7', '#c084fc', '#d8b4fe']
+          }]
+        },
+        options: {
+          responsive: false,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = tooltipLabels[context.dataIndex] || '';
+                  const value = context.parsed;
+                  return `${label}: ${value}`;
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // Mostrar fuentes debajo de la gráfica
+      const container = canvas.parentElement;
+      let sourcesList = container.querySelector('.sources-list');
+      if (!sourcesList && Object.keys(sourceCounts).length > 0) {
+        sourcesList = document.createElement('div');
+        sourcesList.className = 'sources-list';
+        sourcesList.style.cssText = 'margin-top: 10px; font-size: 12px; color: #666;';
+        
+        const sortedSources = Object.entries(sourceCounts)
+          .sort(([,a], [,b]) => b - a);
+        
+        sourcesList.innerHTML = '<strong>Fuentes de conocimiento:</strong><br>' +
+          sortedSources.map(([source, count]) => `• ${source}: ${count}`).join('<br>');
+        
+        container.appendChild(sourcesList);
+      }
+    } catch (error) {
+      console.error('Error renderizando gráfica de awareness:', error);
+    }
   }
+  
 
   exportReport() {
     if (this.data.length === 0) {

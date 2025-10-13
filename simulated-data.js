@@ -38,6 +38,9 @@ const SimulatedData = {
     },
     
     generateSurvey(zone) {
+      // Generar awareness primero para usarlo en fuente_conocimiento
+      const awareness_omo = this.randomOmomobilityAwareness();
+      
       const survey = {
         ts: this.randomDate(),
         zona: zone.name,
@@ -57,7 +60,8 @@ const SimulatedData = {
         // Conocimiento de marca (14% conoce Omomobility)
         marca_espontanea: this.randomSpontaneousBrand(),
         marca_asistida: this.randomAssistedBrand(),
-        awareness_omo: this.randomOmomobilityAwareness(),
+        awareness_omo: awareness_omo,
+        fuente_conocimiento: this.randomSourceKnowledge(awareness_omo),
         favorabilidad_omo: this.randomFavorability(),
         
         // Intención y uso
@@ -74,7 +78,7 @@ const SimulatedData = {
         precio_objetivo: this.randomTargetPrice(zone.socioeconomic),
         
         // Atributos valorados (1-5)
-        atr_precio: this.randomAttribute(4.5), // Precio muy importante
+        atr_precio: this.randomAttribute(4.5),
         atr_autonomia: this.randomAttribute(4.2),
         atr_desempeno: this.randomAttribute(3.8),
         atr_diseno: this.randomAttribute(3.5),
@@ -111,6 +115,7 @@ const SimulatedData = {
       
       return survey;
     },
+
     
     // Funciones auxiliares de generación aleatoria
     randomDate() {
@@ -199,6 +204,27 @@ const SimulatedData = {
       const awareness = ['No la conozco', 'Me suena', 'La conozco', 'La he visto/probado'];
       const weights = [0.86, 0.08, 0.05, 0.01]; // 14% total conocimiento
       return this.weightedChoice(awareness, weights);
+    },
+
+    randomSourceKnowledge(awareness_omo) {
+      // Si no conoce la marca, retornar "No la he escuchado"
+      if (awareness_omo === 'No la conozco') {
+        return 'No la he escuchado';
+      }
+      
+      // Si conoce la marca, generar 1-3 fuentes
+      const sources = ['Redes sociales', 'Amigos/Familia', 'YouTube', 'Publicidad', 'Tienda física', 'Eventos/Prensa'];
+      const selected = [];
+      const numSources = Math.floor(Math.random() * 3) + 1; // 1-3 fuentes
+      
+      for (let i = 0; i < numSources; i++) {
+        const source = this.randomChoice(sources);
+        if (!selected.includes(source)) {
+          selected.push(source);
+        }
+      }
+      
+      return selected.join('|');
     },
     
     // Funciones auxiliares
