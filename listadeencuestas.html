@@ -217,6 +217,23 @@ th.sortable.sort-desc::after {
   <input id="importCsv" type="file" accept=".csv,text/csv" style="display:none;">
 </label>
 
+<!-- Leyenda de encuestadores -->
+<div class="encuestadores-legend">
+  <span class="legend-title">Encuestadores:</span>
+  <div class="legend-item">
+    <span class="legend-badge avatar maximo">MX</span>
+    <span>Máximo García</span>
+  </div>
+  <div class="legend-item">
+    <span class="legend-badge avatar humberto">HU</span>
+    <span>Humberto Castillo</span>
+  </div>
+  <div class="legend-item">
+    <span class="legend-badge avatar aristides">AR</span>
+    <span>Arístides Prats</span>
+  </div>
+</div>
+
     <div class="table-wrap">
       <table>
         <thead>
@@ -426,6 +443,15 @@ async function fetchFromFirestore() {
         ...d
       });
     });
+    
+    // DEBUGGING: Ver qué encuestadores están en Firebase
+    const uniqueEncuestadores = [...new Set(rows.map(r => r.encuestador_id))];
+    console.log('🔍 Encuestadores únicos en Firebase:', uniqueEncuestadores);
+    console.log('📊 Distribución:', uniqueEncuestadores.map(enc => ({
+      encuestador: enc,
+      cantidad: rows.filter(r => r.encuestador_id === enc).length
+    })));
+    
     console.log('[Dashboard] Firestore rows:', rows.length, rows[0] ? Object.keys(rows[0]) : 'no rows');
     return rows;
   } catch (e) {
@@ -603,26 +629,37 @@ function applyFilter() {
     return { badge: 'SU', class: 'supervisor' };
   }
   
-  // Encuestadores (Máximo, Humberto, Arístides)
+  // Máximo García Dorame
   if (id === 'encuestador' || 
       id === 'encuestador@omobility.com' ||
-      id === 'encuestador2' || 
-      id === 'encuestador2@omobility.com' ||
-      id === 'encuestador3' || 
-      id === 'encuestador3@omobility.com' ||
       id.includes('maximo') ||
       id.includes('máximo') ||
+      id.includes('garcia')) {
+    return { badge: 'MX', class: 'maximo' };
+  }
+  
+  // Humberto Castillo
+  if (id === 'encuestador2' || 
+      id === 'encuestador2@omobility.com' ||
       id.includes('humberto') ||
-      id.includes('castillo') ||
+      id.includes('castillo')) {
+    return { badge: 'HU', class: 'humberto' };
+  }
+  
+  // Arístides Prats
+  if (id === 'encuestador3' || 
+      id === 'encuestador3@omobility.com' ||
       id.includes('aristides') ||
       id.includes('arístides') ||
       id.includes('prats')) {
-    return { badge: 'EN', class: 'encuestador' };
+    return { badge: 'AR', class: 'aristides' };
   }
   
   // Default
   return { badge: id.slice(0, 2).toUpperCase(), class: '' };
 }
+
+
     function render() {
       const total = state.filtered.length;
       const pages = Math.max(1, Math.ceil(total / state.pageSize));
@@ -657,11 +694,10 @@ function applyFilter() {
         tr.innerHTML = `
         <td class="nowrap">${fmtDate(r.ts)}</td>
         <td>
-          <div class="cell-user">
-           <span class="avatar ${encBadge.class}">${encBadge.badge}</span>
-            <span>${r.encuestador_id || '<span class="muted">N/A</span>'}</span>
-          </div>
-        </td>
+            <div class="cell-user">
+            <span class="avatar ${encBadge.class}">${encBadge.badge}</span>
+            </div>
+          </td>
         <td><span class="chip">${(r.zona || 'Sin especificar')}</span></td>
         <td class="num">${r.edad ?? ''}</td>
         <td class="num">
