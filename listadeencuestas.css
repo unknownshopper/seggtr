@@ -335,4 +335,94 @@
     }
   }
 
-  
+  /* Frame de celular para evidencia */
+.phone-frame {
+  width: 375px;
+  max-width: 100%;
+  margin: 0 auto;
+  background: #1a1a1a;
+  border-radius: 36px;
+  padding: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.phone-header {
+  background: #000;
+  border-radius: 24px 24px 0 0;
+  padding: 8px 20px 4px;
+  position: relative;
+}
+
+.phone-notch {
+  width: 120px;
+  height: 24px;
+  background: #1a1a1a;
+  margin: 0 auto;
+  border-radius: 0 0 16px 16px;
+}
+
+.phone-status {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #fff;
+  padding: 4px 0;
+}
+
+.phone-content {
+  background: #fff;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.phone-content img {
+  width: 100%;
+  display: block;
+}
+
+.phone-footer {
+  background: #000;
+  border-radius: 0 0 24px 24px;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.phone-button {
+  width: 120px;
+  height: 4px;
+  background: #444;
+  border-radius: 2px;
+}
+
+/* Botón generar thumbnail */
+.btn-gen-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-gen-thumb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.generating-thumb {
+  display: inline-block;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-radius: 6px;
+  font-size: 11px;
+  color: #6b7280;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

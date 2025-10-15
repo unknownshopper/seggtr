@@ -216,7 +216,7 @@
         console.log('📊 Distribución:', uniqueEncuestadores.map(enc => ({
           encuestador: enc,
           cantidad: rows.filter(r => r.encuestador_id === enc).length
-        })));
+                })));
         
         console.log('[Dashboard] Firestore rows:', rows.length, rows[0] ? Object.keys(rows[0]) : 'no rows');
         return rows;
@@ -225,7 +225,10 @@
         return [];
       }
     }
-  
+     
+
+    
+     
     function updateFirebaseStats() {
       const total = state.all.length;
       const maxSurveys = 250;
@@ -258,20 +261,72 @@
       // Barras de progreso
       const surveyPercent = Math.min((total / maxSurveys) * 100, 100);
       const surveyBar = document.getElementById('progress-surveys');
-      surveyBar.style.width = `${surveyPercent}%`;
-      surveyBar.className = 'progress-fill';
-      if (surveyPercent > 80) surveyBar.classList.add('danger');
-      else if (surveyPercent > 60) surveyBar.classList.add('warning');
+      if (surveyBar) {
+        surveyBar.style.width = `${surveyPercent}%`;
+        surveyBar.classList.remove('ok', 'warning', 'danger');
+        if (surveyPercent >= 90) surveyBar.classList.add('danger');
+        else if (surveyPercent >= 70) surveyBar.classList.add('warning');
+        else surveyBar.classList.add('ok');
+      }
       
-      const storageBar = document.getElementById('progress-storage');
-      storageBar.style.width = `${Math.min(storagePercent, 100)}%`;
-      storageBar.className = 'progress-fill';
-      if (storagePercent > 80) storageBar.classList.add('danger');
-      else if (storagePercent > 60) storageBar.classList.add('warning');
+      const storageBar = document.getElementById('storage-bar');
+      if (storageBar) {
+        storageBar.style.width = `${Math.min(storagePercent, 100)}%`;
+        storageBar.classList.remove('ok', 'warning', 'danger');
+        if (storagePercent > 80) storageBar.classList.add('danger');
+        else if (storagePercent > 60) storageBar.classList.add('warning');
+      }
       
       console.log(`[Stats] Total: ${total}, Storage: ${estimatedMB}MB, Images: ${withImages}`);
     }
-  
+    
+    // Función global para generar evidencia
+    window.generarEvidencia = async function(firestoreId) {
+      const record = state.all.find(r => r._firestoreId === firestoreId);
+      if (!record) {
+        alert('❌ No se encontró el registro');
+        return;
+      }
+      
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '⏳ Generando imagen...';
+      
+      try {
+        const imageDataUrl = await generateEvidenceFromData(record);
+        
+        // Mostrar imagen generada
+        const container = document.getElementById(`evidence-container-${firestoreId}`);
+        container.innerHTML = `<div class="img-wrap"><img src="${imageDataUrl}" alt="evidencia generada"/></div>`;
+        
+        // Guardar en Firestore
+        if (window.db) {
+          const shouldSave = confirm('✅ Imagen generada correctamente.\n\n¿Deseas guardarla permanentemente en Firestore?');
+          if (shouldSave) {
+            btn.textContent = '💾 Guardando en Firestore...';
+            await window.db.collection('surveys').doc(firestoreId).update({
+              image_proof_png: imageDataUrl
+            });
+            alert('✅ Imagen guardada en Firestore exitosamente');
+            // Actualizar en memoria local
+            record.image_proof_png = imageDataUrl;
+            btn.remove();
+          } else {
+            btn.textContent = '✅ Imagen generada (no guardada)';
+            btn.disabled = false;
+          }
+        } else {
+          btn.textContent = '✅ Imagen generada';
+          btn.disabled = false;
+        }
+      } catch (error) {
+        console.error('Error generando evidencia:', error);
+        alert('❌ Error al generar imagen: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = '🖼️ Reintentar';
+      }
+    };
+     
     // ==================== FILTROS Y ORDENAMIENTO ====================
   
     function applyFilter() {
@@ -391,8 +446,8 @@
           <td class="nowrap">${fmtGeo(r)}</td>
           <td>
             ${r.image_proof_png
-              ? `<img class="thumb" src="${r.image_proof_png}" alt="evidencia" data-action="evidence" data-idx="${idx}" />`
-              : `<span class="muted">Sin imagen</span>`}
+              ? `<img class="thumb" src="${r.image_proof_png}" alt="evidencia" onclick="openEvidence(${idx})" style="cursor: pointer;" />`
+              : `<div class="generating-thumb" data-idx="${idx}">⏳ Generando...</div>`}
           </td>
           <td><div class="actions">${actions.join('')}</div></td>
         `;
@@ -403,6 +458,44 @@
       document.getElementById('countInfo').textContent = `${total} encuestas (mostrando máx. ${MAX})`;
       document.getElementById('prev').disabled = state.page <= 1;
       document.getElementById('next').disabled = state.page >= pages;
+      
+      // Generar imágenes faltantes en segundo plano
+      setTimeout(() => autoGenerateMissingImages(), 500);
+    }
+  
+    // Generar imágenes faltantes automáticamente
+    async function autoGenerateMissingImages() {
+      const recordsWithoutImage = state.filtered.filter(r => !r.image_proof_png);
+      
+      if (recordsWithoutImage.length === 0) return;
+      
+      console.log(`[AutoGen] Generando ${recordsWithoutImage.length} imágenes faltantes...`);
+      
+      for (const record of recordsWithoutImage) {
+        try {
+          const imageDataUrl = await generateEvidenceFromData(record);
+          
+          // Guardar en Firestore
+          if (window.db && record._firestoreId) {
+            await window.db.collection('surveys').doc(record._firestoreId).update({
+              image_proof_png: imageDataUrl
+            });
+          }
+          
+          // Actualizar en memoria
+          record.image_proof_png = imageDataUrl;
+          const originalRecord = state.all.find(r => r._firestoreId === record._firestoreId);
+          if (originalRecord) originalRecord.image_proof_png = imageDataUrl;
+          
+          console.log(`[AutoGen] ✅ Imagen generada para ${record._firestoreId}`);
+        } catch (error) {
+          console.error(`[AutoGen] ❌ Error generando imagen para ${record._firestoreId}:`, error);
+        }
+      }
+      
+      // Refrescar tabla después de generar todas
+      render();
+      updateFirebaseStats();
     }
   
     // ==================== EVENTOS ====================
@@ -462,52 +555,376 @@
   
       document.getElementById('saveEdit').addEventListener('click', saveEdit);
     }
+
+
+        // Generar imagen de evidencia dinámicamente desde datos
+        async function generateEvidenceFromData(r) {
+          return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Dimensiones del canvas
+            const width = 800;
+            const padding = 20;
+            const lineHeight = 24;
+            const headerHeight = 60;
+            
+            // Preparar campos a mostrar
+            const fields = [
+              { label: 'Encuestador', value: r.encuestador_id || 'N/A' },
+              { label: 'Fecha', value: fmtDate(r.ts) },
+              { label: 'Zona', value: r.zona || 'N/A' },
+              { label: 'Edad', value: r.edad || 'N/A' },
+              { label: 'Sexo', value: r.sexo || 'N/A' },
+              { label: 'Ocupación', value: r.ocupacion || 'N/A' },
+              { label: 'Intención (0-10)', value: r.intencion || 'N/A' },
+              { label: '¿Usa moto?', value: r.usaMoto || 'N/A' },
+              { label: 'Moto actual', value: r.moto_actual || 'N/A' },
+              { label: 'Uso principal', value: r.uso || 'N/A' },
+              { label: 'Frecuencia', value: r.frecuencia || 'N/A' },
+              { label: 'Km/día', value: r.km_dia || 'N/A' },
+              { label: 'Barreras', value: r.barreras || 'N/A' },
+              { label: 'Marca considerada', value: r.marca || 'N/A' },
+              { label: 'Awareness OMO', value: r.awareness_omo || 'N/A' },
+              { label: 'Favorabilidad OMO', value: r.favorabilidad_omo || 'N/A' },
+              { label: 'Horizonte de compra', value: r.horizonte || 'N/A' },
+              { label: 'Disposición a pagar', value: r.pago || 'N/A' },
+              { label: 'Financiamiento', value: r.financia || 'N/A' },
+              { label: 'Comentarios', value: r.comentarios || 'N/A' }
+            ];
+            
+            // Calcular altura necesaria
+            const contentHeight = fields.length * lineHeight + headerHeight + padding * 3;
+            canvas.width = width;
+            canvas.height = contentHeight;
+            
+            // Fondo blanco
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, contentHeight);
+            
+            // Header con gradiente
+            const gradient = ctx.createLinearGradient(0, 0, width, headerHeight);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, headerHeight);
+            
+            // Título
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Arial, sans-serif';
+            ctx.fillText('ENCUESTA OMOMOBILITY', padding, 35);
+            
+            // Subtítulo
+            ctx.font = '14px Arial, sans-serif';
+            ctx.fillText('Estudio de Mercado - Villahermosa, Tabasco', padding, 52);
+            
+            // Contenido - campos
+            let y = headerHeight + padding + 20;
+            ctx.fillStyle = '#1e293b';
+            
+            fields.forEach((field, idx) => {
+              // Fondo alternado
+              if (idx % 2 === 0) {
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(0, y - 18, width, lineHeight);
+              }
+              
+              // Label
+              ctx.fillStyle = '#64748b';
+              ctx.font = 'bold 12px Arial, sans-serif';
+              ctx.fillText(field.label + ':', padding, y);
+              
+              // Value
+              ctx.fillStyle = '#1e293b';
+              ctx.font = '12px Arial, sans-serif';
+              const valueText = String(field.value).substring(0, 80); // Truncar si es muy largo
+              ctx.fillText(valueText, padding + 180, y);
+              
+              y += lineHeight;
+            });
+            
+            // Footer con metadatos
+            const footerY = contentHeight - padding - 40;
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(0, footerY, width, 60);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '11px Arial, sans-serif';
+            ctx.fillText(`Ubicación: Lat ${r.geo_lat || 'N/A'}, Lng ${r.geo_lng || 'N/A'} (±${r.geo_accuracy || 'N/A'}m)`, padding, footerY + 20);
+            ctx.fillText(`Generado: ${new Date().toLocaleString('es-MX')}`, padding, footerY + 38);
+            ctx.fillText(`ID: ${r._firestoreId || 'N/A'}`, width - padding - 200, footerY + 38);
+            
+            // Convertir a imagen
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
+          });
+        }
   
     // ==================== MODALES ====================
-  
     function openView(r) {
       const box = document.getElementById('detail');
       const geoTxt = fmtGeo(r);
   
+      // Campos a excluir del detalle (metadatos internos)
+      const excludeFields = ['_firestoreId', '_createdAt', '_createdBy', '_createdEmail', '_origin', 'image_proof_png'];
+      
+      // Campos prioritarios que se muestran primero
+      const priorityFields = ['ts', 'encuestador_id', 'zona', 'edad', 'sexo', 'ocupacion', 'intencion', 'usaMoto', 'moto_actual'];
+      
+      // Generar HTML para todos los campos
+      let fieldsHTML = '';
+      
+      // 1. Campos prioritarios primero
+      priorityFields.forEach(field => {
+        if (r[field] !== undefined && r[field] !== null && r[field] !== '') {
+          const label = getFieldLabel(field);
+          const value = formatFieldValue(field, r[field]);
+          fieldsHTML += `<div class="kv"><label>${label}</label><div class="val">${value}</div></div>`;
+        }
+      });
+      
+      // 2. Resto de campos alfabéticamente
+      const remainingFields = Object.keys(r)
+        .filter(key => !excludeFields.includes(key) && !priorityFields.includes(key))
+        .sort();
+      
+      remainingFields.forEach(field => {
+        const value = r[field];
+        if (value !== undefined && value !== null && value !== '') {
+          const label = getFieldLabel(field);
+          const formattedValue = formatFieldValue(field, value);
+          const isLong = String(value).length > 50;
+          fieldsHTML += `<div class="kv ${isLong ? 'full' : ''}"><label>${label}</label><div class="val">${formattedValue}</div></div>`;
+        }
+      });
+      
+      // 3. Ubicación geográfica
+      if (r.geo_lat || r.geo_lng) {
+        fieldsHTML += `<div class="kv full"><label>Ubicación</label><div class="val mono">${geoTxt}</div></div>`;
+      }
+      
+      // 4. Imagen de evidencia
+      let evidenciaHTML = '';
+      if (r.image_proof_png) {
+        evidenciaHTML = `
+          <div class="kv full">
+            <label>Evidencia</label>
+            <div class="img-wrap"><img src="${r.image_proof_png}" alt="evidencia"/></div>
+          </div>
+        `;
+      } else {
+        // Si no tiene imagen, mostrar botón para generarla
+        evidenciaHTML = `
+          <div class="kv full">
+            <label>Evidencia</label>
+            <div class="val">
+              <button onclick="generarEvidencia('${r._firestoreId}')" class="btn-generate-evidence">
+                🖼️ Generar Imagen de Evidencia
+              </button>
+              <div id="evidence-container-${r._firestoreId}" style="margin-top: 16px;"></div>
+            </div>
+          </div>
+        `;
+      }
+  
       box.innerHTML = `
         <div class="detail">
-          <div class="kv"><label>Fecha</label><div class="val">${fmtDate(r.ts)}</div></div>
-          <div class="kv"><label>Encuestador</label><div class="val">${r.encuestador_id || '<span class="muted">N/A</span>'}</div></div>
-          <div class="kv"><label>Zona</label><div class="val">${r.zona || '<span class="muted">N/A</span>'}</div></div>
-          <div class="kv"><label>Edad</label><div class="val">${r.edad ?? ''}</div></div>
-          <div class="kv"><label>Intención (0–10)</label><div class="val">${r.intencion ?? ''}</div></div>
-          <div class="kv"><label>Ubicación</label><div class="val mono">${geoTxt}</div></div>
-          <div class="kv full"><label>Comentarios</label><div class="val">${(r.comentarios || '').toString() || '<span class="muted">—</span>'}</div></div>
-          <div class="kv full"><label>Barreras</label><div class="val">${(r.barreras || '').toString() || '<span class="muted">—</span>'}</div></div>
-          <div class="kv"><label>Marca considerada</label><div class="val">${(r.marca || '').toString() || '<span class="muted">—</span>'}</div></div>
-          <div class="kv"><label>Awareness OMO</label><div class="val">${(r.awareness_omo || '').toString() || '<span class="muted">—</span>'}</div></div>
-          ${r.image_proof_png ? `
-            <div class="kv full">
-              <label>Evidencia</label>
-              <div class="img-wrap"><img src="${r.image_proof_png}" alt="evidencia"/></div>
-            </div>
-          ` : ''}
+          ${fieldsHTML}
+          ${evidenciaHTML}
         </div>
       `;
       document.getElementById('viewModal').showModal();
     }
-  
-    function openImage(r) {
-      const wrap = document.getElementById('imageWrap');
-      wrap.innerHTML = r.image_proof_png
-        ? `<img src="${r.image_proof_png}" alt="Evidencia"/>`
-        : '<div class="muted">Sin imagen</div>';
-  
-      document.getElementById('img_encuestador').textContent = r.encuestador_id || '—';
-      document.getElementById('img_fecha').textContent = fmtDate(r.ts);
-      document.getElementById('img_geo').textContent =
-        (r.geo_lat != null && r.geo_lng != null)
-          ? `${Number(r.geo_lat).toFixed(5)}, ${Number(r.geo_lng).toFixed(5)}${r.geo_accuracy != null ? ' ±' + Math.round(r.geo_accuracy) + 'm' : ''}`
-          : 'N/A';
-  
-      document.getElementById('imageModal').showModal();
+    
+    // Función auxiliar para obtener etiquetas legibles
+    function getFieldLabel(field) {
+      const labels = {
+        ts: 'Fecha',
+        encuestador_id: 'Encuestador',
+        zona: 'Zona',
+        zona_otro: 'Zona (Otro)',
+        edad: 'Edad',
+        sexo: 'Sexo',
+        ocupacion: 'Ocupación',
+        ocupacion_otro: 'Ocupación (Otro)',
+        intencion: 'Intención (0-10)',
+        usaMoto: '¿Usa moto?',
+        moto_actual: 'Moto actual',
+        uso: 'Uso principal',
+        frecuencia: 'Frecuencia de uso',
+        km_dia: 'Km por día',
+        barreras: 'Barreras',
+        marca: 'Marca considerada',
+        marca_espontanea: 'Marca (espontánea)',
+        marca_asistida: 'Marca (asistida)',
+        awareness_omo: 'Awareness Omomobility',
+        favorabilidad_omo: 'Favorabilidad Omomobility',
+        comentarios: 'Comentarios',
+        pago: 'Disposición a pagar',
+        pago_mensual: 'Pago mensual',
+        financia: 'Financiamiento',
+        plazo: 'Plazo',
+        enganche: 'Enganche',
+        horizonte: 'Horizonte de compra',
+        can_compra: 'Canal de compra',
+        can_test_ride: 'Test ride',
+        hogar: 'Vehículos en hogar',
+        vehiculos: 'Vehículos',
+        ingreso: 'Ingreso mensual',
+        posee_cargador: 'Posee cargador',
+        canales_info: 'Canales de información',
+        fuente_conocimiento: 'Fuente de conocimiento',
+        asociacion: 'Asociación con marca',
+        motivos_no_compra: 'Motivos de no compra',
+        mejoras_esperadas: 'Mejoras esperadas',
+        precio_objetivo: 'Precio objetivo',
+        // Atributos
+        atr_precio: 'Atributo: Precio',
+        atr_autonomia: 'Atributo: Autonomía',
+        atr_tiempo_carga: 'Atributo: Tiempo de carga',
+        atr_desempeno: 'Atributo: Desempeño',
+        atr_diseno: 'Atributo: Diseño',
+        atr_seguridad: 'Atributo: Seguridad',
+        atr_garantia: 'Atributo: Garantía',
+        atr_servicio: 'Atributo: Servicio',
+        atr_refacciones: 'Atributo: Refacciones',
+        atr_conectividad: 'Atributo: Conectividad',
+        // Servicios
+        svc_red: 'Servicio: Red de carga',
+        svc_coste: 'Servicio: Costo',
+        svc_tiempo_rep: 'Servicio: Tiempo de reparación',
+        svc_ext_garantia: 'Servicio: Extensión de garantía',
+        // Ambientales
+        amb_motiva: 'Ambiental: Motivación',
+        amb_ruido: 'Ambiental: Ruido',
+        amb_ansiedad_autonomia: 'Ambiental: Ansiedad de autonomía',
+        // Barreras extendidas
+        barreras_ext: 'Barreras extendidas',
+        geo_lat: 'Latitud',
+        geo_lng: 'Longitud',
+        geo_accuracy: 'Precisión GPS',
+        geo_error: 'Error GPS'
+      };
+      return labels[field] || field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
-  
+    
+    // Función auxiliar para formatear valores
+    function formatFieldValue(field, value) {
+      if (value === null || value === undefined || value === '') {
+        return '<span class="muted">—</span>';
+      }
+      
+      // Fechas
+      if (field === 'ts') {
+        return fmtDate(value);
+      }
+      
+      // Valores booleanos
+      if (typeof value === 'boolean') {
+        return value ? 'Sí' : 'No';
+      }
+      
+      // Arrays o strings con pipe
+      if (typeof value === 'string' && value.includes('|')) {
+        return value.split('|').join(', ');
+      }
+      
+      // Números
+      if (typeof value === 'number') {
+        return value.toLocaleString('es-MX');
+      }
+      
+      // Strings largos
+      if (typeof value === 'string' && value.length > 100) {
+        return `<div style="max-height: 200px; overflow-y: auto;">${value}</div>`;
+      }
+      
+      return value.toString();
+    }
+
+
+       // Abrir evidencia en modal estilo celular
+       window.openEvidence = async function(idx) {
+        const r = state.filtered[idx];
+        if (!r) return;
+        
+        // Si no tiene imagen, generarla primero
+        if (!r.image_proof_png) {
+          await generateAndShowEvidence(idx);
+          return;
+        }
+        
+        const wrap = document.getElementById('imageWrap');
+        wrap.innerHTML = `
+          <div class="phone-frame">
+            <div class="phone-header">
+              <div class="phone-notch"></div>
+              <div class="phone-status">
+                <span>📶 5G</span>
+                <span>${new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span>🔋 85%</span>
+              </div>
+            </div>
+            <div class="phone-content">
+              <img src="${r.image_proof_png}" alt="Evidencia de encuesta" />
+            </div>
+            <div class="phone-footer">
+              <div class="phone-button"></div>
+            </div>
+          </div>
+        `;
+    
+        document.getElementById('img_encuestador').textContent = r.encuestador_id || '—';
+        document.getElementById('img_fecha').textContent = fmtDate(r.ts);
+        document.getElementById('img_zona').textContent = r.zona || '—';
+        document.getElementById('img_lat').textContent = r.geo_lat ?? 'N/A';
+        document.getElementById('img_lng').textContent = r.geo_lng ?? 'N/A';
+        document.getElementById('img_acc').textContent = r.geo_accuracy 
+          ? `±${r.geo_accuracy}m` 
+          : 'N/A';
+    
+        document.getElementById('imageModal').showModal();
+      }
+      
+      // Generar evidencia y mostrarla
+      window.generateAndShowEvidence = async function(idx) {
+        const r = state.filtered[idx];
+        if (!r) return;
+        
+        try {
+          // Generar imagen
+          const imageDataUrl = await generateEvidenceFromData(r);
+          
+          // Guardar en Firestore si está disponible
+          if (window.db && r._firestoreId) {
+            await window.db.collection('surveys').doc(r._firestoreId).update({
+              image_proof_png: imageDataUrl
+            });
+          }
+          
+          // Actualizar en memoria
+          r.image_proof_png = imageDataUrl;
+          const originalRecord = state.all.find(rec => rec._firestoreId === r._firestoreId);
+          if (originalRecord) originalRecord.image_proof_png = imageDataUrl;
+          
+          // Refrescar tabla
+          render();
+          updateFirebaseStats();
+          
+          // Abrir modal
+          openEvidence(idx);
+        } catch (error) {
+          console.error('Error generando evidencia:', error);
+          alert('❌ Error al generar imagen: ' + error.message);
+        }
+      }
+      
+      // Función legacy (mantener por compatibilidad)
+      function openImage(r) {
+        const idx = state.filtered.indexOf(r);
+        if (idx >= 0) openEvidence(idx);
+      }
+
+
     function openEdit(r) {
       const idx = state.all.indexOf(r);
       state.editIndex = idx;
