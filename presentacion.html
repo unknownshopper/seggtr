@@ -1,50 +1,365 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Presentación ejecutiva — Omomobility</title>
-  <meta name="description" content="Placeholder de la presentación ejecutiva del estudio de mercado para Omomobility." />
-  <link rel="icon" href="logcho.png" type="image/png" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root { --bg:#f7f7f9; --paper:#ffffff; --ink:#121212; --muted:#5f6b7a; --primary:#1e88e5; --border:#e5e7eb; }
-    *{box-sizing:border-box}
-    body{ margin:0; background:var(--bg); color:var(--ink); font:400 16px/1.6 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif; }
-    .page{ max-width:960px; margin:32px auto; padding:0 16px }
-    .header{ background:linear-gradient(180deg,#ffffff 0%,#fafbff 100%); border:1px solid var(--border); border-radius:14px; padding:18px 20px; display:flex; align-items:center; gap:12px; box-shadow:0 8px 24px rgba(10,31,68,.08) }
-    .logo{ width:48px; height:48px; border-radius:8px; object-fit:contain }
-    h1{ margin:0; font:600 20px/1.25 "Inter",sans-serif }
-    .lead{ color:var(--muted); margin:6px 0 0; font-size:14px }
-    .block{ background:var(--paper); border:1px solid var(--border); border-radius:12px; padding:16px; margin:14px 0 }
-    .back{ display:inline-block; margin-top:10px; text-decoration:none; color:var(--primary); font-weight:600 }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentación Ejecutiva - Omomobility</title>
+  <meta name="description" content="Presentación ejecutiva del estudio de mercado para Omomobility en Villahermosa, Tabasco">
+  <link rel="icon" href="logcho.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="presentacion.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 </head>
 <body>
-  <div class="page">
-    <header class="header">
-      <img class="logo" src="logcho.png" alt="TUS" />
-      <div>
-        <h1>Presentación ejecutiva (placeholder)</h1>
-        <p class="lead">Estructura sugerida: Resumen, Objetivo, Metodología, Hallazgos clave, TCO, Roadmap y KPIs.</p>
+  <div class="presentation-container">
+    <!-- Slide 1: Portada -->
+    <div class="slide active" data-slide="1">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <button class="fullscreen-btn" onclick="PresentacionManager.toggleFullscreen()">⛶ Pantalla completa</button>
+      
+      <div class="slide-header cover">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <h1>Estudio de Mercado</h1>
+        <h2>Omomobility • Villahermosa, Tabasco</h2>
+        <div class="cover-info">
+          <div>
+            <strong>Cliente</strong>
+            <span>Omomobility</span>
+          </div>
+          <div>
+            <strong>Consultor</strong>
+            <span>The Unknown Shopper</span>
+          </div>
+          <div>
+            <strong>Fecha</strong>
+            <span id="presentation-date">2025</span>
+          </div>
+        </div>
       </div>
-    </header>
+      
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()" disabled>← Anterior</button>
+        <span class="slide-counter"><span class="current">1</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+      </div>
+    </div>
 
-    <section class="block">
-      <h2>Contenido tentativo</h2>
-      <ol>
-        <li>Resumen ejecutivo</li>
-        <li>Objetivos y alcance</li>
-        <li>Metodología (desk, campo, encuestas)</li>
-        <li>Hallazgos clave y oportunidades</li>
-        <li>Modelo TCO y escenarios</li>
-        <li>Plan de entrada (GTM) y roadmap</li>
-        <li>KPIs y próximos pasos</li>
-      </ol>
-    </section>
+    <!-- Slide 2: Resumen Ejecutivo -->
+    <div class="slide" data-slide="2">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <div class="progress-dots"></div>
+      
+      <div class="slide-header">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <div class="slide-title">
+          <h1>Resumen Ejecutivo</h1>
+          <p>Hallazgos clave del estudio</p>
+        </div>
+      </div>
+      
+      <div class="slide-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="total-encuestas">0</div>
+            <div class="stat-label">Encuestas Realizadas</div>
+          </div>
+          <div class="stat-card secondary">
+            <div class="stat-value" id="interes-promedio">0%</div>
+            <div class="stat-label">Interés Promedio</div>
+          </div>
+          <div class="stat-card accent">
+            <div class="stat-value" id="ahorro-tco">$20K</div>
+            <div class="stat-label">Ahorro TCO (5 años)</div>
+          </div>
+        </div>
 
-    <a class="back" href="index.html">← Volver al inicio</a>
+        <div class="highlight-box">
+          <h3>💡 Oportunidad Identificada</h3>
+          <p>
+            El mercado de motocicletas eléctricas en Villahermosa muestra un potencial significativo, 
+            con usuarios interesados en alternativas sustentables que ofrezcan ahorro operativo.
+          </p>
+        </div>
+      </div>
+
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+        <span class="slide-counter"><span class="current">2</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 3: Objetivos -->
+    <div class="slide" data-slide="3">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <div class="progress-dots"></div>
+      
+      <div class="slide-header">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <div class="slide-title">
+          <h1>Objetivos del Estudio</h1>
+          <p>Alcance y metodología</p>
+        </div>
+      </div>
+      
+      <div class="slide-content">
+        <ul class="content-list">
+          <li><strong>Evaluar viabilidad</strong> comercial y operativa de Omomobility en Villahermosa</li>
+          <li><strong>Identificar segmentos</strong> prioritarios y tamaño de mercado (TAM/SAM/SOM)</li>
+          <li><strong>Analizar competencia</strong> local y posicionamiento de marcas existentes</li>
+          <li><strong>Calcular TCO</strong> comparativo entre motos eléctricas y de combustión</li>
+          <li><strong>Mapear barreras</strong> y drivers de adopción en el mercado local</li>
+          <li><strong>Desarrollar roadmap</strong> de entrada al mercado con recomendaciones</li>
+        </ul>
+      </div>
+
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+        <span class="slide-counter"><span class="current">3</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 4: Perfil de Encuestados -->
+    <div class="slide" data-slide="4">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <div class="progress-dots"></div>
+      
+      <div class="slide-header">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <div class="slide-title">
+          <h1>Perfil de Encuestados</h1>
+          <p>Demografía y características</p>
+        </div>
+      </div>
+      
+      <div class="slide-content">
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h3>Distribución por Edad</h3>
+            <canvas id="chart-edad"></canvas>
+          </div>
+          <div class="chart-card">
+            <h3>Distribución por Zona</h3>
+            <canvas id="chart-zona"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+        <span class="slide-counter"><span class="current">4</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 5: Intención de Compra -->
+    <div class="slide" data-slide="5">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <div class="progress-dots"></div>
+      
+      <div class="slide-header">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <div class="slide-title">
+          <h1>Intención de Compra</h1>
+          <p>Nivel de interés en motos eléctricas</p>
+        </div>
+      </div>
+      
+      <div class="slide-content">
+        <div class="chart-container">
+          <canvas id="chart-intencion"></canvas>
+        </div>
+      </div>
+
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+        <span class="slide-counter"><span class="current">5</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 6: Modelo TCO -->
+    <div class="slide" data-slide="6">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <div class="progress-dots"></div>
+      
+      <div class="slide-header">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <div class="slide-title">
+          <h1>Modelo TCO</h1>
+          <p>Comparativo eléctrica vs. combustión</p>
+        </div>
+      </div>
+      
+      <div class="slide-content">
+        <div class="chart-container">
+          <canvas id="chart-tco"></canvas>
+        </div>
+        <div class="highlight-box">
+          <h3>📊 Conclusión TCO</h3>
+          <p id="tco-conclusion">
+            Una moto eléctrica genera ahorros significativos en costos operativos a lo largo de 5 años.
+          </p>
+        </div>
+      </div>
+
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+        <span class="slide-counter"><span class="current">6</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 7: Barreras y Drivers -->
+    <div class="slide" data-slide="7">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <div class="progress-dots"></div>
+      
+      <div class="slide-header">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <div class="slide-title">
+          <h1>Barreras y Drivers</h1>
+          <p>Factores de adopción</p>
+        </div>
+      </div>
+      
+      <div class="slide-content">
+        <div class="chart-container">
+          <canvas id="chart-barreras"></canvas>
+        </div>
+      </div>
+
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+        <span class="slide-counter"><span class="current">7</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 8: Recomendaciones -->
+    <div class="slide" data-slide="8">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <div class="progress-dots"></div>
+      
+      <div class="slide-header">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <div class="slide-title">
+          <h1>Recomendaciones Estratégicas</h1>
+          <p>Plan de entrada al mercado</p>
+        </div>
+      </div>
+      
+      <div class="slide-content">
+        <ul class="content-list">
+          <li><strong>Fase Piloto:</strong> Lanzar con 20-30 unidades en zonas de alto tráfico</li>
+          <li><strong>Alianzas:</strong> Establecer red de servicio y puntos de carga</li>
+          <li><strong>Financiamiento:</strong> Ofrecer esquemas accesibles (12-24 meses)</li>
+          <li><strong>Marketing:</strong> Enfocarse en ahorro operativo y sustentabilidad</li>
+          <li><strong>Servicio:</strong> Garantía extendida y mantenimiento incluido primer año</li>
+        </ul>
+      </div>
+
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+        <span class="slide-counter"><span class="current">8</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 9: Roadmap -->
+    <div class="slide" data-slide="9">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <div class="progress-dots"></div>
+      
+      <div class="slide-header">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <div class="slide-title">
+          <h1>Roadmap de Implementación</h1>
+          <p>Cronograma de actividades</p>
+        </div>
+      </div>
+      
+      <div class="slide-content">
+        <table>
+          <thead>
+            <tr>
+              <th>Fase</th>
+              <th>Actividades</th>
+              <th>Duración</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>Preparación: alianzas, logística, inventario inicial</td>
+              <td>3 meses</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>Lanzamiento piloto: 20-30 unidades, campaña digital</td>
+              <td>3 meses</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>Expansión: incrementar inventario, abrir puntos de venta</td>
+              <td>3 meses</td>
+            </tr>
+            <tr>
+              <td><strong>Q4 2025</strong></td>
+              <td>Consolidación: optimizar operaciones, escalar marketing</td>
+              <td>3 meses</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+        <span class="slide-counter"><span class="current">9</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 10: Cierre -->
+    <div class="slide" data-slide="10">
+      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+      <div class="progress-dots"></div>
+      
+      <div class="slide-header cover">
+        <img src="logch.png" alt="Logo" class="slide-logo">
+        <h1>¡Gracias!</h1>
+        <h2>¿Preguntas?</h2>
+        <div class="cover-info">
+          <div>
+            <strong>Contacto</strong>
+            <span>The Unknown Shopper</span>
+          </div>
+          <div>
+            <strong>Email</strong>
+            <span>the@unknownshoppers.com</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+        <span class="slide-counter"><span class="current">10</span> / <span class="total">10</span></span>
+        <button class="nav-btn" onclick="PresentacionManager.nextSlide()" disabled>Siguiente →</button>
+      </div>
+    </div>
   </div>
-</body>
-</html>
+
+  <footer>
+    <p>© 2025 The Unknown Shopper. Todos los derechos reservados.</p>
+  </footer>
+
+   <!-- Scripts -->
+   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+   <script src="firebase-config.js"></script>
+   <script src="auth.js"></script>
+   <script src="presentacion.js"></script>
+ </body>
+ </html>

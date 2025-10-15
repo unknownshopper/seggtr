@@ -1,0 +1,338 @@
+/* Estilos específicos para la página de lista de encuestas */
+
+.page { 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 16px; 
+  }
+  
+  .toolbar { 
+    display: flex; 
+    gap: 8px; 
+    flex-wrap: wrap; 
+    align-items: center; 
+    margin: 16px 0; 
+  }
+  
+  .search { 
+    min-width: 220px; 
+  }
+  
+  /* Tabla mejorada */
+  table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: var(--paper); 
+    border-radius: 12px; 
+    overflow: hidden; 
+  }
+  
+  th, td { 
+    padding: 10px 12px; 
+    border-bottom: 1px solid var(--border); 
+    font-size: 14px; 
+  }
+  
+  th { 
+    position: sticky; 
+    top: 0; 
+    z-index: 1; 
+    text-align: left; 
+    font-weight: 600; 
+    color: var(--muted); 
+    background: #f7f7f7; 
+    backdrop-filter: blur(4px); 
+  }
+  
+  tbody tr:nth-child(odd) { 
+    background: #fcfcfc; 
+  }
+  
+  tbody tr:hover { 
+    background: #fffbe6; 
+  }
+  
+  .actions { 
+    display: flex; 
+    gap: 6px; 
+  }
+  
+  .pill { 
+    padding: 2px 8px; 
+    border-radius: 999px; 
+    font-size: 12px; 
+    display: inline-block; 
+  }
+  
+  .role-admin { 
+    background: #dc35451a; 
+    color: #dc3545; 
+  }
+  
+  .role-supervisor { 
+    background: #0d6efd1a; 
+    color: #0d6efd; 
+  }
+  
+  .role-encuestador { 
+    background: #6c757d1a; 
+    color: #6c757d; 
+  }
+  
+  .pagination { 
+    display: flex; 
+    gap: 6px; 
+    margin-top: 10px; 
+    align-items: center; 
+  }
+  
+  .btn.small { 
+    padding: 6px 10px; 
+    font-size: 12px; 
+  }
+  
+  .muted { 
+    color: var(--muted); 
+  }
+  
+  .nowrap { 
+    white-space: nowrap; 
+  }
+  
+  .w100 { width: 100px; }
+  .w120 { width: 120px; }
+  .w160 { width: 160px; }
+  
+  /* Evidencia */
+  .thumb { 
+    max-width: 120px; 
+    max-height: 80px; 
+    border: 1px solid var(--border); 
+    border-radius: 8px; 
+    transition: transform .15s ease, box-shadow .15s ease; 
+  }
+  
+  .thumb:hover { 
+    transform: scale(1.4); 
+    box-shadow: 0 6px 18px rgba(0,0,0,.15); 
+  }
+  
+  /* Celdas mejoradas */
+  .cell-user { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+  }
+  
+  .avatar {
+    width: 28px; 
+    height: 28px; 
+    border-radius: 999px;
+    background: #eef2ff; 
+    color: #4f46e5; 
+    font-weight: 700;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 12px; 
+    border: 1px solid #e5e7eb;
+  }
+  
+  .chip {
+    display: inline-block; 
+    padding: 2px 8px; 
+    border-radius: 999px;
+    background: #f0fdf4; 
+    color: #16a34a; 
+    font-size: 12px; 
+    border: 1px solid #e2e8f0;
+  }
+  
+  .num { 
+    text-align: center; 
+    font-variant-numeric: tabular-nums; 
+  }
+  
+  .geo { 
+    color: #64748b; 
+    font-size: 12px; 
+  }
+  
+  /* Barra de intención mini */
+  .intent {
+    display: inline-flex; 
+    align-items: center; 
+    gap: 6px;
+  }
+  
+  .intent-bar {
+    width: 90px; 
+    height: 8px; 
+    border-radius: 999px; 
+    background: #e5e7eb; 
+    overflow: hidden; 
+    border: 1px solid #e2e8f0;
+  }
+  
+  .intent-fill {
+    height: 100%; 
+    background: linear-gradient(90deg, #34d399, #10b981);
+    width: 0%;
+  }
+  
+  /* Encabezados ordenables */
+  th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+  }
+  
+  th.sortable:hover {
+    background: #e5e7eb;
+  }
+  
+  th.sortable::after {
+    content: ' ↕';
+    opacity: 0.3;
+    font-size: 12px;
+  }
+  
+  th.sortable.sort-asc::after {
+    content: ' ↑';
+    opacity: 1;
+    color: #4f46e5;
+  }
+  
+  th.sortable.sort-desc::after {
+    content: ' ↓';
+    opacity: 1;
+    color: #4f46e5;
+  }
+  
+  /* Panel de estadísticas de Firebase */
+  .stats-panel {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+  
+  .stats-panel h3 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+  }
+  
+  .stat-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .stat-label {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+  }
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  
+  .stat-subtext {
+    font-size: 11px;
+    opacity: 0.8;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #34d399, #10b981);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+  
+  .progress-fill.warning {
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  }
+  
+  .progress-fill.danger {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+  }
+  
+  /* Toast de notificación en tiempo real */
+  .realtime-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    animation: slideInRight 0.3s ease-out;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .realtime-toast:hover {
+    transform: translateX(-4px);
+  }
+  
+  .realtime-toast.hiding {
+    animation: slideOutRight 0.3s ease-out forwards;
+  }
+  
+  @keyframes slideInRight {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+  }
+
+  

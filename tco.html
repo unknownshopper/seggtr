@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modelo TCO - Omomobility</title>
+  <meta name="description" content="Calculadora de Costo Total de Propiedad (TCO) - Comparación entre motos eléctricas y de combustión">
+  <link rel="icon" href="logcho.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tco.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo-section">
+          <img src="logcho.png" alt="Logo" class="logo">
+          <div>
+            <h1>Modelo TCO</h1>
+            <p class="subtitle">Total Cost of Ownership - Omomobility</p>
+          </div>
+        </div>
+        <a href="index.html" class="btn-back">← Volver al inicio</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Introducción -->
+    <section class="intro-section">
+      <h2>Calculadora de Costo Total de Propiedad</h2>
+      <p>
+        Compara el costo real de una motocicleta eléctrica vs. una de combustión considerando 
+        <strong>compra, energía, mantenimiento y depreciación</strong> a lo largo de su vida útil.
+      </p>
+    </section>
+
+    <!-- Formulario de Parámetros -->
+    <section class="parameters-section">
+      <h3>Parámetros de Comparación</h3>
+      
+      <div class="form-grid">
+        <!-- Columna Izquierda: Moto Eléctrica -->
+        <div class="form-column electric">
+          <h4>⚡ Motocicleta Eléctrica</h4>
+          
+          <div class="form-group">
+            <label for="precio_electrica">Precio de compra (MXN)</label>
+            <input type="number" id="precio_electrica" value="45000" min="0" step="1000">
+          </div>
+
+          <div class="form-group">
+            <label for="autonomia_electrica">Autonomía por carga (km)</label>
+            <input type="number" id="autonomia_electrica" value="80" min="1" step="5">
+          </div>
+
+          <div class="form-group">
+            <label for="costo_carga">Costo por carga completa (MXN)</label>
+            <input type="number" id="costo_carga" value="8" min="0" step="0.5">
+          </div>
+
+          <div class="form-group">
+            <label for="mant_electrica">Mantenimiento anual (MXN)</label>
+            <input type="number" id="mant_electrica" value="1500" min="0" step="100">
+          </div>
+
+          <div class="form-group">
+            <label for="depreciacion_electrica">Depreciación anual (%)</label>
+            <input type="number" id="depreciacion_electrica" value="15" min="0" max="100" step="1">
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Moto de Combustión -->
+        <div class="form-column combustion">
+          <h4>⛽ Motocicleta de Combustión</h4>
+          
+          <div class="form-group">
+            <label for="precio_combustion">Precio de compra (MXN)</label>
+            <input type="number" id="precio_combustion" value="35000" min="0" step="1000">
+          </div>
+
+          <div class="form-group">
+            <label for="rendimiento_combustion">Rendimiento (km/litro)</label>
+            <input type="number" id="rendimiento_combustion" value="35" min="1" step="1">
+          </div>
+
+          <div class="form-group">
+            <label for="precio_gasolina">Precio de gasolina (MXN/litro)</label>
+            <input type="number" id="precio_gasolina" value="24" min="0" step="0.5">
+          </div>
+
+          <div class="form-group">
+            <label for="mant_combustion">Mantenimiento anual (MXN)</label>
+            <input type="number" id="mant_combustion" value="4500" min="0" step="100">
+          </div>
+
+          <div class="form-group">
+            <label for="depreciacion_combustion">Depreciación anual (%)</label>
+            <input type="number" id="depreciacion_combustion" value="20" min="0" max="100" step="1">
+          </div>
+        </div>
+      </div>
+
+      <!-- Parámetros Generales -->
+      <div class="general-params">
+        <h4>Parámetros Generales</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="km_anuales">Kilómetros anuales</label>
+            <input type="number" id="km_anuales" value="12000" min="1000" step="1000">
+          </div>
+
+          <div class="form-group">
+            <label for="años_uso">Años de uso</label>
+            <input type="number" id="años_uso" value="5" min="1" max="15" step="1">
+          </div>
+
+          <div class="form-group">
+            <label for="tasa_descuento">Tasa de descuento anual (%)</label>
+            <input type="number" id="tasa_descuento" value="8" min="0" max="20" step="0.5">
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón Calcular -->
+      <div class="button-container">
+        <button id="btn-calcular" class="btn-primary">Calcular TCO</button>
+        <button id="btn-reset" class="btn-secondary">Restablecer valores</button>
+      </div>
+    </section>
+
+    <!-- Resultados -->
+    <section id="resultados-section" class="resultados-section" style="display: none;">
+      <h3>Resultados del Análisis TCO</h3>
+
+      <!-- Resumen Comparativo -->
+      <div class="summary-cards">
+        <div class="summary-card electric">
+          <h4>⚡ Moto Eléctrica</h4>
+          <div class="tco-total">
+            <span class="label">TCO Total</span>
+            <span class="value" id="tco_total_electrica">$0</span>
+          </div>
+          <div class="tco-breakdown">
+            <div class="breakdown-item">
+              <span>Compra:</span>
+              <span id="compra_electrica">$0</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Energía:</span>
+              <span id="energia_electrica">$0</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Mantenimiento:</span>
+              <span id="mant_total_electrica">$0</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Depreciación:</span>
+              <span id="depr_electrica">$0</span>
+            </div>
+          </div>
+          <div class="cost-per-km">
+            <span>Costo por km:</span>
+            <span id="costo_km_electrica">$0.00</span>
+          </div>
+        </div>
+
+        <div class="summary-card combustion">
+          <h4>⛽ Moto de Combustión</h4>
+          <div class="tco-total">
+            <span class="label">TCO Total</span>
+            <span class="value" id="tco_total_combustion">$0</span>
+          </div>
+          <div class="tco-breakdown">
+            <div class="breakdown-item">
+              <span>Compra:</span>
+              <span id="compra_combustion">$0</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Combustible:</span>
+              <span id="combustible_combustion">$0</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Mantenimiento:</span>
+              <span id="mant_total_combustion">$0</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Depreciación:</span>
+              <span id="depr_combustion">$0</span>
+            </div>
+          </div>
+          <div class="cost-per-km">
+            <span>Costo por km:</span>
+            <span id="costo_km_combustion">$0.00</span>
+          </div>
+        </div>
+
+        <div class="summary-card savings">
+          <h4>💰 Ahorro con Eléctrica</h4>
+          <div class="tco-total">
+            <span class="label">Ahorro Total</span>
+            <span class="value" id="ahorro_total">$0</span>
+          </div>
+          <div class="savings-details">
+            <div class="breakdown-item">
+              <span>Ahorro anual:</span>
+              <span id="ahorro_anual">$0</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Ahorro mensual:</span>
+              <span id="ahorro_mensual">$0</span>
+            </div>
+            <div class="breakdown-item">
+              <span>ROI:</span>
+              <span id="roi_porcentaje">0%</span>
+            </div>
+            <div class="breakdown-item">
+              <span>Punto de equilibrio:</span>
+              <span id="break_even">0 años</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficas -->
+      <div class="charts-container">
+        <div class="chart-card">
+          <h4>Comparación de Costos Totales</h4>
+          <canvas id="chart-comparacion"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Evolución del TCO Acumulado</h4>
+          <canvas id="chart-evolucion"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Desglose de Costos por Categoría</h4>
+          <canvas id="chart-desglose"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Costo Anual por Año</h4>
+          <canvas id="chart-anual"></canvas>
+        </div>
+      </div>
+
+      <!-- Tabla de Desglose Anual -->
+      <div class="table-container">
+        <h4>Desglose Anual Detallado</h4>
+        <div class="table-responsive">
+          <table id="tabla-desglose">
+            <thead>
+              <tr>
+                <th>Año</th>
+                <th colspan="2">Eléctrica</th>
+                <th colspan="2">Combustión</th>
+                <th>Ahorro Anual</th>
+              </tr>
+              <tr class="subheader">
+                <th></th>
+                <th>Anual</th>
+                <th>Acumulado</th>
+                <th>Anual</th>
+                <th>Acumulado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-body">
+              <!-- Generado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Botones de Exportación -->
+      <div class="export-buttons">
+        <button id="btn-export-pdf" class="btn-secondary">📄 Exportar PDF</button>
+        <button id="btn-export-excel" class="btn-secondary">📊 Exportar Excel</button>
+        <button id="btn-share" class="btn-secondary">🔗 Compartir resultados</button>
+      </div>
+    </section>
+
+    <!-- Notas y Metodología -->
+    <section class="methodology-section">
+      <h3>Metodología y Supuestos</h3>
+      <div class="methodology-content">
+        <h4>¿Qué incluye el TCO?</h4>
+        <ul>
+          <li><strong>Costo de adquisición:</strong> Precio de compra inicial de la motocicleta</li>
+          <li><strong>Energía/Combustible:</strong> Costo de electricidad o gasolina según uso anual</li>
+          <li><strong>Mantenimiento:</strong> Servicios preventivos, reparaciones, refacciones y consumibles</li>
+          <li><strong>Depreciación:</strong> Pérdida de valor del vehículo a lo largo del tiempo</li>
+        </ul>
+
+        <h4>Supuestos del modelo</h4>
+        <ul>
+          <li>Los costos de energía y combustible se mantienen constantes (ajustables)</li>
+          <li>El mantenimiento es anual y constante (puede variar según uso real)</li>
+          <li>La depreciación es lineal según el porcentaje anual definido</li>
+          <li>No se incluyen seguros, tenencias ni costos de financiamiento</li>
+          <li>Tasa de descuento aplicada para valor presente neto (VPN)</li>
+        </ul>
+
+        <h4>Ventajas de las motos eléctricas</h4>
+        <ul>
+          <li>✅ Menor costo de energía (electricidad vs. gasolina)</li>
+          <li>✅ Mantenimiento reducido (sin cambios de aceite, filtros, bujías)</li>
+          <li>✅ Menor depreciación en mercados maduros</li>
+          <li>✅ Cero emisiones locales</li>
+          <li>✅ Menor ruido y vibración</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 Omomobility - Estudio de Mercado | The Unknown Shopper</p>
+      <p class="small">Modelo TCO v1.0 - Calculadora interactiva para análisis de viabilidad económica</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="auth.js"></script>
+  <script src="tco.js"></script>
+</body>
+</html>

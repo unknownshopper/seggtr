@@ -328,133 +328,181 @@
       }
     }
 
-    // Calcular estadísticas de encuestadores desde los datos
-    async function loadEncuestadorStats() {
-      try {
-        // Esperar a que Firebase esté listo
-        if (!window.fbAuth || !window.fbAuth.currentUser) {
-          console.log('[Encuestadores] Esperando autenticación...');
-          return;
-        }
 
-        // Intentar cargar desde Firestore primero
-        let surveys = [];
-        if (window.db) {
-          const snap = await window.db.collection('surveys').get();
-          surveys = snap.docs.map(doc => doc.data());
-          console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde Firestore`);
-        } else {
-          // Fallback a localStorage
-          surveys = DataManager.readAll();
-          console.log(`[Encuestadores] Cargadas ${surveys.length} encuestas desde localStorage`);
-        }
+// Variable global para controlar reintentos
+let loadStatsRetries = 0;
+const MAX_RETRIES = 3;
 
-        // Función para identificar encuestador de forma flexible
-        function identifyEncuestador(encuestadorId) {
-          if (!encuestadorId) return null;
-          
-          const id = String(encuestadorId).toLowerCase().trim();
-          
-          // Encuestador 1 (Máximo García)
-          if (id.includes('encuestador@') || 
-              id === 'encuestador' || 
-              id === 'encuestador 1' ||
-              id === 'encuestador1' ||
-              id.includes('maximo') ||
-              id.includes('máximo')) {
-            return 'enc1';
-          }
-          
-          // Encuestador 2 (Humberto Castillo)
-          if (id.includes('encuestador2@') || 
-              id === 'encuestador2' || 
-              id === 'encuestador 2' ||
-              id.includes('humberto') ||
-              id.includes('castillo')) {
-            return 'enc2';
-          }
-
-          // Encuestador 3 (Arístides Prats)
-          if (id.includes('encuestador3@') || 
-              id === 'encuestador3' || 
-              id === 'encuestador 3' ||
-              id.includes('aristides') ||
-              id.includes('arístides') ||
-              id.includes('prats')) {
-            return 'enc3';
-          }
-          
-          return null;
-        }
-
-        // Agrupar por encuestador
-        const stats = {
-          enc1: { total: 0, zonas: new Set(), precisions: [], lastActivity: null },
-          enc2: { total: 0, zonas: new Set(), precisions: [], lastActivity: null },
-          enc3: { total: 0, zonas: new Set(), precisions: [], lastActivity: null }
-        };
-
-        surveys.forEach(s => {
-          const encId = identifyEncuestador(s.encuestador_id);
-          if (!encId) {
-            console.log('[Encuestadores] No identificado:', s.encuestador_id);
-            return;
-          }
-
-          stats[encId].total++;
-          if (s.zona) stats[encId].zonas.add(s.zona);
-          if (s.geo_accuracy != null) stats[encId].precisions.push(s.geo_accuracy);
-          
-          const ts = new Date(s.ts || s._createdAt);
-          if (!stats[encId].lastActivity || ts > stats[encId].lastActivity) {
-            stats[encId].lastActivity = ts;
-          }
-        });
-
-        // Actualizar UI
-        Object.keys(stats).forEach(encId => {
-          const data = stats[encId];
-          
-          const totalEl = document.getElementById(`${encId}-total`);
-          const zonasEl = document.getElementById(`${encId}-zonas`);
-          const precisionEl = document.getElementById(`${encId}-precision`);
-          const activityEl = document.getElementById(`${encId}-lastActivity`);
-          
-          if (!totalEl) return; // Skip si el elemento no existe (card oculta)
-          
-          // Total encuestas
-          totalEl.textContent = data.total;
-          
-          // Zonas cubiertas
-          if (zonasEl) zonasEl.textContent = data.zonas.size;
-          
-          // Precisión GPS promedio
-          if (precisionEl && data.precisions.length > 0) {
-            const avgPrecision = data.precisions.reduce((a, b) => a + b, 0) / data.precisions.length;
-            precisionEl.textContent = `±${Math.round(avgPrecision)}m`;
-          }
-          
-          // Última actividad
-          if (activityEl && data.lastActivity) {
-            const now = new Date();
-            const diff = now - data.lastActivity;
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const days = Math.floor(hours / 24);
-            
-            let timeStr;
-            if (days > 0) timeStr = `Hace ${days} día${days > 1 ? 's' : ''}`;
-            else if (hours > 0) timeStr = `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
-            else timeStr = 'Hace menos de 1 hora';
-            
-            activityEl.textContent = timeStr;
-          }
-        });
-
-        console.log('[Encuestadores] Estadísticas:', stats);
-      } catch (e) {
-        console.error('[Encuestadores] Error cargando estadísticas:', e);
+async function loadEncuestadorStats() {
+  try {
+    // Esperar a que Firebase esté listo usando el evento
+    if (!window.firebaseReady || !window.fbAuth || !window.fbAuth.currentUser) {
+      if (loadStatsRetries < MAX_RETRIES) {
+        console.log('[Encuestadores] Esperando Firebase... (intento ' + (loadStatsRetries + 1) + ')');
+        loadStatsRetries++;
+        setTimeout(loadEncuestadorStats, 2000); // Aumentar a 2 segundos
+        return;
+      } else {
+        console.warn('[Encuestadores] ⚠️ Firebase no disponible después de varios intentos');
+        return;
       }
     }
+
+    // Reset contador de reintentos cuando conecta exitosamente
+    loadStatsRetries = 0;
+
+    // Intentar cargar desde Firestore con timeout y cache
+    let surveys = [];
+    if (window.db) {
+      try {
+        // Usar cache primero para reducir llamadas al servidor
+        const snap = await window.db.collection('surveys')
+          .limit(250)
+          .get({ source: 'cache' })
+          .catch(() => {
+            // Si falla el cache, intentar servidor
+            return window.db.collection('surveys').limit(250).get({ source: 'server' });
+          });
+        
+        surveys = snap.docs.map(doc => ({
+          ...doc.data(),
+          _firestoreId: doc.id
+        }));
+        
+        console.log(`[Encuestadores] ✅ Cargadas ${surveys.length} encuestas`);
+      } catch (firestoreError) {
+        console.warn('[Encuestadores] ⚠️ Error de Firestore:', firestoreError.code || firestoreError.message);
+        
+        // Fallback a localStorage si Firestore falla
+        if (window.DataManager && typeof DataManager.readAll === 'function') {
+          surveys = DataManager.readAll() || [];
+          console.log(`[Encuestadores] Usando localStorage: ${surveys.length} encuestas`);
+        }
+      }
+    }
+
+    if (surveys.length === 0) {
+      console.warn('[Encuestadores] ⚠️ No hay encuestas disponibles');
+      document.querySelectorAll('[id$="-total"]').forEach(el => el.textContent = '0');
+      return;
+    }
+
+        // Función para identificar encuestador de forma flexible (igual que listadeencuestas-core.js)
+        function identifyEncuestador(survey) {
+      // Priorizar _createdEmail si encuestador_id es genérico
+      const emailToUse = (survey.encuestador_id === 'Encuestador' || survey.encuestador_id === 'encuestador') 
+        ? survey._createdEmail 
+        : survey.encuestador_id;
+      
+      if (!emailToUse) return null;
+      
+      const id = String(emailToUse).toLowerCase().trim();
+      
+      // Encuestador 1 (Máximo García)
+      if (id === 'encuestador' || 
+          id === 'encuestador@omobility.com' ||
+          id === 'encuestador 1' ||
+          id === 'encuestador1' ||
+          id.includes('maximo') ||
+          id.includes('máximo') ||
+          id.includes('garcia')) {
+        return 'enc1';
+      }
+      
+      // Encuestador 2 (Humberto Castillo)
+      if (id === 'encuestador2' || 
+          id === 'encuestador2@omobility.com' ||
+          id === 'encuestador 2' ||
+          id.includes('humberto') ||
+          id.includes('castillo')) {
+        return 'enc2';
+      }
+
+      // Encuestador 3 (Arístides Prats)
+      if (id === 'encuestador3' || 
+          id === 'encuestador3@omobility.com' ||
+          id === 'encuestador 3' ||
+          id.includes('aristides') ||
+          id.includes('arístides') ||
+          id.includes('prats')) {
+        return 'enc3';
+      }
+      
+      return null;
+    }
+
+
+    // Agrupar por encuestador
+    const stats = {
+      enc1: { total: 0, zonas: new Set(), precisions: [], lastActivity: null },
+      enc2: { total: 0, zonas: new Set(), precisions: [], lastActivity: null },
+      enc3: { total: 0, zonas: new Set(), precisions: [], lastActivity: null }
+    };
+
+    surveys.forEach(s => {
+      const encId = identifyEncuestador(s);
+        if (!encId) {
+        // Solo loguear en desarrollo
+        if (window.location.hostname === 'localhost') {
+          console.log('[Encuestadores] No identificado:', s.encuestador_id, '| Email:', s._createdEmail);
+        }
+        return;
+      }
+
+      stats[encId].total++;
+      if (s.zona) stats[encId].zonas.add(s.zona);
+      if (s.geo_accuracy != null) stats[encId].precisions.push(s.geo_accuracy);
+      
+      const ts = new Date(s.ts || s._createdAt);
+      if (!stats[encId].lastActivity || ts > stats[encId].lastActivity) {
+        stats[encId].lastActivity = ts;
+      }
+    });
+
+    // Actualizar UI
+    Object.keys(stats).forEach(encId => {
+      const data = stats[encId];
+      
+      const totalEl = document.getElementById(`${encId}-total`);
+      const zonasEl = document.getElementById(`${encId}-zonas`);
+      const precisionEl = document.getElementById(`${encId}-precision`);
+      const activityEl = document.getElementById(`${encId}-lastActivity`);
+      
+      if (!totalEl) return; // Skip si el elemento no existe (card oculta)
+      
+      // Total encuestas
+      totalEl.textContent = data.total;
+      
+      // Zonas cubiertas
+      if (zonasEl) zonasEl.textContent = data.zonas.size;
+      
+      // Precisión GPS promedio
+      if (precisionEl && data.precisions.length > 0) {
+        const avgPrecision = data.precisions.reduce((a, b) => a + b, 0) / data.precisions.length;
+        precisionEl.textContent = `±${Math.round(avgPrecision)}m`;
+      }
+      
+      // Última actividad
+      if (activityEl && data.lastActivity) {
+        const now = new Date();
+        const diff = now - data.lastActivity;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const days = Math.floor(hours / 24);
+        
+        let timeStr;
+        if (days > 0) timeStr = `Hace ${days} día${days > 1 ? 's' : ''}`;
+        else if (hours > 0) timeStr = `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
+        else timeStr = 'Hace menos de 1 hora';
+        
+        activityEl.textContent = timeStr;
+      }
+    });
+
+    console.log('[Encuestadores] ✅ Estadísticas actualizadas');
+  } catch (e) {
+    console.error('[Encuestadores] ❌ Error cargando estadísticas:', e);
+  }
+}
 
     // Detectar dispositivo del navegador actual
     function detectDevice() {
@@ -485,15 +533,24 @@
       }
     }
 
-    // Cargar al inicio
-    document.addEventListener('DOMContentLoaded', () => {
-      setupGafeteView();
-      detectDevice();
+  // Cargar al inicio
+  document.addEventListener('DOMContentLoaded', () => {
+    setupGafeteView();
+    detectDevice();
+    
+    // Esperar evento de Firebase listo
+    if (window.firebaseReady) {
       loadEncuestadorStats();
-      
-      // Recargar cada 30 segundos
-      setInterval(loadEncuestadorStats, 30000);
-    });
+    } else {
+      window.addEventListener('firebaseReady', () => {
+        console.log('[Encuestadores] Firebase listo, cargando stats...');
+        loadEncuestadorStats();
+      }, { once: true });
+    }
+    
+    // Recargar cada 60 segundos (aumentado de 30 para reducir carga)
+    setInterval(loadEncuestadorStats, 60000);
+  });
   </script>
 
    <!-- Firebase SDK -->

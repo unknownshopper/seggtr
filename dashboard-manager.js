@@ -13,57 +13,62 @@ class DashboardManager {
     this.updateLastUpdateTime();
   }
 
-  loadData() {
-    // Intenta Firestore primero
-    if (window.db) {
-      this.fetchFromFirestore().then(rows => {
-        if (Array.isArray(rows) && rows.length) {
-          this.data = this.preprocessData(rows);
-        } else {
-          // Fallback a localStorage si no hay datos en Firestore
+ 
+    // Cargar datos de encuestas
+    async  loadData() {
+      // Intenta Firestore primero
+      if (window.db) {
+        this.fetchFromFirestore().then(rows => {
+          if (Array.isArray(rows) && rows.length) {
+            this.data = this.preprocessData(rows);
+          } else {
+            // Fallback a localStorage si no hay datos en Firestore
+            try {
+              if (window.DataManager && typeof DataManager.readAll === 'function') {
+                this.data = this.preprocessData(DataManager.readAll());
+              } else {
+                this.data = this.preprocessData(JSON.parse(localStorage.getItem('encuestas') || '[]'));
+              }
+            } catch (error) {
+              console.error('[Dashboard] Error leyendo localStorage:', error);
+              this.data = [];
+            }
+          }
+          // Render tras cargar
+          this.renderDashboard();
+          this.updateLastUpdateTime();
+        }).catch(() => {
+          // Si falla Firestore, fallback a localStorage
           try {
             if (window.DataManager && typeof DataManager.readAll === 'function') {
               this.data = this.preprocessData(DataManager.readAll());
             } else {
               this.data = this.preprocessData(JSON.parse(localStorage.getItem('encuestas') || '[]'));
             }
-          } catch (e) {
+          } catch (error) {
+            console.error('[Dashboard] Error en fallback localStorage:', error);
             this.data = [];
           }
-        }
-        // Render tras cargar
-        this.renderDashboard();
-        this.updateLastUpdateTime();
-      }).catch(() => {
-        // Si falla Firestore, fallback a localStorage
+          this.renderDashboard();
+          this.updateLastUpdateTime();
+        });
+      } else {
+        // Sin Firestore disponible: localStorage
         try {
           if (window.DataManager && typeof DataManager.readAll === 'function') {
             this.data = this.preprocessData(DataManager.readAll());
           } else {
             this.data = this.preprocessData(JSON.parse(localStorage.getItem('encuestas') || '[]'));
           }
-        } catch (e) {
+        } catch (error) {
+          console.error('[Dashboard] Error leyendo localStorage:', error);
           this.data = [];
         }
         this.renderDashboard();
         this.updateLastUpdateTime();
-      });
-    } else {
-      // Sin Firestore disponible: localStorage
-      try {
-        if (window.DataManager && typeof DataManager.readAll === 'function') {
-          this.data = this.preprocessData(DataManager.readAll());
-        } else {
-          this.data = this.preprocessData(JSON.parse(localStorage.getItem('encuestas') || '[]'));
-        }
-      } catch (e) {
-        this.data = [];
       }
-      this.renderDashboard();
-      this.updateLastUpdateTime();
     }
-  }
-
+  
   async fetchFromFirestore() {
     try {
       const colRef = window.db.collection('surveys');

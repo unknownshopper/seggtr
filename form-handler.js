@@ -286,6 +286,27 @@ async function saveSurveyToFirestore(row) {
   }
 }
 
+// Verificar duplicados recientes (mismo encuestador en últimos 5 minutos)
+async function checkRecentDuplicate(encuestadorId, timestamp) {
+  try {
+    if (!window.db) return false;
+    
+    const fiveMinutesAgo = new Date(new Date(timestamp).getTime() - 5 * 60 * 1000).toISOString();
+    
+    const snap = await window.db.collection('surveys')
+      .where('encuestador_id', '==', encuestadorId)
+      .where('ts', '>', fiveMinutesAgo)
+      .limit(1)
+      .get();
+    
+    return !snap.empty;
+  } catch (error) {
+    console.error('[FormHandler] Error verificando duplicados:', error);
+    return false; // En caso de error, permitir el envío
+  }
+}
+
+
 const FormHandler = {
   serializeForm(form) {
     const data = {};
@@ -395,12 +416,13 @@ const FormHandler = {
         let imageDataUrl = null;
         try {
           imageDataUrl = await generateSurveyImage(formEncuestaEl, metadata);
-        } catch (_) {
-          imageDataUrl = null;
-        }
-        if (imageDataUrl) {
-          row.image_proof_png = imageDataUrl;
-        }
+          let imageDataUrl = null;
+          try {
+            imageDataUrl = await generateSurveyImage(formEncuestaEl, metadata);
+          } catch (error) {
+            console.error('[FormHandler] Error generando imagen:', error);
+            imageDataUrl = null;
+          }
   
         console.log('[FormHandler] Datos finales antes de guardar:', {
           encuestador_id: row.encuestador_id,
@@ -410,9 +432,21 @@ const FormHandler = {
           tieneImagen: !!imageDataUrl
         });
 
+                // 5) Verificar duplicados recientes
+                const isDuplicate = await checkRecentDuplicate(row.encuestador_id, row.ts);
+                if (isDuplicate) {
+                  if (!confirm('Ya registraste una encuesta hace menos de 5 minutos. ¿Deseas continuar de todas formas?')) {
+                    if (submitBtn) {
+                      submitBtn.disabled = false;
+                      submitBtn.textContent = originalText;
+                    }
+                    return;
+                  }
+                }
+        
 
-                // 5) Guardar SOLO en Firestore (sin localStorage)
-                try {
+
+        // 6) Guardar SOLO en Firestore (sin localStorage)                try {
                   if (!window.db || !window.fbAuth || !window.fbAuth.currentUser) {
                     throw new Error('Firebase no disponible. Verifica tu conexión a internet y que hayas iniciado sesión.');
                   }
