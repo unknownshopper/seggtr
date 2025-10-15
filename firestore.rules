@@ -3,14 +3,13 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Colección de encuestas
     match /surveys/{surveyId} {
-      // Lectura: usuarios autenticados
+      // Lectura: solo usuarios autenticados (admins)
       allow read: if request.auth != null;
       
-      // Escritura: solo encuestadores y admins
-      allow create: if request.auth != null && 
-                    (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['encuestador', 'admin']);
+      // Escritura: CUALQUIERA puede crear encuestas (encuestadores anónimos)
+      allow create: if true;
       
-      // Actualización/eliminación: solo admins
+      // Actualización/eliminación: solo admins autenticados
       allow update, delete: if request.auth != null && 
                             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }

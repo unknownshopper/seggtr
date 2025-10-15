@@ -446,21 +446,27 @@ const FormHandler = {
         
 
 
-        // 6) Guardar SOLO en Firestore (sin localStorage)                try {
-                  if (!window.db || !window.fbAuth || !window.fbAuth.currentUser) {
-                    throw new Error('Firebase no disponible. Verifica tu conexión a internet y que hayas iniciado sesión.');
-                  }
-                  
-                  const res = await saveSurveyToFirestore(row);
-                  if (!res.ok) {
-                    throw new Error(res.reason || 'Error al guardar en Firestore');
-                  }
-                  
-                  console.log('[FormHandler] ✓ Encuesta guardada en Firestore exitosamente');
-                } catch (e) {
-                  console.error('[FormHandler] Error crítico al guardar:', e.message);
-                  throw e; // Re-lanzar para que el catch externo lo maneje
-                }
+   
+        // 6) Guardar SOLO en Firestore (sin localStorage)
+        try {
+          if (!window.db) {
+            throw new Error('Firebase no disponible. Verifica tu conexión a internet.');
+          }
+          
+          // Permitir guardado sin autenticación para encuestadores
+          const usuario = window.fbAuth?.currentUser?.email || 'Anónimo (encuestador)';
+          console.log('[FormHandler] Guardando encuesta. Usuario:', usuario);
+          
+          const res = await saveSurveyToFirestore(row);
+          if (!res.ok) {
+            throw new Error(res.reason || 'Error al guardar en Firestore');
+          }
+          
+          console.log('[FormHandler] ✓ Encuesta guardada en Firestore exitosamente');
+        } catch (e) {
+          console.error('[FormHandler] Error crítico al guardar:', e.message);
+          throw e; // Re-lanzar para que el catch externo lo maneje
+        }
  
         
         
