@@ -553,3 +553,258 @@
   .resultados-section {
     animation: fadeIn 0.5s ease;
   }
+
+  /* Guía de Uso */
+.guide-section {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.guide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.toggle-guide {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.toggle-guide:hover {
+  background: #5a6268;
+}
+
+.guide-content {
+  display: block;
+}
+
+.guide-content.hidden {
+  display: none;
+}
+
+.guide-steps {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.guide-step {
+  display: flex;
+  gap: 16px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.step-content h4 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 16px;
+}
+
+.step-content p {
+  margin: 0 0 12px 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.tip {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #856404;
+}
+
+.guide-examples {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.example-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.example-card {
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.example-card h5 {
+  margin: 0 0 12px 0;
+  color: #2c3e50;
+  font-size: 15px;
+}
+
+.example-card ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.example-card li {
+  margin: 6px 0;
+}
+
+/* Panel de Conclusiones */
+.conclusions-panel {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 12px;
+  margin: 24px 0;
+}
+
+.conclusions-panel h4 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+}
+
+.conclusions-content {
+  display: grid;
+  gap: 12px;
+}
+
+.conclusion-item {
+  background: rgba(255,255,255,0.15);
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+}
+
+.conclusion-item.positive {
+  border-left-color: #10b981;
+}
+
+.conclusion-item.negative {
+  border-left-color: #ef4444;
+}
+
+.conclusion-item.neutral {
+  border-left-color: #ffc107;
+}
+
+/* Panel de Interpretación */
+.interpretation-panel {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.interpretation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.interpretation-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.indicator-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.interpretation-card h5 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.interpretation-card p {
+  margin: 0 0 12px 0;
+  color: #6c757d;
+  font-size: 13px;
+  min-height: 40px;
+}
+
+.indicator-bar {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.indicator-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  transition: width 0.5s ease;
+}
+
+.recommendation-box {
+  background: linear-gradient(135deg, #10b98115 0%, #05966915 100%);
+  border: 2px solid #10b981;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.recommendation-box h5 {
+  margin: 0 0 12px 0;
+  color: #065f46;
+  font-size: 18px;
+}
+
+.recommendation-box p {
+  margin: 0;
+  color: #047857;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .guide-step {
+    flex-direction: column;
+  }
+  
+  .interpretation-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .example-cards {
+    grid-template-columns: 1fr;
+  }
+}

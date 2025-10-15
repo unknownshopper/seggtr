@@ -38,6 +38,83 @@
       </p>
     </section>
 
+        <!-- Guía de Uso -->
+        <section class="guide-section">
+          <div class="guide-header">
+            <h3>📋 Cómo usar esta calculadora</h3>
+            <button class="toggle-guide" onclick="toggleGuide()">▶ Mostrar Guía</button>
+          </div>
+          <div class="guide-content hidden" id="guide-content">
+            <div class="guide-steps">
+              <div class="guide-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <h4>Ingresa los datos de la moto eléctrica</h4>
+                  <p>Precio de compra, autonomía por carga, costo de electricidad y mantenimiento anual.</p>
+                  <div class="tip">💡 <strong>Tip:</strong> El costo por carga se calcula multiplicando los kWh de la batería por el precio del kWh de CFE (~$2-3 MXN/kWh).</div>
+                </div>
+              </div>
+    
+              <div class="guide-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <h4>Ingresa los datos de la moto de combustión</h4>
+                  <p>Precio, rendimiento (km/litro), precio de gasolina y mantenimiento anual.</p>
+                  <div class="tip">💡 <strong>Tip:</strong> El mantenimiento de motos de combustión incluye: aceite, filtros, bujías, afinaciones (~$3,000-6,000/año).</div>
+                </div>
+              </div>
+    
+              <div class="guide-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <h4>Define los parámetros generales</h4>
+                  <p>Kilómetros anuales que recorrerás, años de uso proyectados y tasa de descuento.</p>
+                  <div class="tip">💡 <strong>Tip:</strong> En Villahermosa, el promedio es 10,000-15,000 km/año para uso urbano.</div>
+                </div>
+              </div>
+    
+              <div class="guide-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                  <h4>Haz clic en "Calcular TCO"</h4>
+                  <p>El sistema generará automáticamente gráficas, tablas y conclusiones sobre cuál opción es más económica.</p>
+                  <div class="tip">✅ <strong>Resultado:</strong> Verás el ahorro total, punto de equilibrio y costo por kilómetro de cada opción.</div>
+                </div>
+              </div>
+            </div>
+    
+            <div class="guide-examples">
+              <h4>Ejemplos de escenarios</h4>
+              <div class="example-cards">
+                <div class="example-card">
+                  <h5>🏍️ Repartidor (Alto uso)</h5>
+                  <ul>
+                    <li>20,000 km/año</li>
+                    <li>Ahorro eléctrica: ~$25,000/año</li>
+                    <li>ROI: 18 meses</li>
+                  </ul>
+                </div>
+                <div class="example-card">
+                  <h5>🏙️ Uso urbano (Medio)</h5>
+                  <ul>
+                    <li>12,000 km/año</li>
+                    <li>Ahorro eléctrica: ~$15,000/año</li>
+                    <li>ROI: 2-3 años</li>
+                  </ul>
+                </div>
+                <div class="example-card">
+                  <h5>🚶 Uso ocasional (Bajo)</h5>
+                  <ul>
+                    <li>6,000 km/año</li>
+                    <li>Ahorro eléctrica: ~$8,000/año</li>
+                    <li>ROI: 4-5 años</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
     <!-- Formulario de Parámetros -->
     <section class="parameters-section">
       <h3>Parámetros de Comparación</h3>
@@ -328,5 +405,19 @@
   <!-- Scripts -->
   <script src="auth.js"></script>
   <script src="tco.js"></script>
+  <script>
+    function toggleGuide() {
+      const guideContent = document.getElementById('guide-content');
+      const toggleBtn = document.querySelector('.toggle-guide');
+      
+      if (guideContent.classList.contains('hidden')) {
+        guideContent.classList.remove('hidden');
+        toggleBtn.textContent = '▼ Ocultar Guía';
+      } else {
+        guideContent.classList.add('hidden');
+        toggleBtn.textContent = '▶ Ocultar Guía';
+      }
+    }
+  </script>
 </body>
 </html>

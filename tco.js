@@ -37,6 +37,8 @@ class TCOCalculator {
       if (btnShare) {
         btnShare.addEventListener('click', () => this.shareResults());
       }
+
+      
   
       // Auto-guardar valores al cambiar
       const inputs = document.querySelectorAll('input[type="number"]');
@@ -212,12 +214,20 @@ class TCOCalculator {
     mostrarResultados() {
       const r = this.resultados;
       
-      // Mostrar sección
+    // Mostrar sección
       document.getElementById('resultados-section').style.display = 'block';
-      
+
+      // Mostrar paneles de conclusiones e interpretación
+      const conclusionsPanel = document.getElementById('conclusions-panel');
+      const interpretationPanel = document.getElementById('interpretation-panel');
+      if (conclusionsPanel) conclusionsPanel.style.display = 'block';
+      if (interpretationPanel) interpretationPanel.style.display = 'block';
+
+      // Generar conclusiones automáticas
+      this.generarConclusiones();
+
       // Scroll suave
       document.getElementById('resultados-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  
       // Eléctrica
       document.getElementById('tco_total_electrica').textContent = this.formatMoney(r.electrica.tcoTotal);
       document.getElementById('compra_electrica').textContent = this.formatMoney(r.electrica.compra);
@@ -461,9 +471,169 @@ class TCOCalculator {
         });
       }
     }
-  }
+
+    // Generar conclusiones automáticas
+    generarConclusiones() {
+      if (!this.resultados) return;
   
-  // Inicializar al cargar la página
-  document.addEventListener('DOMContentLoaded', () => {
-    new TCOCalculator();
-  });
+      const { electrica, combustion, ahorro } = this.resultados;
+      const conclusionsContent = document.getElementById('conclusions-content');
+      
+      if (!conclusionsContent) return;
+  
+      let conclusiones = [];
+  
+      // Conclusión 1: Ahorro total
+      if (ahorro.total > 0) {
+        conclusiones.push({
+          type: 'positive',
+          text: `✅ La moto eléctrica genera un ahorro total de <strong>${this.formatCurrency(ahorro.total)}</strong> en ${this.getInputValue('años_uso')} años.`
+        });
+      } else {
+        conclusiones.push({
+          type: 'negative',
+          text: `⚠️ La moto de combustión resulta más económica por <strong>${this.formatCurrency(Math.abs(ahorro.total))}</strong> en este escenario.`
+        });
+      }
+  
+      // Conclusión 2: Punto de equilibrio
+      if (ahorro.breakEven <= this.getInputValue('años_uso')) {
+        conclusiones.push({
+          type: 'positive',
+          text: `⏱️ La inversión en la moto eléctrica se recupera en <strong>${ahorro.breakEven.toFixed(1)} años</strong>, antes del periodo de análisis.`
+        });
+      } else {
+        conclusiones.push({
+          type: 'neutral',
+          text: `⏱️ El punto de equilibrio se alcanza en <strong>${ahorro.breakEven.toFixed(1)} años</strong>, después del periodo analizado.`
+        });
+      }
+  
+      // Conclusión 3: Costo por km
+      const ahorroKm = combustion.costoKm - electrica.costoKm;
+      if (ahorroKm > 0) {
+        conclusiones.push({
+          type: 'positive',
+          text: `🛣️ Cada kilómetro recorrido en moto eléctrica ahorra <strong>${this.formatCurrency(ahorroKm)}</strong> vs. combustión.`
+        });
+      }
+  
+      // Conclusión 4: Mantenimiento
+      const ahorroMant = (combustion.mantenimientoTotal - electrica.mantenimientoTotal);
+      if (ahorroMant > 0) {
+        conclusiones.push({
+          type: 'positive',
+          text: `🔧 El mantenimiento de la moto eléctrica es <strong>${((ahorroMant / combustion.mantenimientoTotal) * 100).toFixed(0)}% más económico</strong>, ahorrando ${this.formatCurrency(ahorroMant)}.`
+        });
+      }
+  
+      // Conclusión 5: Energía
+      const ahorroEnergia = combustion.combustibleTotal - electrica.energiaTotal;
+      conclusiones.push({
+        type: 'positive',
+        text: `⚡ El costo de energía eléctrica es <strong>${((ahorroEnergia / combustion.combustibleTotal) * 100).toFixed(0)}% menor</strong> que la gasolina, ahorrando ${this.formatCurrency(ahorroEnergia)}.`
+      });
+  
+      // Renderizar conclusiones
+      conclusionsContent.innerHTML = conclusiones.map(c => `
+        <div class="conclusion-item ${c.type}">
+          ${c.text}
+        </div>
+      `).join('');
+  
+      // Actualizar interpretación visual
+      this.actualizarInterpretacion();
+    }
+  
+    // Actualizar indicadores visuales de interpretación
+    actualizarInterpretacion() {
+      if (!this.resultados) return;
+  
+      const { electrica, combustion, ahorro } = this.resultados;
+      const años = this.getInputValue('años_uso');
+  
+      // Indicador de ahorro
+      const maxAhorro = combustion.tcoTotal * 0.5; // 50% como máximo
+      const porcentajeAhorro = Math.min((ahorro.total / maxAhorro) * 100, 100);
+      document.getElementById('indicator-ahorro').style.width = `${porcentajeAhorro}%`;
+      
+      if (ahorro.total > 0) {
+        document.getElementById('interp-ahorro').innerHTML = `
+          <strong style="color: #10b981; font-size: 18px;">${this.formatCurrency(ahorro.total)}</strong><br>
+          <span style="font-size: 12px;">Ahorro significativo con moto eléctrica</span>
+        `;
+      } else {
+        document.getElementById('interp-ahorro').innerHTML = `
+          <strong style="color: #ef4444; font-size: 18px;">${this.formatCurrency(Math.abs(ahorro.total))}</strong><br>
+          <span style="font-size: 12px;">Combustión más económica en este caso</span>
+        `;
+      }
+  
+      // Indicador de punto de equilibrio
+      const porcentajeBreakeven = Math.min((años / ahorro.breakEven) * 100, 100);
+      document.getElementById('indicator-breakeven').style.width = `${porcentajeBreakeven}%`;
+      document.getElementById('interp-breakeven').innerHTML = `
+        <strong style="color: ${ahorro.breakEven <= años ? '#10b981' : '#ffc107'}; font-size: 18px;">${ahorro.breakEven.toFixed(1)} años</strong><br>
+        <span style="font-size: 12px;">${ahorro.breakEven <= años ? 'Se recupera la inversión' : 'Fuera del periodo'}</span>
+      `;
+  
+      // Indicador de ROI
+      const porcentajeROI = Math.min(ahorro.roi, 100);
+      document.getElementById('indicator-roi').style.width = `${porcentajeROI}%`;
+      document.getElementById('interp-roi').innerHTML = `
+        <strong style="color: ${ahorro.roi > 0 ? '#10b981' : '#ef4444'}; font-size: 18px;">${ahorro.roi.toFixed(1)}%</strong><br>
+        <span style="font-size: 12px;">${ahorro.roi > 20 ? 'Excelente retorno' : ahorro.roi > 0 ? 'Retorno positivo' : 'Sin retorno'}</span>
+      `;
+  
+      // Indicador de costo por km
+      const maxCostoKm = Math.max(electrica.costoKm, combustion.costoKm);
+      const porcentajeCostoKm = ((maxCostoKm - electrica.costoKm) / maxCostoKm) * 100;
+      document.getElementById('indicator-costokm').style.width = `${porcentajeCostoKm}%`;
+      document.getElementById('interp-costokm').innerHTML = `
+        <strong style="color: #10b981; font-size: 18px;">${this.formatCurrency(electrica.costoKm)}/km</strong><br>
+        <span style="font-size: 12px;">vs ${this.formatCurrency(combustion.costoKm)}/km combustión</span>
+      `;
+  
+      // Recomendación final
+      this.generarRecomendacion();
+    }
+  
+    // Generar recomendación personalizada
+    generarRecomendacion() {
+      if (!this.resultados) return;
+  
+      const { ahorro } = this.resultados;
+      const kmAnuales = this.getInputValue('km_anuales');
+      const recommendationBox = document.getElementById('recommendation-box');
+      const recommendationText = document.getElementById('recommendation-text');
+  
+      if (!recommendationText) return;
+  
+      let recomendacion = '';
+      let boxColor = '#10b981';
+  
+      if (ahorro.total > 50000 && ahorro.breakEven < 3) {
+        recomendacion = `<strong>¡Altamente recomendada!</strong> La moto eléctrica ofrece ahorros significativos (${this.formatCurrency(ahorro.total)}) y recuperas tu inversión en menos de 3 años. Ideal para tu perfil de uso de ${kmAnuales.toLocaleString()} km/año.`;
+        boxColor = '#10b981';
+      } else if (ahorro.total > 20000 && ahorro.breakEven < 5) {
+        recomendacion = `<strong>Recomendada.</strong> La moto eléctrica genera ahorros considerables (${this.formatCurrency(ahorro.total)}) con un punto de equilibrio razonable de ${ahorro.breakEven.toFixed(1)} años. Buena opción para uso regular.`;
+        boxColor = '#10b981';
+      } else if (ahorro.total > 0) {
+        recomendacion = `<strong>Viable a largo plazo.</strong> La moto eléctrica ahorra ${this.formatCurrency(ahorro.total)}, pero el retorno toma ${ahorro.breakEven.toFixed(1)} años. Considera si planeas mantener la moto por ese periodo.`;
+        boxColor = '#ffc107';
+      } else {
+        recomendacion = `<strong>Evaluar caso específico.</strong> En este escenario, la moto de combustión resulta más económica. Considera aumentar el kilometraje anual o revisar los costos de mantenimiento para una mejor comparación.`;
+        boxColor = '#ef4444';
+      }
+  
+      recommendationText.innerHTML = recomendacion;
+      recommendationBox.style.borderColor = boxColor;
+      recommendationBox.style.background = `${boxColor}15`;
+    }
+  } // <-- CIERRE DE LA CLASE TCOCalculator
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+  new TCOCalculator();
+});
+
