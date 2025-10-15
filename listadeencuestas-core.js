@@ -569,29 +569,39 @@
             const lineHeight = 24;
             const headerHeight = 60;
             
-            // Preparar campos a mostrar
-            const fields = [
-              { label: 'Encuestador', value: r.encuestador_id || 'N/A' },
-              { label: 'Fecha', value: fmtDate(r.ts) },
-              { label: 'Zona', value: r.zona || 'N/A' },
-              { label: 'Edad', value: r.edad || 'N/A' },
-              { label: 'Sexo', value: r.sexo || 'N/A' },
-              { label: 'Ocupación', value: r.ocupacion || 'N/A' },
-              { label: 'Intención (0-10)', value: r.intencion || 'N/A' },
-              { label: '¿Usa moto?', value: r.usaMoto || 'N/A' },
-              { label: 'Moto actual', value: r.moto_actual || 'N/A' },
-              { label: 'Uso principal', value: r.uso || 'N/A' },
-              { label: 'Frecuencia', value: r.frecuencia || 'N/A' },
-              { label: 'Km/día', value: r.km_dia || 'N/A' },
-              { label: 'Barreras', value: r.barreras || 'N/A' },
-              { label: 'Marca considerada', value: r.marca || 'N/A' },
-              { label: 'Awareness OMO', value: r.awareness_omo || 'N/A' },
-              { label: 'Favorabilidad OMO', value: r.favorabilidad_omo || 'N/A' },
-              { label: 'Horizonte de compra', value: r.horizonte || 'N/A' },
-              { label: 'Disposición a pagar', value: r.pago || 'N/A' },
-              { label: 'Financiamiento', value: r.financia || 'N/A' },
-              { label: 'Comentarios', value: r.comentarios || 'N/A' }
-            ];
+                        // Preparar campos a mostrar - TODOS los campos disponibles
+                        const allFields = [];
+            
+                        // Campos prioritarios primero
+                        const priorityFields = [
+                          { label: 'Encuestador', value: r.encuestador_id },
+                          { label: 'Fecha', value: fmtDate(r.ts) },
+                          { label: 'Zona', value: r.zona },
+                          { label: 'Edad', value: r.edad },
+                          { label: 'Sexo', value: r.sexo },
+                          { label: 'Ocupación', value: r.ocupacion },
+                          { label: 'Intención (0-10)', value: r.intencion }
+                        ];
+                        
+                        // Agregar todos los demás campos dinámicamente
+                        const excludeFields = ['_firestoreId', '_createdAt', '_createdBy', '_createdEmail', '_origin', 'image_proof_png', 'geo_lat', 'geo_lng', 'geo_accuracy', 'geo_error'];
+                        const fieldLabels = getFieldLabel; // Usar la función que ya existe
+                        
+                        Object.keys(r).forEach(key => {
+                          if (excludeFields.includes(key)) return;
+                          if (priorityFields.some(f => f.label.toLowerCase().includes(key.toLowerCase()))) return;
+                          
+                          const value = r[key];
+                          if (value !== null && value !== undefined && value !== '') {
+                            allFields.push({
+                              label: getFieldLabel(key),
+                              value: String(value).substring(0, 80) // Truncar valores largos
+                            });
+                          }
+                        });
+                        
+                        // Combinar campos prioritarios + resto
+                        const fields = [...priorityFields.filter(f => f.value), ...allFields];
             
             // Calcular altura necesaria
             const contentHeight = fields.length * lineHeight + headerHeight + padding * 3;
@@ -841,19 +851,14 @@
       return value.toString();
     }
 
-
-       // Abrir evidencia en modal estilo celular
+       // Abrir evidencia mostrando la encuesta completa con sus estilos
        window.openEvidence = async function(idx) {
         const r = state.filtered[idx];
         if (!r) return;
         
-        // Si no tiene imagen, generarla primero
-        if (!r.image_proof_png) {
-          await generateAndShowEvidence(idx);
-          return;
-        }
-        
         const wrap = document.getElementById('imageWrap');
+        
+        // Generar HTML de la encuesta completa con los datos llenados
         wrap.innerHTML = `
           <div class="phone-frame">
             <div class="phone-header">
@@ -865,25 +870,75 @@
               </div>
             </div>
             <div class="phone-content">
-              <img src="${r.image_proof_png}" alt="Evidencia de encuesta" />
+              <iframe id="survey-preview" style="width: 100%; height: 600px; border: none;"></iframe>
             </div>
             <div class="phone-footer">
               <div class="phone-button"></div>
             </div>
           </div>
+          <div class="evidence-metadata">
+            <div><strong>Encuestador:</strong> ${r.encuestador_id || '—'}</div>
+            <div><strong>Fecha:</strong> ${fmtDate(r.ts)}</div>
+            <div><strong>Ubicación:</strong> ${fmtGeo(r)}</div>
+            <div><strong>ID:</strong> ${r._firestoreId || '—'}</div>
+          </div>
         `;
+    
+        // Cargar encuesta.html en el iframe y llenar con datos
+        const iframe = document.getElementById('survey-preview');
+        iframe.onload = function() {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+          
+          // Llenar todos los campos del formulario con los datos
+          Object.keys(r).forEach(key => {
+            const value = r[key];
+            if (!value || key.startsWith('_') || key === 'image_proof_png') return;
+            
+            // Buscar el campo en el iframe
+            const field = iframeDoc.querySelector(`[name="${key}"]`);
+            if (!field) return;
+            
+            if (field.type === 'checkbox') {
+              // Para checkboxes múltiples
+              const values = String(value).split('|');
+              iframeDoc.querySelectorAll(`[name="${key}"]`).forEach(cb => {
+                if (values.includes(cb.value)) cb.checked = true;
+              });
+            } else if (field.type === 'radio') {
+              // Para radios
+              const radio = iframeDoc.querySelector(`[name="${key}"][value="${value}"]`);
+              if (radio) radio.checked = true;
+            } else {
+              // Para inputs normales, selects, textareas
+              field.value = value;
+            }
+          });
+          
+          // Deshabilitar todos los campos (solo lectura)
+          iframeDoc.querySelectorAll('input, select, textarea, button').forEach(el => {
+            el.disabled = true;
+            el.style.pointerEvents = 'none';
+          });
+          
+          // Agregar marca de agua
+          const watermark = iframeDoc.createElement('div');
+          watermark.style.cssText = 'position: fixed; top: 10px; right: 10px; background: rgba(102, 126, 234, 0.9); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 9999;';
+          watermark.textContent = '📋 EVIDENCIA - SOLO LECTURA';
+          iframeDoc.body.appendChild(watermark);
+        };
+        
+        iframe.src = 'encuesta.html';
     
         document.getElementById('img_encuestador').textContent = r.encuestador_id || '—';
         document.getElementById('img_fecha').textContent = fmtDate(r.ts);
-        document.getElementById('img_zona').textContent = r.zona || '—';
-        document.getElementById('img_lat').textContent = r.geo_lat ?? 'N/A';
-        document.getElementById('img_lng').textContent = r.geo_lng ?? 'N/A';
-        document.getElementById('img_acc').textContent = r.geo_accuracy 
-          ? `±${r.geo_accuracy}m` 
-          : 'N/A';
+        document.getElementById('img_geo').textContent = 
+          (r.geo_lat != null && r.geo_lng != null)
+            ? `${Number(r.geo_lat).toFixed(5)}, ${Number(r.geo_lng).toFixed(5)}${r.geo_accuracy != null ? ' ±' + Math.round(r.geo_accuracy) + 'm' : ''}`
+            : 'N/A';
     
         document.getElementById('imageModal').showModal();
       }
+    
       
       // Generar evidencia y mostrarla
       window.generateAndShowEvidence = async function(idx) {
