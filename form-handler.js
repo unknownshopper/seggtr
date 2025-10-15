@@ -412,61 +412,50 @@ const FormHandler = {
           geo_accuracy: row.geo_accuracy
         };
   
-        // 4) Generar imagen de evidencia
-        let imageDataUrl = null;
-        try {
-          imageDataUrl = await generateSurveyImage(formEncuestaEl, metadata);
-          let imageDataUrl = null;
-          try {
-            imageDataUrl = await generateSurveyImage(formEncuestaEl, metadata);
-          } catch (error) {
-            console.error('[FormHandler] Error generando imagen:', error);
-            imageDataUrl = null;
-          }
-  
-        console.log('[FormHandler] Datos finales antes de guardar:', {
-          encuestador_id: row.encuestador_id,
-          edad: row.edad,
-          zona: row.zona,
-          intencion: row.intencion,
-          tieneImagen: !!imageDataUrl
-        });
-
-                // 5) Verificar duplicados recientes
-                const isDuplicate = await checkRecentDuplicate(row.encuestador_id, row.ts);
-                if (isDuplicate) {
-                  if (!confirm('Ya registraste una encuesta hace menos de 5 minutos. ¿Deseas continuar de todas formas?')) {
-                    if (submitBtn) {
-                      submitBtn.disabled = false;
-                      submitBtn.textContent = originalText;
-                    }
-                    return;
-                  }
-                }
-        
-
-
-   
-        // 6) Guardar SOLO en Firestore (sin localStorage)
-        try {
-          if (!window.db) {
-            throw new Error('Firebase no disponible. Verifica tu conexión a internet.');
-          }
-          
-          // Permitir guardado sin autenticación para encuestadores
-          const usuario = window.fbAuth?.currentUser?.email || 'Anónimo (encuestador)';
-          console.log('[FormHandler] Guardando encuesta. Usuario:', usuario);
-          
-          const res = await saveSurveyToFirestore(row);
-          if (!res.ok) {
-            throw new Error(res.reason || 'Error al guardar en Firestore');
-          }
-          
-          console.log('[FormHandler] ✓ Encuesta guardada en Firestore exitosamente');
-        } catch (e) {
-          console.error('[FormHandler] Error crítico al guardar:', e.message);
-          throw e; // Re-lanzar para que el catch externo lo maneje
-        }
+               // 4) Generar imagen de evidencia
+               let imageDataUrl = null;
+               try {
+                 imageDataUrl = await generateSurveyImage(formEncuestaEl, metadata);
+               } catch (error) {
+                 console.error('[FormHandler] Error generando imagen:', error);
+                 imageDataUrl = null;
+               }
+       
+               console.log('[FormHandler] Datos finales antes de guardar:', {
+                 encuestador_id: row.encuestador_id,
+                 edad: row.edad,
+                 zona: row.zona,
+                 intencion: row.intencion,
+                 tieneImagen: !!imageDataUrl
+               });
+       
+               // 5) Verificar duplicados recientes
+               const isDuplicate = await checkRecentDuplicate(row.encuestador_id, row.ts);
+               if (isDuplicate) {
+                 if (!confirm('Ya registraste una encuesta hace menos de 5 minutos. ¿Deseas continuar de todas formas?')) {
+                   if (submitBtn) {
+                     submitBtn.disabled = false;
+                     submitBtn.textContent = originalText;
+                   }
+                   return;
+                 }
+               }
+       
+               // 6) Guardar SOLO en Firestore (sin localStorage)
+               if (!window.db) {
+                 throw new Error('Firebase no disponible. Verifica tu conexión a internet.');
+               }
+               
+               // Permitir guardado sin autenticación para encuestadores
+               const usuario = window.fbAuth?.currentUser?.email || 'Anónimo (encuestador)';
+               console.log('[FormHandler] Guardando encuesta. Usuario:', usuario);
+               
+               const res = await saveSurveyToFirestore(row);
+               if (!res.ok) {
+                 throw new Error(res.reason || 'Error al guardar en Firestore');
+               }
+               
+               console.log('[FormHandler] ✓ Encuesta guardada en Firestore exitosamente');
  
         
         
