@@ -310,32 +310,56 @@ const FormHandler = {
     const groups = new Map();
     const els = form.querySelectorAll('input, select, textarea');
     
+    console.log('[serializeForm] Total de elementos encontrados:', els.length);
+    
     els.forEach(el => {
-      const { name, type } = el;
-      if(!name) return;
-      if(type === 'checkbox') {
-        if(!groups.has(name)) groups.set(name, []);
-        if(el.checked) groups.get(name).push(el.value);
+      const { name, type, disabled } = el;
+      
+      // Ignorar elementos sin nombre o deshabilitados
+      if (!name || disabled) return;
+      
+      // Checkboxes: agrupar valores seleccionados
+      if (type === 'checkbox') {
+        if (!groups.has(name)) groups.set(name, []);
+        if (el.checked) groups.get(name).push(el.value);
         return;
       }
-      if(type === 'radio') {
-        if(el.checked) data[name] = el.value;
+      
+      // Radios: solo capturar el seleccionado
+      if (type === 'radio') {
+        if (el.checked) data[name] = el.value;
         return;
       }
+      
+      // Otros campos: capturar valor (incluso si está vacío)
       let val = el.value;
-      if(type === 'number') val = val === '' ? '' : Number(val);
+      
+      // Convertir números
+      if (type === 'number') {
+        val = val === '' ? null : Number(val);
+      }
+      
+      // Guardar valor (incluso si está vacío)
       data[name] = val;
     });
   
-    // Flatten checkbox groups
+    // Flatten checkbox groups (incluso si están vacíos)
     for (const [name, arr] of groups.entries()) {
-      data[name] = arr.join('|');
+      data[name] = arr.length > 0 ? arr.join('|') : '';
     }
+    
+    // Agregar checkboxes no marcados como string vacío
+    const allCheckboxNames = new Set();
+    form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      if (cb.name) allCheckboxNames.add(cb.name);
+    });
+    allCheckboxNames.forEach(name => {
+      if (!(name in data)) data[name] = '';
+    });
   
     // Add timestamp
     if (!('ts' in data)) data.ts = new Date().toISOString();
   
-    // >>> PEGAR AQUÍ (antes del return) <<<
     // Fijar encuestador desde sesión si el campo viene vacío
     if (!data.encuestador_id) {
       try {
@@ -345,7 +369,8 @@ const FormHandler = {
         }
       } catch (_) {}
     }
-    // >>> FIN DEL BLOQUE A PEGAR <<<
+    
+    console.log('[serializeForm] Campos capturados:', Object.keys(data).length);
   
     return data;
   },
@@ -396,7 +421,7 @@ const FormHandler = {
         console.log('[FormHandler] 📊 CAMPOS CAPTURADOS:');
         console.log('- Total de campos:', Object.keys(row).length);
         console.log('- Campos completos:', JSON.stringify(row, null, 2));
-        
+
         // 2) Capturar geolocalización
         const geo = await getGeolocation();
         row.geo_lat = geo.lat;
