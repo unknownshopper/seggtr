@@ -254,34 +254,31 @@ function enforceSurveyPermissions() {
 }
 
 async function saveSurveyToFirestore(row) {
-  console.log('[saveSurveyToFirestore] Inicio - db:', !!window.db, 'fbAuth:', !!window.fbAuth, 'currentUser:', window.fbAuth?.currentUser?.email || null);
+  console.log('[saveSurveyToFirestore] Inicio - db:', !!window.db, 'fbAuth:', !!window.fbAuth, 'currentUser:', window.fbAuth?.currentUser?.email || 'Anónimo');
   
   try {
-    if (!window.db || !window.fbAuth) return { ok: false, reason: 'no_firebase' };
+    if (!window.db) return { ok: false, reason: 'no_firebase' };
 
-    const user = window.fbAuth.currentUser;
-    console.log('[saveSurveyToFirestore] user tras leer:', user?.email || null, 'uid:', user?.uid || null);
-    
-    if (!user) return { ok: false, reason: 'no_auth' };
+    const user = window.fbAuth?.currentUser;
+    console.log('[saveSurveyToFirestore] user:', user?.email || 'Anónimo (encuestador)', 'uid:', user?.uid || 'N/A');
 
     // Colección donde guardaremos
     const col = window.db.collection('surveys');
 
-    // Puedes usar add (id autogenerado) o un id determinista por ts+encuestador
-    // Opción simple: add
+    // Payload con metadatos
     const payload = {
       ...row,
       _createdAt: new Date().toISOString(),
-      _createdBy: user.uid,
-      _createdEmail: user.email || null,
+      _createdBy: user?.uid || 'anonimo',
+      _createdEmail: user?.email || 'encuestador_anonimo',
       _origin: location.origin
     };
 
     await col.add(payload);
-    console.log('[Form] Guardado en Firestore OK:', payload._createdAt, 'user:', payload._createdBy, 'email:', payload._createdEmail);
+    console.log('[Form] ✅ Guardado en Firestore OK:', payload._createdAt, 'user:', payload._createdBy, 'email:', payload._createdEmail);
     return { ok: true };
   } catch (e) {
-    console.error('Firestore write error:', e);
+    console.error('❌ Firestore write error:', e);
     return { ok: false, reason: e?.message || 'error' };
   }
 }
@@ -439,9 +436,17 @@ const FormHandler = {
                    }
                    return;
                  }
-               }
+                }
        
-               // 6) Guardar SOLO en Firestore (sin localStorage)
+                // 6) Agregar imagen de evidencia al registro
+                if (imageDataUrl) {
+                  row.evidencia_imagen = imageDataUrl;
+                  console.log('[FormHandler] Imagen de evidencia agregada al registro');
+                } else {
+                  console.warn('[FormHandler] No se pudo generar imagen de evidencia');
+                }
+        
+                // 7) Guardar SOLO en Firestore (sin localStorage)
                if (!window.db) {
                  throw new Error('Firebase no disponible. Verifica tu conexión a internet.');
                }

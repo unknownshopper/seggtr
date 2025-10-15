@@ -110,3 +110,8 @@ function init() {
     }, { once: true });
   }
 }
+
+// Inicializar
+init();
+
+})(); // Cierre del IIFE setupRealtimeUpdates
