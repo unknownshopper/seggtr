@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dataset y Tabulados — Omomobility</title>
+  <meta name="description" content="Exportación de datos, tabulados cruzados y análisis estadístico de las encuestas de percepción." />
+  <link rel="icon" href="logcho.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="dataset.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <img class="logo" src="logcho.png" alt="Omomobility" onerror="this.onerror=null; this.src='logch.png'" />
+      <div>
+        <h1>Dataset y Tabulados</h1>
+        <p class="lead">Exportación de datos, análisis cruzado y reportes estadísticos de las encuestas</p>
+      </div>
+    </header>
+
+    <div class="actions no-print" style="margin: 12px 0;">
+      <a href="index.html" class="btn outline">← Inicio</a>
+    </div>
+
+    <!-- Panel de estadísticas generales -->
+    <div class="stats-panel">
+      <h2 class="section-title">📊 Resumen del Dataset</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div class="stat-value" id="total-surveys">0</div>
+          <div class="stat-label">Encuestas totales</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value" id="date-range">—</div>
+          <div class="stat-label">Rango de fechas</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-value" id="unique-zones">0</div>
+          <div class="stat-label">Zonas cubiertas</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-value" id="avg-intention">0.0</div>
+          <div class="stat-label">Intención promedio</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de exportación -->
+    <div class="export-section">
+      <h2 class="section-title">📤 Exportar Datos</h2>
+      <div class="export-grid">
+        <div class="export-card">
+          <div class="export-icon">📊</div>
+          <h3>CSV Completo</h3>
+          <p>Todas las encuestas con todos los campos en formato CSV para Excel/Sheets</p>
+          <button class="btn" id="btn-export-csv-full">Descargar CSV</button>
+        </div>
+
+        <div class="export-card">
+          <div class="export-icon">📈</div>
+          <h3>CSV Resumido</h3>
+          <p>Solo campos clave: edad, zona, ocupación, intención, barreras</p>
+          <button class="btn outline" id="btn-export-csv-summary">Descargar Resumido</button>
+        </div>
+
+        <div class="export-card">
+          <div class="export-icon">📋</div>
+          <h3>JSON</h3>
+          <p>Formato JSON para análisis programático o integración con APIs</p>
+          <button class="btn outline" id="btn-export-json">Descargar JSON</button>
+        </div>
+
+        <div class="export-card">
+            <div class="export-icon">📄</div>
+            <h3>Reporte PDF</h3>
+            <p>Documento ejecutivo con tabulados y gráficas principales</p>
+            <button class="btn" id="btn-preview-pdf">Vista Previa PDF</button>
+            <button class="btn outline" id="btn-export-pdf" style="margin-top: 8px;">Descargar PDF</button>
+          </div>
+      </div>
+    </div>
+
+    <!-- Sección de tabulados cruzados -->
+    <div class="tabulation-section">
+      <h2 class="section-title">📊 Tabulados Cruzados</h2>
+      <p class="section-description">
+        Análisis de relaciones entre variables clave. Selecciona dos variables para ver su distribución cruzada.
+      </p>
+
+      <div class="tabulation-controls">
+        <div class="control-group">
+          <label for="var-rows">Variable en filas:</label>
+          <select id="var-rows" class="select-control">
+            <option value="edad_grupo">Grupo de edad</option>
+            <option value="zona">Zona</option>
+            <option value="ocupacion">Ocupación</option>
+            <option value="sexo">Sexo</option>
+            <option value="ingreso">Ingreso mensual</option>
+            <option value="uso">Uso principal</option>
+            <option value="usaMoto">Usa moto actualmente</option>
+            <option value="intencion_grupo">Intención de compra (agrupada)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="var-cols">Variable en columnas:</label>
+          <select id="var-cols" class="select-control">
+            <option value="intencion_grupo" selected>Intención de compra (agrupada)</option>
+            <option value="edad_grupo">Grupo de edad</option>
+            <option value="zona">Zona</option>
+            <option value="ocupacion">Ocupación</option>
+            <option value="sexo">Sexo</option>
+            <option value="ingreso">Ingreso mensual</option>
+            <option value="uso">Uso principal</option>
+            <option value="usaMoto">Usa moto actualmente</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="display-mode">Mostrar:</label>
+          <select id="display-mode" class="select-control">
+            <option value="count">Frecuencias (n)</option>
+            <option value="percent-row">Porcentaje por fila (%)</option>
+            <option value="percent-col">Porcentaje por columna (%)</option>
+            <option value="percent-total">Porcentaje del total (%)</option>
+          </select>
+        </div>
+
+        <button class="btn" id="btn-generate-table">Generar Tabla</button>
+        <button class="btn outline" id="btn-export-table">Exportar Tabla</button>
+      </div>
+
+      <div id="tabulation-result" class="tabulation-result">
+        <p class="placeholder-text">Selecciona las variables y haz clic en "Generar Tabla" para ver el tabulado cruzado.</p>
+      </div>
+    </div>
+
+    <!-- Sección de análisis estadístico -->
+    <div class="statistics-section">
+      <h2 class="section-title">📈 Análisis Estadístico</h2>
+      
+      <div class="stats-tabs">
+        <button class="tab-btn active" data-tab="descriptive">Estadística Descriptiva</button>
+        <button class="tab-btn" data-tab="barriers">Análisis de Barreras</button>
+        <button class="tab-btn" data-tab="brands">Marcas Mencionadas</button>
+        <button class="tab-btn" data-tab="correlations">Correlaciones</button>
+      </div>
+
+      <div class="stats-content">
+        <!-- Tab: Estadística Descriptiva -->
+        <div class="tab-panel active" id="tab-descriptive">
+          <h3>Variables Numéricas</h3>
+          <div class="table-responsive">
+            <table class="stats-table" id="descriptive-table">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>n</th>
+                  <th>Media</th>
+                  <th>Mediana</th>
+                  <th>Desv. Est.</th>
+                  <th>Mín</th>
+                  <th>Máx</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Generado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top: 24px;">Variables Categóricas</h3>
+          <div class="table-responsive">
+            <table class="stats-table" id="categorical-table">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Categoría</th>
+                  <th>Frecuencia</th>
+                  <th>Porcentaje</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Generado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Análisis de Barreras -->
+        <div class="tab-panel" id="tab-barriers">
+          <h3>Barreras Principales (Frecuencia de Mención)</h3>
+          <div class="table-responsive">
+            <table class="stats-table" id="barriers-table">
+              <thead>
+                <tr>
+                  <th>Barrera</th>
+                  <th>Menciones</th>
+                  <th>% del Total</th>
+                  <th>Visualización</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Generado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Marcas Mencionadas -->
+        <div class="tab-panel" id="tab-brands">
+          <h3>Marcas Mencionadas (Top of Mind)</h3>
+          <div class="table-responsive">
+            <table class="stats-table" id="brands-table">
+              <thead>
+                <tr>
+                  <th>Marca</th>
+                  <th>Menciones Espontáneas</th>
+                  <th>Menciones Asistidas</th>
+                  <th>Total</th>
+                  <th>% Awareness</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Generado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Correlaciones -->
+        <div class="tab-panel" id="tab-correlations">
+          <h3>Matriz de Correlaciones (Variables Numéricas)</h3>
+          <p class="note">Coeficiente de correlación de Pearson entre variables numéricas clave</p>
+          <div class="table-responsive">
+            <table class="stats-table correlation-matrix" id="correlation-table">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Edad</th>
+                  <th>Intención</th>
+                  <th>Disp. Pagar</th>
+                  <th>Favorabilidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Generado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+          <div class="correlation-legend">
+            <span class="legend-item"><span class="color-box strong-positive"></span> Fuerte positiva (>0.7)</span>
+            <span class="legend-item"><span class="color-box moderate-positive"></span> Moderada positiva (0.3-0.7)</span>
+            <span class="legend-item"><span class="color-box weak"></span> Débil (-0.3 a 0.3)</span>
+            <span class="legend-item"><span class="color-box moderate-negative"></span> Moderada negativa (-0.7 a -0.3)</span>
+            <span class="legend-item"><span class="color-box strong-negative"></span> Fuerte negativa (<-0.7)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de filtros avanzados -->
+    <div class="filters-section">
+      <h2 class="section-title">🔍 Filtros Avanzados</h2>
+      <p class="section-description">Filtra el dataset antes de exportar o generar tabulados</p>
+      
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Rango de edad:</label>
+          <div class="range-inputs">
+            <input type="number" id="filter-edad-min" placeholder="Mín" min="15" max="80" />
+            <span>—</span>
+            <input type="number" id="filter-edad-max" placeholder="Máx" min="15" max="80" />
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label>Zona:</label>
+          <select id="filter-zona" class="select-control" multiple size="3">
+            <option value="">Todas las zonas</option>
+            <!-- Generado dinámicamente -->
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Ocupación:</label>
+          <select id="filter-ocupacion" class="select-control">
+            <option value="">Todas</option>
+            <option value="Estudiante">Estudiante</option>
+            <option value="Empleado">Empleado</option>
+            <option value="Independiente">Independiente</option>
+            <option value="Repartidor">Repartidor</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Intención mínima:</label>
+          <input type="number" id="filter-intencion-min" class="select-control" min="0" max="10" placeholder="0-10" />
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn" id="btn-apply-filters">Aplicar Filtros</button>
+        <button class="btn outline" id="btn-clear-filters">Limpiar Filtros</button>
+        <span id="filter-status" class="filter-status"></span>
+      </div>
+    </div>
+
+    <!-- Footer con información -->
+    <div class="info-section">
+      <h2 class="section-title">ℹ️ Información del Dataset</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <h4>Campos Disponibles</h4>
+          <ul class="field-list" id="fields-list">
+            <!-- Generado dinámicamente -->
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h4>Notas Metodológicas</h4>
+          <ul>
+            <li><strong>Agrupación de edad:</strong> 15-24, 25-34, 35-44, 45-54, 55+</li>
+            <li><strong>Intención agrupada:</strong> Baja (0-3), Media (4-6), Alta (7-10)</li>
+            <li><strong>Datos faltantes:</strong> Se muestran como "N/A" en las tablas</li>
+            <li><strong>Barreras:</strong> Campo de selección múltiple, cada barrera se cuenta independientemente</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h4>Formatos de Exportación</h4>
+          <ul>
+            <li><strong>CSV:</strong> Compatible con Excel, Google Sheets, SPSS</li>
+            <li><strong>JSON:</strong> Para análisis programático (Python, R, JavaScript)</li>
+            <li><strong>PDF:</strong> Reporte ejecutivo con gráficas y tabulados principales</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <a href="index.html" class="btn outline">← Volver al inicio</a>
+      <a href="listadeencuestas.html" class="btn">Ver lista de encuestas</a>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="auth.js"></script>
+  
+  <!-- Librerías para exportación -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  
+  <!-- Script principal -->
+  <script src="dataset.js"></script>
+</body>
+</html>
