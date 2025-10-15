@@ -1,8 +1,8 @@
 // Firebase config and initialization (compat)
 // This file assumes you loaded:
-//   - https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js
-//   - https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js
-//   - https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js
+//   - https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js
+//   - https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js
+//   - https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js
 
 const firebaseConfig = {
   apiKey: "AIzaSyDqULwMCZyzaYM3EN59WiOo_qLluaQAhDM",
@@ -22,7 +22,18 @@ window.db = firebase.firestore();
 
 // ===== CONFIGURACIÓN MEJORADA PARA REDUCIR ERRORES =====
 
-// 1. Habilitar persistencia offline (reduce errores de conexión)
+// 1. Configurar ajustes de Firestore PRIMERO (antes de cualquier operación)
+try {
+  window.db.settings({
+    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+    ignoreUndefinedProperties: true
+  });
+  console.log('[Firebase] ⚙️ Settings configurados');
+} catch (e) {
+  console.warn('[Firebase] Settings ya configurados');
+}
+
+// 2. Habilitar persistencia offline DESPUÉS de settings
 try {
   window.db.enablePersistence({ synchronizeTabs: true })
     .then(() => {
@@ -38,12 +49,6 @@ try {
 } catch (e) {
   console.warn('[Firebase] Persistencia ya habilitada o no disponible');
 }
-
-// 2. Configurar ajustes de Firestore para mejor rendimiento
-window.db.settings({
-  cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
-  ignoreUndefinedProperties: true
-});
 
 // 3. Estado de conexión global
 window.firebaseReady = false;
