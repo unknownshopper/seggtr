@@ -391,7 +391,12 @@ const FormHandler = {
         const row = this.serializeForm(e.target);
         console.log('[FormHandler] Datos serializados:', row);
         console.log('[FormHandler] Campos principales - edad:', row.edad, 'zona:', row.zona, 'intencion:', row.intencion);
-  
+        
+        // LOG DETALLADO: Ver TODOS los campos capturados
+        console.log('[FormHandler] 📊 CAMPOS CAPTURADOS:');
+        console.log('- Total de campos:', Object.keys(row).length);
+        console.log('- Campos completos:', JSON.stringify(row, null, 2));
+        
         // 2) Capturar geolocalización
         const geo = await getGeolocation();
         row.geo_lat = geo.lat;
@@ -439,8 +444,9 @@ const FormHandler = {
                 }
        
                 // 6) Agregar imagen de evidencia al registro
+                
                 if (imageDataUrl) {
-                  row.evidencia_imagen = imageDataUrl;
+                  row.image_proof_png = imageDataUrl;
                   console.log('[FormHandler] Imagen de evidencia agregada al registro');
                 } else {
                   console.warn('[FormHandler] No se pudo generar imagen de evidencia');
