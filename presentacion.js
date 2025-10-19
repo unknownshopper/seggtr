@@ -2,7 +2,7 @@
 class PresentacionManager {
     constructor() {
       this.currentSlide = 1;
-      this.totalSlides = 10;
+      this.totalSlides = 0; // será calculado dinámicamente
       this.charts = {};
       this.data = [];
       this.init();
@@ -11,6 +11,8 @@ class PresentacionManager {
 
     async init() {
         await this.loadData(); // Esperar a que carguen los datos
+        this.computeTotalSlides();
+        this.updateTotalCountersUI();
         this.setupNavigation();
         this.setupKeyboardNav();
         this.updateProgressDots();
@@ -144,28 +146,37 @@ class PresentacionManager {
   
     // Mostrar slide específico
     showSlide(slideNumber) {
+      // Recalcular total por si el DOM cambió
+      this.computeTotalSlides();
+      this.updateTotalCountersUI();
+
+      // Limitar slideNumber al rango válido
+      if (slideNumber < 1) slideNumber = 1;
+      if (slideNumber > this.totalSlides) slideNumber = this.totalSlides;
+      this.currentSlide = slideNumber;
+
       // Ocultar todos los slides
       document.querySelectorAll('.slide').forEach(slide => {
         slide.classList.remove('active');
       });
-  
+
       // Mostrar slide actual
       const targetSlide = document.querySelector(`.slide[data-slide="${slideNumber}"]`);
       if (targetSlide) {
         targetSlide.classList.add('active');
       }
-  
+
       // Actualizar contadores
       document.querySelectorAll('.slide-counter .current').forEach(el => {
         el.textContent = slideNumber;
       });
-  
+
       // Actualizar botones
       this.updateNavButtons();
-  
+
       // Actualizar progress dots
       this.updateProgressDots();
-  
+
       // Renderizar contenido del slide
       this.renderCurrentSlide();
     }
@@ -198,6 +209,19 @@ class PresentacionManager {
         }
       });
     }
+
+    // Calcular total de slides desde el DOM
+    computeTotalSlides() {
+      const slides = document.querySelectorAll('.slide');
+      this.totalSlides = slides ? slides.length : 0;
+    }
+
+    // Actualizar el número total en los contadores UI
+    updateTotalCountersUI() {
+      document.querySelectorAll('.slide-counter .total').forEach(el => {
+        el.textContent = this.totalSlides;
+      });
+    }
   
     // Establecer fecha actual
     setDate() {
@@ -227,6 +251,20 @@ class PresentacionManager {
         case 7:
           this.renderBarreras();
           break;
+        // Contenidos reordenados
+        case 8:
+          this.renderZonasTop();
+          break;
+        case 9:
+          this.renderIntencionPorZona();
+          break;
+        case 10:
+          this.renderAwarenessYFavorabilidad();
+          break;
+        case 12:
+          this.renderRecomendacionesClave();
+          break;
+        // 15 es "Cierre" y no requiere render específico
       }
     }
   
@@ -522,17 +560,173 @@ class PresentacionManager {
       }
     });
   }
-  
-    // Pantalla completa
-    static toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-          console.log('Error al entrar en pantalla completa:', err);
+
+  // Slide 10: Zonas con mayor cobertura
+  renderZonasTop() {
+    const ctx = document.getElementById('chart-zonas-top');
+    if (!ctx || this.data.length === 0) return;
+
+    if (this.charts.zonasTop) {
+      this.charts.zonasTop.destroy();
+    }
+
+    const zonaCounts = {};
+    this.data.forEach(d => {
+      const zona = d.zona || 'Sin especificar';
+      zonaCounts[zona] = (zonaCounts[zona] || 0) + 1;
+    });
+
+    const sorted = Object.entries(zonaCounts).sort((a,b) => b[1]-a[1]).slice(0, 10);
+
+    this.charts.zonasTop = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: sorted.map(s => s[0]),
+        datasets: [{
+          label: 'Encuestas',
+          data: sorted.map(s => s[1]),
+          backgroundColor: '#2563eb'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: 'Top Zonas por número de encuestas' }
+        },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+  }
+
+
+  // Slide 12: Intención por Zona
+  renderIntencionPorZona() {
+    const ctx = document.getElementById('chart-intencion-zona');
+    if (!ctx || this.data.length === 0) return;
+
+    if (this.charts.intencionZona) {
+      this.charts.intencionZona.destroy();
+    }
+
+    const acumulados = {};
+    const cantidades = {};
+    this.data.forEach(d => {
+      const zona = d.zona || 'Sin especificar';
+      const int = parseFloat(d.intencion);
+      if (!isNaN(int)) {
+        acumulados[zona] = (acumulados[zona] || 0) + int;
+        cantidades[zona] = (cantidades[zona] || 0) + 1;
+      }
+    });
+
+    const zonas = Object.keys(acumulados);
+    const promedios = zonas.map(z => acumulados[z] / (cantidades[z] || 1));
+
+    this.charts.intencionZona = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: zonas,
+        datasets: [{
+          label: 'Intención promedio (0–10)',
+          data: promedios,
+          backgroundColor: '#8b5cf6'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: 'Intención promedio por zona' }
+        },
+        scales: { y: { beginAtZero: true, suggestedMax: 10 } }
+      }
+    });
+  }
+
+  // Slide 13: Awareness y Favorabilidad
+  renderAwarenessYFavorabilidad() {
+    const ctxAw = document.getElementById('chart-awareness-pres');
+    const ctxFav = document.getElementById('chart-favorabilidad');
+
+    // Awareness (conoce_marca)
+    if (ctxAw) {
+      if (this.charts.awarenessPres) this.charts.awarenessPres.destroy();
+      const counts = { 'Sí': 0, 'No': 0 };
+      this.data.forEach(d => {
+        const v = (d.conoce_marca || '').toString().toLowerCase();
+        if (v === 'si' || v === 'sí' || v === 'true' || v === '1') counts['Sí']++;
+        else counts['No']++;
+      });
+      this.charts.awarenessPres = new Chart(ctxAw, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(counts),
+          datasets: [{ data: Object.values(counts), backgroundColor: ['#10b981', '#ef4444'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+
+    // Favorabilidad (si no existe un campo específico, ocultamos la tarjeta)
+    if (ctxFav) {
+      const favCard = ctxFav.closest('.chart-card');
+      if (this.charts.favorabilidad) this.charts.favorabilidad.destroy();
+      const favFieldCandidates = ['favorabilidad', 'percepcion_marca', 'favor'];
+      let hasField = false;
+      for (const c of favFieldCandidates) {
+        if (this.data.some(d => d[c] !== undefined && d[c] !== null && d[c] !== '')) { hasField = c; break; }
+      }
+      if (hasField) {
+        if (favCard) favCard.style.display = '';
+        const counts = {};
+        this.data.forEach(d => {
+          const key = (d[hasField] || 'Sin dato').toString();
+          counts[key] = (counts[key] || 0) + 1;
+        });
+        this.charts.favorabilidad = new Chart(ctxFav, {
+          type: 'bar',
+          data: { labels: Object.keys(counts), datasets: [{ label: 'Respuestas', data: Object.values(counts), backgroundColor: '#f59e0b' }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
       } else {
-        document.exitFullscreen();
+        if (favCard) favCard.style.display = 'none';
+        console.warn('[Presentación] Campo de favorabilidad no encontrado en datos; ocultando tarjeta');
       }
     }
+  }
+
+  // Slide 14: Recomendaciones Clave
+  renderRecomendacionesClave() {
+    const list = document.getElementById('reco-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const total = this.data.length;
+
+    const recomendaciones = [
+      'Priorizar zonas con mayor densidad de encuestas y alta intención promedio',
+      'Comunicar ahorro operativo y sustentabilidad como ejes de marketing',
+      'Diseñar plan de financiamiento accesible (12–24 meses)',
+      'Asegurar red de servicio y puntos de carga en zonas prioritarias',
+      'Programa piloto con 20–30 unidades y medición mensual de KPIs'
+    ];
+
+    recomendaciones.forEach(txt => {
+      const li = document.createElement('li');
+      li.textContent = txt;
+      list.appendChild(li);
+    });
+
+    const footer = document.createElement('p');
+    footer.style.marginTop = '12px';
+    footer.style.color = 'var(--muted)';
+    footer.style.fontSize = '13px';
+    footer.textContent = `Base de datos analizada: ${total} encuestas`;
+    list.parentElement.appendChild(footer);
+  }
   
     // Métodos estáticos para llamar desde HTML
     static nextSlide() {
@@ -540,14 +734,23 @@ class PresentacionManager {
         window.presentacionInstance.nextSlide();
       }
     }
-  
+
     static prevSlide() {
       if (window.presentacionInstance) {
         window.presentacionInstance.prevSlide();
       }
     }
+
+    static toggleFullscreen() {
+      const docEl = document.documentElement;
+      if (!document.fullscreenElement) {
+        if (docEl.requestFullscreen) docEl.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
   }
-  
+
   // Inicializar al cargar la página
   document.addEventListener('DOMContentLoaded', () => {
     window.presentacionInstance = new PresentacionManager();

@@ -39,7 +39,7 @@
       
       <div class="slide-nav">
         <button class="nav-btn" onclick="PresentacionManager.prevSlide()" disabled>← Anterior</button>
-        <span class="slide-counter"><span class="current">1</span> / <span class="total">10</span></span>
+        <span class="slide-counter"><span class="current">1</span> / <span class="total">15</span></span>
         <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
       </div>
     </div>
@@ -228,6 +228,9 @@
         <div class="chart-container">
           <canvas id="chart-barreras"></canvas>
         </div>
+        <p id="nota-barreras" style="margin-top:12px; margin-bottom:80px; color: var(--muted); font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; word-break: break-word; max-width: 100%;">
+          Nota: Algunas etiquetas aparecen combinadas con '/' porque el encuestado mencionó varias barreras a la vez. Por ejemplo: "precio/autonomía" indica costo y alcance por carga; "autonomía/rendimiento" indica alcance y desempeño; "precio/rendimiento" indica costo y desempeño; y "precio/autonomía/rendimiento" incluye las tres. Cuando aparece solo "precio", se refiere al costo (inicial o total percibido).
+        </p>
       </div>
 
       <div class="slide-nav">
@@ -237,121 +240,223 @@
       </div>
     </div>
 
-    <!-- Slide 8: Recomendaciones -->
-    <div class="slide" data-slide="8">
-      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
-      <div class="progress-dots"></div>
-      
-      <div class="slide-header">
-        <img src="logch.png" alt="Logo" class="slide-logo">
-        <div class="slide-title">
-          <h1>Recomendaciones Estratégicas</h1>
-          <p>Plan de entrada al mercado</p>
+
+
+    <!-- Slide 8: Zonas Top -->
+  <div class="slide" data-slide="8">
+    <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+    <div class="progress-dots"></div>
+    <div class="slide-header">
+      <img src="logch.png" alt="Logo" class="slide-logo">
+      <div class="slide-title">
+        <h1>Zonas con mayor cobertura</h1>
+        <p>Top de zonas por número de encuestas</p>
+      </div>
+    </div>
+    <div class="slide-content">
+      <div class="chart-container">
+        <canvas id="chart-zonas-top"></canvas>
+      </div>
+    </div>
+    <div class="slide-nav">
+      <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+      <span class="slide-counter"><span class="current">8</span> / <span class="total">14</span></span>
+      <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+    </div>
+  </div>
+
+
+  <!-- Slide 9: Intención por Zona -->
+  <div class="slide" data-slide="9">
+    <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+    <div class="progress-dots"></div>
+    <div class="slide-header">
+      <img src="logch.png" alt="Logo" class="slide-logo">
+      <div class="slide-title">
+        <h1>Intención por Zona</h1>
+        <p>Promedio de intención (0–10) por zona</p>
+      </div>
+    </div>
+    <div class="slide-content">
+      <div class="chart-container">
+        <canvas id="chart-intencion-zona"></canvas>
+      </div>
+    </div>
+    <div class="slide-nav">
+      <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+      <span class="slide-counter"><span class="current">9</span> / <span class="total">14</span></span>
+      <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- Slide 10: Awareness y Favorabilidad -->
+  <div class="slide" data-slide="10">
+    <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+    <div class="progress-dots"></div>
+    <div class="slide-header">
+      <img src="logch.png" alt="Logo" class="slide-logo">
+      <div class="slide-title">
+        <h1>Awareness y Favorabilidad</h1>
+        <p>Conocimiento y percepción de Omomobility</p>
+      </div>
+    </div>
+    <div class="slide-content">
+      <p style="margin-bottom:12px; color: var(--muted); font-size: 14px; line-height: 1.5;">
+        Awareness significa el nivel de conocimiento de marca: qué porcentaje de personas declara conocer Omomobility.
+      </p>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Awareness</h3>
+          <canvas id="chart-awareness-pres"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Favorabilidad</h3>
+          <canvas id="chart-favorabilidad"></canvas>
         </div>
       </div>
-      
-      <div class="slide-content">
-        <ul class="content-list">
-          <li><strong>Fase Piloto:</strong> Lanzar con 20-30 unidades en zonas de alto tráfico</li>
-          <li><strong>Alianzas:</strong> Establecer red de servicio y puntos de carga</li>
-          <li><strong>Financiamiento:</strong> Ofrecer esquemas accesibles (12-24 meses)</li>
-          <li><strong>Marketing:</strong> Enfocarse en ahorro operativo y sustentabilidad</li>
-          <li><strong>Servicio:</strong> Garantía extendida y mantenimiento incluido primer año</li>
-        </ul>
-      </div>
+    </div>
+    <div class="slide-nav">
+      <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+      <span class="slide-counter"><span class="current">10</span> / <span class="total">14</span></span>
+      <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+    </div>
+  </div>
 
-      <div class="slide-nav">
-        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
-        <span class="slide-counter"><span class="current">8</span> / <span class="total">10</span></span>
-        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+  <!-- Slide 11: Recomendaciones Estratégicas -->
+  <div class="slide" data-slide="11">
+    <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+    <div class="progress-dots"></div>
+    
+    <div class="slide-header">
+      <img src="logch.png" alt="Logo" class="slide-logo">
+      <div class="slide-title">
+        <h1>Recomendaciones Estratégicas</h1>
+        <p>Plan de entrada al mercado</p>
+      </div>
+    </div>
+    
+    <div class="slide-content">
+      <ul class="content-list">
+        <li><strong>Fase Piloto:</strong> Lanzar con 20-30 unidades en zonas de alto tráfico</li>
+        <li><strong>Alianzas:</strong> Establecer red de servicio y puntos de carga</li>
+        <li><strong>Financiamiento:</strong> Ofrecer esquemas accesibles (12–24 meses)</li>
+        <li><strong>Marketing:</strong> Enfocarse en ahorro operativo y sustentabilidad</li>
+        <li><strong>Servicio:</strong> Garantía extendida y mantenimiento incluido primer año</li>
+      </ul>
+    </div>
+
+    <div class="slide-nav">
+      <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+      <span class="slide-counter"><span class="current">11</span> / <span class="total">14</span></span>
+      <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- Slide 13: Roadmap -->
+  <div class="slide" data-slide="13">
+    <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+    <div class="progress-dots"></div>
+    
+    <div class="slide-header">
+      <img src="logch.png" alt="Logo" class="slide-logo">
+      <div class="slide-title">
+        <h1>Roadmap de Implementación</h1>
+        <p>Cronograma de actividades</p>
+      </div>
+    </div>
+    
+    <div class="slide-content">
+      <table>
+        <thead>
+          <tr>
+            <th>Fase</th>
+            <th>Actividades</th>
+            <th>Duración</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Q1 2025</strong></td>
+            <td>Preparación: alianzas, logística, inventario inicial</td>
+            <td>3 meses</td>
+          </tr>
+          <tr>
+            <td><strong>Q2 2025</strong></td>
+            <td>Lanzamiento piloto: 20-30 unidades, campaña digital</td>
+            <td>3 meses</td>
+          </tr>
+          <tr>
+            <td><strong>Q3 2025</strong></td>
+            <td>Expansión: incrementar inventario, abrir puntos de venta</td>
+            <td>3 meses</td>
+          </tr>
+          <tr>
+            <td><strong>Q4 2025</strong></td>
+            <td>Consolidación: optimizar operaciones, escalar marketing</td>
+            <td>3 meses</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="slide-nav">
+      <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+      <span class="slide-counter"><span class="current">13</span> / <span class="total">14</span></span>
+      <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- Slide 12: Recomendaciones Clave -->
+  <div class="slide" data-slide="12">
+    <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+    <div class="progress-dots"></div>
+    <div class="slide-header">
+      <img src="logch.png" alt="Logo" class="slide-logo">
+      <div class="slide-title">
+        <h1>Recomendaciones Clave</h1>
+        <p>Acciones priorizadas a partir de los hallazgos</p>
+      </div>
+    </div>
+    <div class="slide-content">
+      <div id="reco-list" class="content-list"></div>
+    </div>
+    <div class="slide-nav">
+      <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+      <span class="slide-counter"><span class="current">12</span> / <span class="total">14</span></span>
+      <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- Slide 14: Cierre -->
+  <div class="slide" data-slide="14">
+    <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
+    <div class="progress-dots"></div>
+    
+    <div class="slide-header cover">
+      <img src="logch.png" alt="Logo" class="slide-logo">
+      <h1>¡Gracias!</h1>
+      <h2>¿Preguntas?</h2>
+      <div class="cover-info">
+        <div>
+          <strong>Contacto</strong>
+          <span>The Unknown Shopper</span>
+        </div>
+        <div>
+          <strong>Email</strong>
+          <span>the@unknownshoppers.com</span>
+        </div>
       </div>
     </div>
 
-    <!-- Slide 9: Roadmap -->
-    <div class="slide" data-slide="9">
-      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
-      <div class="progress-dots"></div>
-      
-      <div class="slide-header">
-        <img src="logch.png" alt="Logo" class="slide-logo">
-        <div class="slide-title">
-          <h1>Roadmap de Implementación</h1>
-          <p>Cronograma de actividades</p>
-        </div>
-      </div>
-      
-      <div class="slide-content">
-        <table>
-          <thead>
-            <tr>
-              <th>Fase</th>
-              <th>Actividades</th>
-              <th>Duración</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Q1 2025</strong></td>
-              <td>Preparación: alianzas, logística, inventario inicial</td>
-              <td>3 meses</td>
-            </tr>
-            <tr>
-              <td><strong>Q2 2025</strong></td>
-              <td>Lanzamiento piloto: 20-30 unidades, campaña digital</td>
-              <td>3 meses</td>
-            </tr>
-            <tr>
-              <td><strong>Q3 2025</strong></td>
-              <td>Expansión: incrementar inventario, abrir puntos de venta</td>
-              <td>3 meses</td>
-            </tr>
-            <tr>
-              <td><strong>Q4 2025</strong></td>
-              <td>Consolidación: optimizar operaciones, escalar marketing</td>
-              <td>3 meses</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="slide-nav">
-        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
-        <span class="slide-counter"><span class="current">9</span> / <span class="total">10</span></span>
-        <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
-      </div>
-    </div>
-
-    <!-- Slide 10: Cierre -->
-    <div class="slide" data-slide="10">
-      <button class="exit-btn" onclick="window.location.href='index.html'">← Salir</button>
-      <div class="progress-dots"></div>
-      
-      <div class="slide-header cover">
-        <img src="logch.png" alt="Logo" class="slide-logo">
-        <h1>¡Gracias!</h1>
-        <h2>¿Preguntas?</h2>
-        <div class="cover-info">
-          <div>
-            <strong>Contacto</strong>
-            <span>The Unknown Shopper</span>
-          </div>
-          <div>
-            <strong>Email</strong>
-            <span>the@unknownshoppers.com</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="slide-nav">
-        <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
-        <span class="slide-counter"><span class="current">10</span> / <span class="total">10</span></span>
-        <button class="nav-btn" onclick="PresentacionManager.nextSlide()" disabled>Siguiente →</button>
-      </div>
+    <div class="slide-nav">
+      <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
+      <span class="slide-counter"><span class="current">14</span> / <span class="total">14</span></span>
+      <button class="nav-btn" onclick="PresentacionManager.nextSlide()" disabled>Siguiente →</button>
     </div>
   </div>
 
   <footer>
-    <p>© 2025 The Unknown Shopper. Todos los derechos reservados.</p>
+    <p> 2025 The Unknown Shopper. Todos los derechos reservados.</p>
   </footer>
 
    <!-- Scripts -->
