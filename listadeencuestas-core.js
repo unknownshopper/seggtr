@@ -939,7 +939,7 @@
         document.getElementById('imageModal').showModal();
       }
     
-      
+       
       // Generar evidencia y mostrarla
       window.generateAndShowEvidence = async function(idx) {
         const r = state.filtered[idx];
