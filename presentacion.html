@@ -20,11 +20,11 @@
       <div class="slide-header cover">
         <img src="logch.png" alt="Logo" class="slide-logo">
         <h1>Estudio de Mercado</h1>
-        <h2>Omomobility • Villahermosa, Tabasco</h2>
+        <h2>Omo Mobility • Villahermosa, Tabasco</h2>
         <div class="cover-info">
           <div>
             <strong>Cliente</strong>
-            <span>Omomobility</span>
+            <span>Omo Mobility</span>
           </div>
           <div>
             <strong>Consultor</strong>
@@ -39,7 +39,7 @@
       
       <div class="slide-nav">
         <button class="nav-btn" onclick="PresentacionManager.prevSlide()" disabled>← Anterior</button>
-        <span class="slide-counter"><span class="current">1</span> / <span class="total">15</span></span>
+        <span class="slide-counter"><span class="current">1</span> / <span class="total">--</span></span>
         <button class="nav-btn" onclick="PresentacionManager.nextSlide()">Siguiente →</button>
       </div>
     </div>
@@ -304,7 +304,7 @@
       <p style="margin-bottom:12px; color: var(--muted); font-size: 14px; line-height: 1.5;">
         Awareness significa el nivel de conocimiento de marca: qué porcentaje de personas declara conocer Omomobility.
       </p>
-      <div class="chart-grid">
+      <div class="chart-grid" style="grid-template-columns: repeat(3, 1fr);">
         <div class="chart-card">
           <h3>Awareness</h3>
           <canvas id="chart-awareness-pres"></canvas>
@@ -312,6 +312,10 @@
         <div class="chart-card">
           <h3>Favorabilidad</h3>
           <canvas id="chart-favorabilidad"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Top 5 Zonas con Mayor Intención</h3>
+          <canvas id="chart-top-intencion-zonas"></canvas>
         </div>
       </div>
     </div>
@@ -451,6 +455,7 @@
     <div class="slide-nav">
       <button class="nav-btn" onclick="PresentacionManager.prevSlide()">← Anterior</button>
       <span class="slide-counter"><span class="current">14</span> / <span class="total">14</span></span>
+      <button class="nav-btn" type="button" onclick="window.print()">Descargar PDF</button>
       <button class="nav-btn" onclick="PresentacionManager.nextSlide()" disabled>Siguiente →</button>
     </div>
   </div>
@@ -466,5 +471,5 @@
    <script src="firebase-config.js"></script>
    <script src="auth.js"></script>
    <script src="presentacion.js"></script>
- </body>
- </html>
+  </body>
+  </html>

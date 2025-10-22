@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Omomobility • Recibido de conformidad</title>
+  <meta name="description" content="Aceptación de conformidad del cliente: datos básicos, resumen, firma y resguardo." />
+  <link rel="icon" href="logcho.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="recibido.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <img class="logo" src="logcho.png" alt="The Unknown Shopper — logotipo" onerror="this.onerror=null; this.src='logch.png'" />
+      <div class="titles">
+        <h1>Recibido de conformidad</h1>
+        <p>Confirmación del cliente sobre observaciones y plan propuesto.</p>
+      </div>
+      <div class="meta">
+        <div><strong>Fecha:</strong> <span id="today">--/--/----</span></div>
+      </div>
+    </header>
+
+    <div class="actions no-print" style="margin: 12px 0;">
+      <a href="index.html" class="btn outline">← Inicio</a>
+      <button id="btn-print" class="btn outline" type="button">Imprimir / PDF</button>
+    </div>
+
+    <main class="page">
+      <h2 class="section-title">Datos del cliente</h2>
+      <form id="recibidoForm" class="card" autocomplete="on">
+        <div class="row">
+          <div>
+            <label for="cliente">Nombre del cliente</label>
+            <input id="cliente" name="cliente" type="text" placeholder="Nombre y apellidos" value="Oswaldo J Domínguez Baeza" required />
+          </div>
+          <div>
+            <label for="empresa">Empresa (opcional)</label>
+            <input id="empresa" name="empresa" type="text" placeholder="Empresa" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="correo">Correo</label>
+            <input id="correo" name="correo" type="email" placeholder="correo@dominio.com" required />
+          </div>
+          <div>
+            <label for="telefono">Teléfono (opcional)</label>
+            <input id="telefono" name="telefono" type="tel" placeholder="10 dígitos" />
+          </div>
+        </div>
+
+        <h2 class="section-title">Resumen a aceptar</h2>
+        <div class="notice">
+          <ul class="nice">
+            <li>El cliente recibió las observaciones del documento <strong>Observaciones (Villahermosa)</strong>.</li>
+            <li>Este estudio se entrega a <strong>Oswaldo J Domínguez Baeza</strong>, quien busca invertir en Villahermosa abriendo una tienda de motos y baterías eléctricas.</li>
+            <li>Entiende el plan por fases: validación con pruebas, pilotos (20–30 unidades operadas por repartidores/comercios) y escalamiento.</li>
+            <li>Quedan claros los riesgos principales y las métricas de seguimiento.</li>
+          </ul>
+        </div>
+
+        <label class="accept">
+          <input id="acepto" type="checkbox" required />
+          Acepto de conformidad el contenido anterior y autorizo seguimiento.
+        </label>
+
+        <h2 class="section-title">Firma del cliente</h2>
+        <div class="signature card">
+          <div class="sig-head">
+            <span>Firme en el recuadro</span>
+            <div class="sig-actions">
+              <button type="button" id="sig-clear" class="btn outline">Limpiar</button>
+            </div>
+          </div>
+          <div class="sig-pad">
+            <canvas id="sig-canvas" width="700" height="220" aria-label="Área de firma"></canvas>
+          </div>
+          <div class="sig-footer">
+            <div class="sig-line">
+              <span class="sig-name" id="sig-name">______________________________</span>
+            </div>
+            <small>Nombre del cliente</small>
+          </div>
+        </div>
+
+        <div class="actions no-print">
+          <button id="btn-guardar" type="submit" class="btn">Guardar recibido</button>
+          <button id="btn-descargar" type="button" class="btn outline">Descargar respaldo</button>
+        </div>
+      </form>
+    </main>
+
+    <footer class="footer">
+      <div>Proyecto • The Unknown Shopper</div>
+      <div id="generated">--/--/----</div>
+    </footer>
+  </div>
+
+  <script src="recibido.js"></script>
+</body>
+</html>

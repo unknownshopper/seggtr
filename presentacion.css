@@ -30,19 +30,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px;
+    padding: 0; /* ocupar todo el espacio, sin marco */
   }
   
   /* Slide */
   .slide {
     background: white;
-    width: 100%;
-    max-width: 1200px;
-    height: 100%;
-    max-height: 675px;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    padding: 60px 80px;
+    width: 100vw; /* ocupar ancho total */
+    height: 100vh; /* ocupar alto total */
+    border-radius: 0; /* sin bordes redondeados para fullscreen */
+    box-shadow: none; /* sin sombra en modo fullscreen */
+    padding: 40px 56px; /* margen interno razonable */
     display: none;
     flex-direction: column;
     position: relative;
@@ -162,6 +160,7 @@
     flex: 1;
     overflow-y: auto;
     padding-right: 10px;
+    min-height: 0; /* evita que empuje elementos como el footer */
   }
   
   .slide-content::-webkit-scrollbar {
@@ -263,6 +262,8 @@
   .chart-card canvas {
     max-height: 250px;
   }
+  
+  footer { display: none; }
   
   /* Tabla */
   table {
@@ -425,13 +426,12 @@
   /* Responsive */
   @media (max-width: 768px) {
     .presentation-container {
-      padding: 20px;
+      padding: 0;
     }
   
     .slide {
-      padding: 40px 30px;
-      max-height: none;
-      height: auto;
+      padding: 28px 20px;
+      height: 100vh; /* también fullscreen en móvil */
     }
   
     .slide-title h1 {
@@ -489,14 +489,62 @@
   
   /* Animaciones adicionales */
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   
-  .slide-content {
-    animation: fadeIn 0.3s ease 0.2s both;
+  .slide-content { animation: fadeIn 0.3s ease 0.2s both; }
+  
+  /* Print: exportar toda la presentación */
+  @media print {
+    @page { size: A4 landscape; margin: 10mm; }
+    html, body { height: auto !important; overflow: visible !important; background: #fff !important; margin: 0 !important; }
+    .presentation-container { height: auto !important; padding: 0 !important; display: block !important; }
+    /* Mostrar TODOS los slides en una página c/u, sin márgenes extra */
+    .slide { display: block !important; position: static !important; width: auto !important; height: auto !important; margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; padding: 10mm 8mm !important; page-break-after: always; break-inside: avoid; opacity: 1 !important; transform: none !important; }
+    .slide:last-child { page-break-after: auto; }
+    /* Ocultar controles/UI no imprimible */
+    .exit-btn, .fullscreen-btn, .slide-nav, .progress-dots { display: none !important; }
+    /* Desactivar animaciones/transiciones que causan opacidad 0 al imprimir */
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .slide, .slide * { opacity: 1 !important; transform: none !important; }
+    /* Ajustar contenido interno */
+    .slide-content { overflow: visible !important; padding-right: 0 !important; }
+    /* Dar espacio concreto a bloques de gráficas en cada página */
+    .chart-container, .chart-card { height: 90mm !important; }
+    .chart-card canvas, .chart-container canvas { width: 100% !important; height: 100% !important; max-height: 100% !important; }
+    /* Asegurar contraste si se desactivan fondos en el diálogo de impresión */
+    .slide { background: #ffffff !important; }
+    .slide h1, .slide h2, .slide h3, .slide p, .slide li, .slide span, .slide div { color: #111111 !important; }
+    /* Ajustes específicos para slide 2 (Resumen Ejecutivo) */
+    .slide[data-slide="2"] { padding: 8mm 10mm !important; }
+    .slide[data-slide="2"] .stats-grid { margin: 8px 0 !important; gap: 12px !important; }
+    .slide[data-slide="2"] .stat-card { padding: 16px !important; }
+    .slide[data-slide="2"] .stat-value { font-size: 36px !important; margin-bottom: 6px !important; }
+    .slide[data-slide="2"] .stat-label { font-size: 12px !important; }
+    .slide[data-slide="2"] .highlight-box { padding: 12px !important; margin: 10px 0 !important; }
+    .slide[data-slide="2"] .highlight-box h3 { font-size: 16px !important; margin-bottom: 6px !important; }
+    .slide[data-slide="2"] .highlight-box p { font-size: 14px !important; line-height: 1.4 !important; }
+    /* Ajustes específicos para slide 4 (Perfil de Encuestados) - cada gráfica en su página */
+    .slide[data-slide="4"] { padding: 8mm 10mm !important; }
+    .slide[data-slide="4"] .slide-header { margin-bottom: 12px !important; padding-bottom: 10px !important; }
+    .slide[data-slide="4"] .slide-title h1 { font-size: 28px !important; margin-bottom: 4px !important; }
+    .slide[data-slide="4"] .slide-title p { font-size: 14px !important; }
+    .slide[data-slide="4"] .chart-grid { display: block !important; }
+    .slide[data-slide="4"] .chart-card { page-break-inside: avoid; height: auto !important; margin-bottom: 0 !important; display: flex; flex-direction: column; align-items: center; }
+    .slide[data-slide="4"] .chart-card canvas { max-width: 400px !important; max-height: 400px !important; width: 400px !important; height: 400px !important; }
+    .slide[data-slide="4"] .chart-card:first-child { page-break-after: always; }
+    .slide[data-slide="4"] .chart-card h3 { font-size: 16px !important; margin-bottom: 10px !important; width: 100%; text-align: center; }
+    /* Ajustes específicos para slide 5 (Intención de Compra) */
+    .slide[data-slide="5"] { padding: 8mm 10mm !important; }
+    .slide[data-slide="5"] .slide-header { margin-bottom: 12px !important; padding-bottom: 10px !important; }
+    .slide[data-slide="5"] .chart-container { height: 145mm !important; margin: 10px 0 !important; }
+    /* Ajustes específicos para slide 11 (Recomendaciones Estratégicas) */
+    .slide[data-slide="11"] { padding: 8mm 10mm !important; }
+    .slide[data-slide="11"] .slide-header { margin-bottom: 14px !important; padding-bottom: 10px !important; }
+    .slide[data-slide="11"] .content-list { padding: 0 !important; margin-top: 10px !important; }
+    .slide[data-slide="11"] .content-list li { padding: 16px 20px !important; margin: 16px 0 !important; font-size: 17px !important; line-height: 1.6 !important; }
+    .slide[data-slide="11"] .content-list li strong { font-size: 17px !important; }
+    /* Mejorar reproducción de colores/gráficos */
+    html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }

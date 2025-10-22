@@ -351,14 +351,36 @@ class PresentacionManager {
           labels: Object.keys(zonaCounts),
           datasets: [{
             data: Object.values(zonaCounts),
-            backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444']
+            backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#f97316', '#84cc16', '#a855f7', '#14b8a6', '#f43f5e']
           }]
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: true,
+          aspectRatio: 1,
           plugins: {
-            legend: { position: 'bottom' }
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                padding: 8,
+                font: { size: 11 },
+                generateLabels: (chart) => {
+                  const data = chart.data;
+                  return data.labels.map((label, i) => ({
+                    text: label.length > 20 ? label.substring(0, 18) + '...' : label,
+                    fillStyle: data.datasets[0].backgroundColor[i],
+                    hidden: false,
+                    index: i
+                  }));
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.label}: ${ctx.parsed}`
+              }
+            }
           }
         }
       });
@@ -648,54 +670,153 @@ class PresentacionManager {
 
   // Slide 13: Awareness y Favorabilidad
   renderAwarenessYFavorabilidad() {
-    const ctxAw = document.getElementById('chart-awareness-pres');
-    const ctxFav = document.getElementById('chart-favorabilidad');
+    const awarenessCanvas = document.getElementById('chart-awareness-pres');
+    const favCanvas = document.getElementById('chart-favorabilidad');
+    
+    if (!awarenessCanvas) return;
 
-    // Awareness (conoce_marca)
-    if (ctxAw) {
-      if (this.charts.awarenessPres) this.charts.awarenessPres.destroy();
-      const counts = { 'Sí': 0, 'No': 0 };
-      this.data.forEach(d => {
-        const v = (d.conoce_marca || '').toString().toLowerCase();
-        if (v === 'si' || v === 'sí' || v === 'true' || v === '1') counts['Sí']++;
-        else counts['No']++;
-      });
-      this.charts.awarenessPres = new Chart(ctxAw, {
-        type: 'doughnut',
-        data: {
-          labels: Object.keys(counts),
-          datasets: [{ data: Object.values(counts), backgroundColor: ['#10b981', '#ef4444'] }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-      });
-    }
+    // Awareness - valores reales: 'La conozco', 'Me suena', 'No la conozco'
+    const conocen = this.data.filter(d => {
+      const val = d.awareness_omo || '';
+      return val === 'La conozco' || val === 'Me suena';
+    }).length;
+    const noConocen = this.data.filter(d => {
+      const val = d.awareness_omo || '';
+      return val === 'No la conozco' || val === '';
+    }).length;
+    const total = this.data.length;
+    const pctConocen = total > 0 ? ((conocen / total) * 100).toFixed(1) : 0;
+    const pctNoConocen = total > 0 ? ((noConocen / total) * 100).toFixed(1) : 0;
 
-    // Favorabilidad (si no existe un campo específico, ocultamos la tarjeta)
-    if (ctxFav) {
-      const favCard = ctxFav.closest('.chart-card');
-      if (this.charts.favorabilidad) this.charts.favorabilidad.destroy();
-      const favFieldCandidates = ['favorabilidad', 'percepcion_marca', 'favor'];
-      let hasField = false;
-      for (const c of favFieldCandidates) {
-        if (this.data.some(d => d[c] !== undefined && d[c] !== null && d[c] !== '')) { hasField = c; break; }
+    if (this.charts['awareness-pres']) this.charts['awareness-pres'].destroy();
+    this.charts['awareness-pres'] = new Chart(awarenessCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['Conocen', 'No conocen'],
+        datasets: [{
+          data: [conocen, noConocen],
+          backgroundColor: ['#10b981', '#ef4444']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const total = conocen + noConocen;
+                const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+                return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
+              }
+            }
+          }
+        }
       }
-      if (hasField) {
-        if (favCard) favCard.style.display = '';
-        const counts = {};
-        this.data.forEach(d => {
-          const key = (d[hasField] || 'Sin dato').toString();
-          counts[key] = (counts[key] || 0) + 1;
-        });
-        this.charts.favorabilidad = new Chart(ctxFav, {
-          type: 'bar',
-          data: { labels: Object.keys(counts), datasets: [{ label: 'Respuestas', data: Object.values(counts), backgroundColor: '#f59e0b' }] },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-        });
-      } else {
-        if (favCard) favCard.style.display = 'none';
+    });
+
+    // Favorabilidad - valores numéricos 1-7 y 'Neutral'
+    if (favCanvas) {
+      const favField = this.data.find(d => d.favorabilidad_omo !== undefined);
+      if (!favField) {
         console.warn('[Presentación] Campo de favorabilidad no encontrado en datos; ocultando tarjeta');
+        const card = favCanvas.closest('.chart-card');
+        if (card) card.style.display = 'none';
+      } else {
+        // Agrupar: Favorable (5-7), Neutral (3-4 o 'Neutral'), Desfavorable (1-2)
+        const favorable = this.data.filter(d => {
+          const val = d.favorabilidad_omo;
+          return val === 5 || val === 6 || val === 7 || val === '5' || val === '6' || val === '7';
+        }).length;
+        const neutral = this.data.filter(d => {
+          const val = d.favorabilidad_omo;
+          return val === 3 || val === 4 || val === '3' || val === '4' || val === 'Neutral';
+        }).length;
+        const desfavorable = this.data.filter(d => {
+          const val = d.favorabilidad_omo;
+          return val === 1 || val === 2 || val === '1' || val === '2';
+        }).length;
+
+        if (this.charts['favorabilidad']) this.charts['favorabilidad'].destroy();
+        this.charts['favorabilidad'] = new Chart(favCanvas, {
+          type: 'pie',
+          data: {
+            labels: ['Favorable', 'Neutral', 'Desfavorable'],
+            datasets: [{
+              data: [favorable, neutral, desfavorable],
+              backgroundColor: ['#10b981', '#fbbf24', '#ef4444']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' }
+            }
+          }
+        });
       }
     }
+
+    // Top 5 zonas con mayor intención de compra (siempre se ejecuta)
+    this.renderTopIntencionZonas();
+  }
+
+  renderTopIntencionZonas() {
+    const canvas = document.getElementById('chart-top-intencion-zonas');
+    if (!canvas) return;
+
+    // Calcular promedio de intención por zona
+    const zonaMap = {};
+    this.data.forEach(d => {
+      const zona = d.zona || 'Sin especificar';
+      const intencion = parseFloat(d.intencion) || 0;
+      if (!zonaMap[zona]) {
+        zonaMap[zona] = { sum: 0, count: 0 };
+      }
+      zonaMap[zona].sum += intencion;
+      zonaMap[zona].count += 1;
+    });
+
+    // Calcular promedio y ordenar
+    const zonasConPromedio = Object.keys(zonaMap).map(zona => ({
+      zona,
+      promedio: zonaMap[zona].sum / zonaMap[zona].count
+    })).sort((a, b) => b.promedio - a.promedio);
+
+    // Top 5
+    const top5 = zonasConPromedio.slice(0, 5);
+    const labels = top5.map(z => z.zona);
+    const valores = top5.map(z => z.promedio.toFixed(1));
+
+    if (this.charts['top-intencion-zonas']) this.charts['top-intencion-zonas'].destroy();
+    this.charts['top-intencion-zonas'] = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Intención promedio (0-10)',
+          data: valores,
+          backgroundColor: '#3b82f6'
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            beginAtZero: true,
+            max: 10,
+            title: { display: true, text: 'Intención promedio' }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
   }
 
   // Slide 14: Recomendaciones Clave

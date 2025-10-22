@@ -267,7 +267,9 @@ const AuthSystem = {
       'tco.html',
       'encuesta_metodologia.html',
       'competencia.html',
-      'encuestadores.html'
+      'encuestadores.html',
+      'observaciones.html'
+      
     ]);
 
     if (r === 'encuestador') {
