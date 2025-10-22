@@ -77,7 +77,6 @@ class DashboardManager {
       const rows = [];
       snap.forEach(doc => {
         const d = doc.data() || {};
-        if (d._probe) return;
   
         rows.push({
           ts: d.ts || d._createdAt || d.when || null,

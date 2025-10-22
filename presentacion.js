@@ -37,21 +37,19 @@ class PresentacionManager {
           
           snapshot.forEach(doc => {
             const d = doc.data();
-            if (!d._probe) { // Ignorar datos de prueba
-              firestoreData.push({
-                id: doc.id,
-                ts: d.ts || d._createdAt || d.when || null,
-                encuestador_id: d.encuestador_id || '',
-                zona: d.zona || 'Sin especificar',
-                edad: d.edad || '',
-                intencion: d.intencion || 0,
-                barreras: d.barreras || [],
-                ocupacion: d.ocupacion || '',
-                usa_moto: d.usa_moto || '',
-                conoce_marca: d.conoce_marca || '',
-                ...d
-              });
-            }
+            firestoreData.push({
+              id: doc.id,
+              ts: d.ts || d._createdAt || d.when || null,
+              encuestador_id: d.encuestador_id || '',
+              zona: d.zona || 'Sin especificar',
+              edad: d.edad || '',
+              intencion: d.intencion || 0,
+              barreras: d.barreras || [],
+              ocupacion: d.ocupacion || '',
+              usa_moto: d.usa_moto || '',
+              conoce_marca: d.conoce_marca || '',
+              ...d
+            });
           });
 
           if (firestoreData.length > 0) {

@@ -192,7 +192,6 @@
         
         snap.forEach(doc => {
           const d = doc.data() || {};
-          if (d._probe) return; // omitir registros de prueba
   
           rows.push({
             _firestoreId: doc.id,
@@ -233,7 +232,7 @@
       const total = state.all.length;
       const maxSurveys = 250;
       
-      const withImages = state.all.filter(r => r.image_proof_png).length;
+      const withImages = state.all.filter(r => r.image_proof_png && r.image_proof_png.length > 0).length;
       
       let estimatedSize = 0;
       state.all.forEach(r => {
@@ -269,12 +268,13 @@
         else surveyBar.classList.add('ok');
       }
       
-      const storageBar = document.getElementById('storage-bar');
+      const storageBar = document.getElementById('progress-storage');
       if (storageBar) {
         storageBar.style.width = `${Math.min(storagePercent, 100)}%`;
         storageBar.classList.remove('ok', 'warning', 'danger');
         if (storagePercent > 80) storageBar.classList.add('danger');
         else if (storagePercent > 60) storageBar.classList.add('warning');
+        else storageBar.classList.add('ok');
       }
       
       console.log(`[Stats] Total: ${total}, Storage: ${estimatedMB}MB, Images: ${withImages}`);
