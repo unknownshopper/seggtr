@@ -554,6 +554,9 @@
       });
   
       document.getElementById('saveEdit').addEventListener('click', saveEdit);
+      
+      // Botón de impresión
+      document.getElementById('printAll').addEventListener('click', printAllSurveys);
     }
 
 
@@ -990,51 +993,6 @@
       document.getElementById('editModal').showModal();
     }
   
-    // ==================== OPERACIONES CRUD ====================
-  
-    async function doDelete(r) {
-      if (!confirm('¿Eliminar esta encuesta? Esta acción no se puede deshacer.')) return;
-      
-      console.group('🗑️ Intentando eliminar encuesta');
-      console.log('Registro a eliminar:', r);
-      
-      let removedFromFirestore = false;
-  
-      if (window.db) {
-        try {
-          if (r._firestoreId) {
-            console.log('Usando _firestoreId:', r._firestoreId);
-            await window.db.collection('surveys').doc(r._firestoreId).delete();
-            removedFromFirestore = true;
-            console.log('✓ Eliminado de Firestore');
-          } else if (r._createdAt) {
-            const snap = await window.db.collection('surveys')
-              .where('_createdAt', '==', r._createdAt)
-              .limit(1)
-              .get();
-            
-            if (!snap.empty) {
-              await snap.docs[0].ref.delete();
-              removedFromFirestore = true;
-              console.log('✓ Eliminado de Firestore usando query');
-            }
-          }
-        } catch (e) {
-          console.error('Error eliminando:', e);
-          alert(`Error al eliminar: ${e.message}`);
-        }
-      }
-      
-      console.groupEnd();
-      
-      if (removedFromFirestore) {
-        loadData();
-        alert('Encuesta eliminada exitosamente');
-      } else {
-        alert('No se pudo eliminar la encuesta.');
-      }
-    }
-  
     async function saveEdit() {
       const idx = state.editIndex;
       if (idx == null || idx < 0) { 
@@ -1074,6 +1032,152 @@
         console.error('Error al actualizar:', err);
         alert(`Error al guardar cambios: ${err.message}`);
       }
+    }
+  
+    // ==================== IMPRESIÓN PDF ====================
+    
+    function printAllSurveys() {
+      // Confirmar acción
+      const total = state.filtered.length;
+      if (!confirm(`¿Deseas descargar las ${total} encuestas en un documento PDF?\n\nEsto puede tomar unos momentos.`)) {
+        return;
+      }
+      
+      // Mostrar indicador de carga
+      const btn = document.getElementById('printAll');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Generando PDF...';
+      
+      // Generar PDF en segundo plano
+      setTimeout(() => {
+        try {
+          generatePDF();
+          btn.textContent = '✅ PDF Descargado';
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+          }, 2000);
+        } catch (error) {
+          console.error('Error generando PDF:', error);
+          alert('❌ Error al generar PDF: ' + error.message);
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
+      }, 100);
+    }
+    
+    function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Configuración
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 10;
+      
+      // Header
+      doc.setFillColor(102, 126, 234);
+      doc.rect(0, 0, pageWidth, 25, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18);
+      doc.setFont(undefined, 'bold');
+      doc.text('Lista de Encuestas Omomobility', margin, 12);
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text('Villahermosa, Tabasco - Estudio de Mercado', margin, 19);
+      
+      // Preparar datos para la tabla
+      const headers = [[
+        'Fecha',
+        'Encuestador',
+        'Zona',
+        'Edad',
+        'Sexo',
+        'Ocupación',
+        'Intención',
+        'Usa Moto',
+        'Awareness',
+        'Favorabilidad',
+        'Comentarios'
+      ]];
+      
+      const rows = state.filtered.map(r => {
+        const encBadge = getEncuestadorBadge(r.encuestador_id, r._createdEmail);
+        return [
+          fmtDate(r.ts).substring(0, 16), // Fecha corta
+          encBadge.badge, // Iniciales
+          (r.zona || 'N/A').substring(0, 15), // Zona truncada
+          r.edad || '',
+          (r.sexo || '').substring(0, 1), // M/F
+          (r.ocupacion || 'N/A').substring(0, 12), // Ocupación truncada
+          r.intencion || '',
+          (r.usaMoto || 'N/A').substring(0, 2), // Sí/No
+          (r.awareness_omo || 'N/A').substring(0, 10), // Awareness truncado
+          (r.favorabilidad_omo || 'N/A').toString().substring(0, 8), // Favorabilidad
+          (r.comentarios || '').substring(0, 30) // Comentarios truncados
+        ];
+      });
+      
+      // Generar tabla con autoTable
+      doc.autoTable({
+        head: headers,
+        body: rows,
+        startY: 30,
+        margin: { left: margin, right: margin },
+        styles: {
+          fontSize: 7,
+          cellPadding: 2,
+          overflow: 'linebreak',
+          cellWidth: 'wrap'
+        },
+        headStyles: {
+          fillColor: [102, 126, 234],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        columnStyles: {
+          0: { cellWidth: 25 }, // Fecha
+          1: { cellWidth: 12, halign: 'center' }, // Encuestador
+          2: { cellWidth: 22 }, // Zona
+          3: { cellWidth: 10, halign: 'center' }, // Edad
+          4: { cellWidth: 8, halign: 'center' }, // Sexo
+          5: { cellWidth: 20 }, // Ocupación
+          6: { cellWidth: 12, halign: 'center' }, // Intención
+          7: { cellWidth: 12, halign: 'center' }, // Usa Moto
+          8: { cellWidth: 18 }, // Awareness
+          9: { cellWidth: 15 }, // Favorabilidad
+          10: { cellWidth: 35 } // Comentarios
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252]
+        },
+        didDrawPage: function(data) {
+          // Footer en cada página
+          const pageCount = doc.internal.getNumberOfPages();
+          const currentPage = doc.internal.getCurrentPageInfo().pageNumber;
+          
+          doc.setFontSize(8);
+          doc.setTextColor(100);
+          doc.text(
+            `Página ${currentPage} de ${pageCount} | Total: ${state.filtered.length} encuestas | Generado: ${new Date().toLocaleString('es-MX')}`,
+            pageWidth / 2,
+            pageHeight - 5,
+            { align: 'center' }
+          );
+        }
+      });
+      
+      // Descargar PDF
+      const fileName = `Encuestas_Omomobility_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      
+      console.log(`✅ PDF generado: ${fileName} (${state.filtered.length} encuestas)`);
     }
   
     // ==================== INICIALIZACIÓN ====================

@@ -284,6 +284,75 @@
     background: linear-gradient(90deg, #ef4444, #dc2626);
   }
   
+  /* Leyenda de encuestadores */
+  .encuestadores-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin: 12px 0;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .legend-title {
+    font-weight: 600;
+    color: #475569;
+    font-size: 14px;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #64748b;
+  }
+  
+  .legend-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid #e5e7eb;
+  }
+  
+  /* Colores específicos para cada encuestador */
+  .avatar.maximo, .legend-badge.maximo {
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #93c5fd;
+  }
+  
+  .avatar.humberto, .legend-badge.humberto {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+  }
+  
+  .avatar.aristides, .legend-badge.aristides {
+    background: #fef3c7;
+    color: #b45309;
+    border-color: #fcd34d;
+  }
+  
+  .avatar.admin, .legend-badge.admin {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+  }
+  
+  .avatar.supervisor, .legend-badge.supervisor {
+    background: #e0e7ff;
+    color: #3730a3;
+    border-color: #a5b4fc;
+  }
+  
   /* Toast de notificación en tiempo real */
   .realtime-toast {
     position: fixed;
@@ -448,4 +517,176 @@
 .evidence-metadata strong {
   color: #475569;
   margin-right: 8px;
+}
+
+/* Estilos de impresión para PDF */
+@media print {
+  /* Ocultar elementos de navegación y UI */
+  .header-actions,
+  .toolbar,
+  .stats-panel,
+  .encuestadores-legend,
+  .pagination,
+  #fb-status-badge,
+  .actions button,
+  .btn,
+  .search,
+  #pageSize,
+  #countInfo,
+  .phone-frame,
+  .phone-header,
+  .phone-footer {
+    display: none !important;
+  }
+
+  /* Configuración de página */
+  @page {
+    size: A4 landscape;
+    margin: 1cm;
+  }
+
+  body {
+    background: white;
+    margin: 0;
+    padding: 0;
+  }
+
+  .page {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Header simplificado para impresión */
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    page-break-after: avoid;
+  }
+
+  .header h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+
+  .header .lead {
+    margin: 8px 0 0 0;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  /* Tabla optimizada para impresión */
+  .table-wrap {
+    overflow: visible;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9px;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+    background: #f3f4f6 !important;
+  }
+
+  th {
+    background: #f3f4f6 !important;
+    color: #1f2937;
+    font-weight: 600;
+    padding: 8px 4px;
+    border: 1px solid #d1d5db;
+    font-size: 9px;
+    position: static;
+  }
+
+  tbody tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  td {
+    padding: 6px 4px;
+    border: 1px solid #e5e7eb;
+    font-size: 8px;
+    vertical-align: top;
+  }
+
+  /* Ocultar columna de acciones */
+  th:last-child,
+  td:last-child {
+    display: none;
+  }
+
+  /* Ajustar evidencia para impresión */
+  .thumb {
+    max-width: 60px;
+    max-height: 40px;
+    display: block;
+  }
+
+  .generating-thumb {
+    font-size: 8px;
+    padding: 4px;
+  }
+
+  /* Avatares y chips más pequeños */
+  .avatar {
+    width: 20px;
+    height: 20px;
+    font-size: 9px;
+  }
+
+  .chip {
+    padding: 2px 6px;
+    font-size: 8px;
+  }
+
+  /* Barra de intención */
+  .intent-bar {
+    width: 50px;
+    height: 6px;
+  }
+
+  /* Ubicación más compacta */
+  .geo {
+    font-size: 7px;
+  }
+
+  /* Ajustar anchos de columnas */
+  .w100 { width: 60px; }
+  .w120 { width: 80px; }
+  .w160 { width: 100px; }
+
+  /* Footer de página */
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 8px;
+    color: #6b7280;
+    padding: 10px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  /* Contador de páginas */
+  .print-footer::after {
+    content: "Página " counter(page);
+  }
+
+  /* Forzar saltos de página cada cierto número de filas */
+  tbody tr:nth-child(20n) {
+    page-break-after: always;
+  }
+
+  /* Evitar que las filas se corten */
+  tr {
+    page-break-inside: avoid;
+  }
 }
