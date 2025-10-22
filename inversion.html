@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zonas recomendadas para inversión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./inversion.css">
+</head>
+<body class="inv">
+  <div class="shell">
+    <header class="header">
+      <img class="logo" src="logcho.png" alt="The Unknown Shopper" onerror="this.onerror=null; this.src='logch.png'" />
+      <div>
+        <h1>Zonas recomendadas para inversión</h1>
+        <p class="lead">Ranking basado en intención, awareness, favorabilidad y tamaño de muestra</p>
+      </div>
+      <div class="kpi" id="kpis"></div>
+    </header>
+
+    <div class="cards">
+      <section class="card print-center">
+        <div class="toolbar">
+          <span class="pill" id="dataSource">Cargando datos…</span>
+          <span class="pill" id="totalResp"></span>
+          <span class="pill" id="zonesCount"></span>
+          <span class="pill" id="lastUpdated"></span>
+          <button class="btn outline no-print" style="margin-left:auto" onclick="window.print()">🖨️ Descargar PDF</button>
+        </div>
+      </section>
+
+      <section class="card grid-6 print-center">
+        <h2>Top 5 zonas recomendadas</h2>
+        <canvas id="chartTop"></canvas>
+        <p class="note" style="margin-top:10px">
+          El ranking considera cuatro factores ponderados: 50% intención promedio (0–10), 20% awareness (conocimiento de marca), 20% favorabilidad (5–7 como favorable) y 10% tamaño de muestra. Se aplica una penalización del 20% a zonas con n < 20 para evitar sesgos por muestras pequeñas. Adicionalmente, usamos el <strong>tamaño de muestra (n)</strong> como un <em>proxy</em> de <strong>flujo de personas/exposición</strong> en la zona.
+        </p>
+      </section>
+
+      <section class="card grid-6 print-center">
+        <h2>Recomendación rápida</h2>
+        <ol id="quickList" class="muted"></ol>
+      </section>
+
+      <section class="card grid-12 print-center">
+        <h2>Recomendación ejecutiva: ubicación sugerida</h2>
+        <div id="execReco" class="note"></div>
+      </section>
+
+      <section class="card">
+        <h2>Tabla de ranking por zona</h2>
+        <div class="legend muted"> 
+          <span>Score = 0.5×Intención + 0.2×Awareness + 0.2×Favorabilidad + 0.1×Tamaño muestra</span>
+          <span>Penalización si n &lt; 20</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Zona</th>
+              <th>Score</th>
+              <th>Intención</th>
+              <th>n</th>
+              <th>Awareness</th>
+              <th>Favorable</th>
+              <th>% usa moto</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </section>
+    </div>
+    <div class="foot">
+      <a href="index.html" class="btn outline">← Volver al inicio</a>
+      <span class="note">Proyecto • The Unknown Shoppers</span>
+    </div>
+    <!-- Footer para impresión en todas las páginas -->
+    <div class="print-footer">The Unknown Shoppers</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="./firebase-config.js"></script>
+  <script src="./auth.js"></script>
+  <script src="./data-manager.js"></script>
+  <script src="./inversion.js"></script>
+</body>
+</html>

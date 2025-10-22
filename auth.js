@@ -268,7 +268,8 @@ const AuthSystem = {
       'encuesta_metodologia.html',
       'competencia.html',
       'encuestadores.html',
-      'observaciones.html'
+      'observaciones.html',
+      'inversion.html'
       
     ]);
 

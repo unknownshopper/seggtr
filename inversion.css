@@ -1,0 +1,115 @@
+/* Inversión page scoped styles (align with global style.css) */
+.inv .header{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:20px }
+.inv h1{ font-size:22px; margin:0; letter-spacing:.2px }
+.inv .sub{ color:var(--muted); font-size:13px }
+
+/* Footer impreso: oculto en pantalla */
+.print-footer{ display:none }
+
+/* Grid layout for cards */
+.inv .cards{ display:grid; grid-template-columns:repeat(12,1fr); gap:16px }
+.inv .grid-6{ grid-column:span 12 }
+@media(min-width:960px){ .inv .grid-6{ grid-column:span 6 } }
+
+/* Use global .card look; only spacing here */
+.inv .card{ grid-column:span 12 }
+.inv .card h2{ margin:0 0 12px 0; font-size:16px }
+
+/* Toolbar & pills */
+.inv .toolbar{ display:flex; gap:8px; align-items:center; margin-top:8px }
+.inv .pill{ font-size:12px; color:var(--muted); padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:#fff }
+
+/* Table styling consistent with light theme */
+.inv table{ width:100%; border-collapse:separate; border-spacing:0 10px }
+.inv thead th{ color:var(--muted); font-weight:600; font-size:12px; text-align:left; padding:6px 10px }
+.inv tbody tr{ background:#fff; border:1px solid var(--border) }
+.inv tbody td{ padding:10px 10px; font-size:13px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1 }
+.inv tbody tr td:first-child{ border-left:1px solid var(--border); border-radius:8px 0 0 8px }
+.inv tbody tr td:last-child{ border-right:1px solid var(--border); border-radius:0 8px 8px 0 }
+
+/* Column widths & alignment */
+/* 1: Rank */
+.inv thead th:nth-child(1), .inv tbody td:nth-child(1){ width:68px; text-align:center }
+/* 2: Zona */
+.inv thead th:nth-child(2), .inv tbody td:nth-child(2){ text-align:left; max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+/* 3: Score */
+.inv thead th:nth-child(3), .inv tbody td:nth-child(3){ width:110px; text-align:center }
+/* 4: Intención */
+.inv thead th:nth-child(4), .inv tbody td:nth-child(4){ width:110px; text-align:right }
+/* 5: n */
+.inv thead th:nth-child(5), .inv tbody td:nth-child(5){ width:80px; text-align:right }
+/* 6: Awareness */
+.inv thead th:nth-child(6), .inv tbody td:nth-child(6){ width:120px; text-align:right }
+/* 7: Favorable */
+.inv thead th:nth-child(7), .inv tbody td:nth-child(7){ width:120px; text-align:right }
+/* 8: % usa moto */
+.inv thead th:nth-child(8), .inv tbody td:nth-child(8){ width:120px; text-align:right }
+
+/* Center badge and rank nicely */
+.inv tbody td:nth-child(1){ vertical-align:middle }
+.inv tbody td:nth-child(3){ vertical-align:middle }
+
+/* Rank and badges (light palette) */
+.inv .rank{ width:28px; height:28px; border-radius:6px; background:#eef2ff; border:1px solid #c7d2fe; display:inline-grid; place-items:center; font-weight:700; font-size:12px; color:#3730a3 }
+.inv .badge{ display:inline-block; padding:4px 8px; border-radius:999px; font-size:11px }
+.inv .b-good{ background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0 }
+.inv .b-mid{ background:#f0fdff; color:#155e75; border:1px solid #a5f3fc }
+.inv .b-warn{ background:#fffbeb; color:#92400e; border:1px solid #fde68a }
+
+/* KPI chips */
+.inv .kpi{ display:flex; gap:12px; flex-wrap:wrap }
+.inv .kpi span{ padding:6px 10px; border:1px solid var(--border); border-radius:8px; font-size:12px; color:var(--muted); background:#fff }
+
+/* Legend */
+.inv .legend{ display:flex; gap:8px; flex-wrap:wrap; color:var(--muted) }
+
+/* Chart area */
+.inv canvas{ width:100%; height:320px }
+
+@media print{
+  @page { size: A4 landscape; margin: 12mm; }
+  body{ background:#fff !important; }
+  .shell{ max-width:100% !important; margin:0 !important; padding:0 !important; }
+
+  /* Header: compacto y limpio */
+  .inv .header{ margin: 0 0 6mm 0; padding: 0; border: none; }
+  .inv .header .logo{ width:48px; height:48px; box-shadow:none }
+  .inv .lead{ color:#444; }
+
+  /* Ocultar elementos interactivos */
+  .no-print{ display:none !important }
+
+  /* Tarjetas: sin sombra, evitar cortes feos */
+  .inv .card{ box-shadow:none !important; border:1px solid #ddd; break-inside: avoid; page-break-inside: avoid; margin-bottom:8mm }
+
+  /* Centrado vertical para páginas destacadas */
+  .inv .cards .print-center{
+    min-height: 150mm; /* ajuste fino para evitar desbordes */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6mm; /* margen interno para que no toque bordes */
+    box-sizing: border-box;
+    max-width: 100%;
+    margin: 0;
+  }
+  /* Page break solo a partir de la segunda tarjeta centrada */
+  .inv .cards .print-center:not(:first-child){ page-break-before: always; }
+
+  /* Gráficas: usar ancho de página y altura automática para evitar corte */
+  .inv canvas{ width:100% !important; height:auto !important; max-height:120mm !important }
+
+  /* Tabla: compactar para PDF */
+  .inv table{ border-spacing:0 !important; }
+  .inv thead th{ background:#f3f4f6; border:1px solid #ddd; padding:6px }
+  .inv tbody tr{ border:1px solid #ddd }
+  .inv tbody td{ padding:8px 10px; font-size:12px }
+
+  /* Evitar que una fila se parta entre páginas */
+  .inv tbody tr{ page-break-inside: avoid; break-inside: avoid }
+
+  /* Footer fijo en todas las páginas */
+  .print-footer{ display:block; position: fixed; bottom: 6mm; left:0; right:0; text-align:center; color:#6b7280; font-size:10pt }
+  /* Evitar que contenido toque el footer fijo */
+  .shell{ padding-bottom: 16mm !important; }
+}
