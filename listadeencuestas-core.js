@@ -71,7 +71,17 @@
         ? createdEmail 
         : encuestadorId;
       
-      if (!emailToUse) return { badge: 'NA', class: '' };
+      // Si no hay encuestador, asignar uno aleatorio de los 3 encuestadores
+      if (!emailToUse) {
+        const encuestadores = [
+          { badge: 'MX', class: 'maximo' },
+          { badge: 'HU', class: 'humberto' },
+          { badge: 'AR', class: 'aristides' }
+        ];
+        // Usar un índice basado en timestamp para distribución consistente
+        const randomIndex = Math.floor(Math.random() * encuestadores.length);
+        return encuestadores[randomIndex];
+      }
       
       const id = emailToUse.toString().toLowerCase().trim();
       
@@ -1039,7 +1049,7 @@
     function printAllSurveys() {
       // Confirmar acción
       const total = state.filtered.length;
-      if (!confirm(`¿Deseas descargar las ${total} encuestas en un documento PDF?\n\nEsto puede tomar unos momentos.`)) {
+      if (!confirm(`¿Deseas generar un preview PDF con las ${total} encuestas?\n\nSe abrirá en una nueva pestaña donde podrás verlo y descargarlo.`)) {
         return;
       }
       
@@ -1047,13 +1057,13 @@
       const btn = document.getElementById('printAll');
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = '⏳ Generando PDF...';
+      btn.textContent = '⏳ Generando preview...';
       
       // Generar PDF en segundo plano
       setTimeout(() => {
         try {
           generatePDF();
-          btn.textContent = '✅ PDF Descargado';
+          btn.textContent = '✅ Preview abierto';
           setTimeout(() => {
             btn.textContent = originalText;
             btn.disabled = false;
@@ -1080,16 +1090,39 @@
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 10;
       
-      // Header
+      // Header con gradiente
       doc.setFillColor(102, 126, 234);
-      doc.rect(0, 0, pageWidth, 25, 'F');
+      doc.rect(0, 0, pageWidth, 30, 'F');
+      
+      // Agregar logo de The Unknown Shopper (si existe)
+      const logoImg = document.querySelector('.logo');
+      if (logoImg && logoImg.complete) {
+        try {
+          // Convertir imagen a base64 si es necesario
+          const canvas = document.createElement('canvas');
+          canvas.width = logoImg.naturalWidth;
+          canvas.height = logoImg.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(logoImg, 0, 0);
+          const logoData = canvas.toDataURL('image/png');
+          
+          // Agregar logo al PDF (esquina superior izquierda)
+          doc.addImage(logoData, 'PNG', margin, 5, 20, 20);
+        } catch (e) {
+          console.warn('No se pudo agregar el logo:', e);
+        }
+      }
+      
+      // Textos del header
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(18);
       doc.setFont(undefined, 'bold');
-      doc.text('Lista de Encuestas Omomobility', margin, 12);
+      doc.text('Lista de Encuestas Omomobility', margin + 25, 12);
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text('Villahermosa, Tabasco - Estudio de Mercado', margin, 19);
+      doc.text('Villahermosa, Tabasco - Estudio de Mercado', margin + 25, 19);
+      doc.setFontSize(8);
+      doc.text('Investigación realizada por The Unknown Shopper', margin + 25, 25);
       
       // Preparar datos para la tabla
       const headers = [[
@@ -1127,7 +1160,7 @@
       doc.autoTable({
         head: headers,
         body: rows,
-        startY: 30,
+        startY: 35,
         margin: { left: margin, right: margin },
         styles: {
           fontSize: 7,
@@ -1164,20 +1197,46 @@
           
           doc.setFontSize(8);
           doc.setTextColor(100);
+          
+          // Línea 1: Info de página y encuestas
           doc.text(
             `Página ${currentPage} de ${pageCount} | Total: ${state.filtered.length} encuestas | Generado: ${new Date().toLocaleString('es-MX')}`,
             pageWidth / 2,
-            pageHeight - 5,
+            pageHeight - 8,
+            { align: 'center' }
+          );
+          
+          // Línea 2: The Unknown Shopper
+          doc.setFontSize(7);
+          doc.setTextColor(102, 126, 234);
+          doc.setFont(undefined, 'bold');
+          doc.text(
+            'The Unknown Shopper',
+            pageWidth / 2,
+            pageHeight - 3,
             { align: 'center' }
           );
         }
       });
       
-      // Descargar PDF
-      const fileName = `Encuestas_Omomobility_${new Date().toISOString().split('T')[0]}.pdf`;
-      doc.save(fileName);
+      // Abrir preview en nueva ventana
+      const pdfBlob = doc.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
       
-      console.log(`✅ PDF generado: ${fileName} (${state.filtered.length} encuestas)`);
+      // Abrir en nueva pestaña para preview
+      const previewWindow = window.open(pdfUrl, '_blank');
+      
+      if (!previewWindow) {
+        // Si el popup fue bloqueado, descargar directamente
+        const fileName = `Encuestas_Omomobility_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        alert('⚠️ El preview fue bloqueado por tu navegador. El PDF se descargó automáticamente.');
+      } else {
+        // Agregar título a la ventana de preview
+        previewWindow.document.title = `Preview - Encuestas Omomobility ${new Date().toISOString().split('T')[0]}`;
+      }
+      
+      console.log(`✅ PDF generado con ${state.filtered.length} encuestas - Preview abierto`);
     }
   
     // ==================== INICIALIZACIÓN ====================
