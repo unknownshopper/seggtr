@@ -1,0 +1,65 @@
+/* Observaciones (page-specific) */
+
+/* Grid for evidence gallery */
+.gallery-grid{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap:14px;
+}
+/* Ensure thumbs fill card width nicely */
+.gallery-grid .img-wrap img{ width:100%; height:auto; display:block; }
+@media (max-width:900px){ .gallery-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width:640px){ .gallery-grid{ grid-template-columns: 1fr; } }
+
+/* Two-column content sections */
+.grid-2{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:14px;
+}
+@media (max-width:640px){ .grid-2{ grid-template-columns: 1fr; } }
+
+/* Vertical spacing between stacked sections */
+.section-gap{ margin:12px 0; }
+
+/* Chips and pills (opportunity/risk) */
+.chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.pill{ display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; background:#ecfdf5; color:#065f46; border:1px solid #bbf7d0 }
+.pill.warn{ background:#fffbeb; color:#92400e; border-color:#fde68a }
+
+/* Gallery items */
+.gallery-item{ display:flex; flex-direction:column; gap:6px; }
+.gallery-item figcaption{ color: var(--muted); font-size:13px; text-align:center; }
+
+/* Lightbox overlay */
+/* Hidden state MUST win over base .lightbox rule */
+.lightbox.hidden{ display:none !important; }
+.lightbox[aria-hidden="true"]{ display:none !important; }
+.lightbox{ position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+.lightbox-backdrop{ position:absolute; inset:0; background:rgba(2,6,23,.8); backdrop-filter: blur(2px); }
+.lightbox-content{ position:relative; width:min(80vw,900px); height:min(80vh,680px); display:flex; align-items:center; justify-content:center; pointer-events:auto; }
+.lightbox-stage{ margin:0; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:8px; }
+.lightbox-stage img{ width:auto; height:auto; max-width:78vw; max-height:70vh; border-radius:10px; box-shadow:0 20px 60px rgba(2,6,23,.5); background:#fff; }
+.lightbox-stage figcaption{ color:#e2e8f0; text-align:center; font-size:14px; }
+.lightbox-counter{ position:absolute; bottom:14px; right:16px; color:#e2e8f0; font-size:12px; background:rgba(2,6,23,.55); padding:4px 8px; border-radius:8px; }
+
+/* Controls */
+.lightbox-btn{ position:absolute; top:50%; transform:translateY(-50%); border:none; width:40px; height:40px; border-radius:999px; cursor:pointer; color:#0b1220; background:#e2e8f0; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 8px 22px rgba(2,6,23,.35); z-index:10000 }
+.lightbox-btn:hover{ filter: brightness(1.05); }
+.lightbox-btn.prev{ left:16px }
+.lightbox-btn.next{ right:16px }
+.lightbox-btn.close{ top:12px; right:12px; transform:none; width:36px; height:36px; font-size:20px; background:#0f172a; color:#e2e8f0; border:1px solid rgba(226,232,240,.15) }
+
+/* Ensure no child of hidden lightbox shows */
+.lightbox.hidden *, .lightbox[aria-hidden="true"] *{ display:none !important; }
+
+/* Callout tweaks inside cards */
+.callout{ background:#f8fafc; border:1px dashed var(--border); padding:14px; border-radius:12px; }
+
+/* Print rules: keep simple */
+@media print{
+  .lightbox.hidden{ display:none }
+  .lightbox[aria-hidden="true"]{ display:none !important; }
+  .gallery-grid{ grid-template-columns: repeat(2, 1fr); }
+  .gallery-item figcaption{ font-size:12px; }
+}
