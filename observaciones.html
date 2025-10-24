@@ -72,16 +72,12 @@
           </ul>
         </div>
         <div class="card">
-          <h2 class="section-title">Oportunidades y riesgos (en pocas palabras)</h2>
-          <div class="chips">
-            <span class="pill">Oportunidad</span>
-            <span class="pill warn">Riesgo</span>
-          </div>
+          <h2 class="section-title">Resumen ejecutivo</h2>
           <ul>
-            <li>Las tiendas actuales permiten activaciones y entregas sin abrir una tienda propia.</li>
-            <li>A la larga, operar una moto eléctrica puede salir más barato (luz y mantenimiento) si lo explicamos con ejemplos reales.</li>
-            <li>Sin exhibición ni prueba, baja la confianza; necesitamos test rides.</li>
-            <li>Debemos explicar bien garantía, refacciones y dónde se da el servicio.</li>
+            <li><strong>Red de distribución existente:</strong> Posibilidad de usar tiendas asociadas para entregas iniciales sin inversión en local propio.</li>
+            <li><strong>Ventaja económica operativa:</strong> Costo de mantenimiento 40% menor y recarga eléctrica hasta 5 veces más económica que gasolina.</li>
+            <li><strong>Demostración tangible:</strong> Test rides obligatorios para superar escepticismo sobre autonomía y rendimiento en clima cálido.</li>
+            <li><strong>Soporte postventa:</strong> Requiere claridad en garantías (3 años), disponibilidad de refacciones y red de talleres certificados.</li>
           </ul>
         </div>
       </div>
@@ -150,7 +146,136 @@
         </ul>
       </div>
 
-     
+      <div class="card section-gap">
+        <h2 class="section-title">ROI Básico <span class="pill" style="background:#eef2ff;color:#4338ca">Solo Ventas</span></h2>
+        <p style="margin-bottom:12px">Retorno basado exclusivamente en ventas de motos:</p>
+        
+        <div class="grid-2" style="gap:20px;margin-bottom:16px">
+          <div>
+            <h3 style="font-size:15px;margin-bottom:8px">Parámetros</h3>
+            <ul class="roi-inputs">
+              <li>
+                <div class="tooltip">Inversión inicial (MXN)
+                  <span class="tooltiptext">Adecuación local, inventario inicial y trámites</span>
+                </div>
+                <input type="number" id="roi1-inversion" placeholder="500000" class="roi-input">
+              </li>
+              <li>
+                <div class="tooltip">Margen por moto (MXN)
+                  <span class="tooltiptext">Diferencia entre precio venta y costo con proveedor</span>
+                </div>
+                <input type="number" id="roi1-margen" placeholder="8000" class="roi-input">
+              </li>
+              <li>
+                <div class="tooltip">Ventas mensuales (unidades)
+                  <span class="tooltiptext">Motos vendidas por mes en promedio</span>
+                </div>
+                <input type="number" id="roi1-ventas" placeholder="5" class="roi-input">
+              </li>
+              <li>
+                <div class="tooltip">Costos fijos/mes (MXN)
+                  <span class="tooltiptext">Renta, salarios y gastos administrativos</span>
+                </div>
+                <input type="number" id="roi1-fijos" placeholder="60000" class="roi-input">
+              </li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 style="font-size:15px;margin-bottom:8px">Resultados</h3>
+            <ul class="roi-results">
+              <li>
+                <div class="tooltip">Utilidad mensual
+                  <span class="tooltiptext">(Margen × Ventas) - Costos fijos</span>
+                </div>
+                <span id="roi1-utilidad">—</span>
+              </li>
+              <li>
+                <div class="tooltip">Punto de equilibrio
+                  <span class="tooltiptext">Motos necesarias/mes para cubrir costos fijos</span>
+                </div>
+                <span id="roi1-equilibrio">—</span>
+              </li>
+              <li>
+                <div class="tooltip">Payback (meses)
+                  <span class="tooltiptext">Tiempo para recuperar la inversión inicial</span>
+                </div>
+                <span id="roi1-payback">—</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section-gap">
+        <h2 class="section-title">ROI Completo <span class="pill" style="background:#ecfdf5;color:#065f46">Venta + Taller</span></h2>
+        <p style="margin-bottom:12px">Retorno incluyendo taller y venta de baterías:</p>
+        
+        <div class="grid-2" style="gap:20px;margin-bottom:16px">
+          <div>
+            <h3 style="font-size:15px;margin-bottom:8px">Parámetros</h3>
+            <ul class="roi-inputs">
+              <li>
+                <div class="tooltip">Inversión inicial (MXN)
+                  <span class="tooltiptext">Adecuación local, taller, inventario y trámites</span>
+                </div>
+                <input type="number" id="roi2-inversion" placeholder="700000" class="roi-input">
+              </li>
+              <li>
+                <div class="tooltip">Margen por moto (MXN)
+                  <span class="tooltiptext">Diferencia entre precio venta y costo con proveedor</span>
+                </div>
+                <input type="number" id="roi2-margen" placeholder="8000" class="roi-input">
+              </li>
+              <li>
+                <div class="tooltip">Margen servicio/baterías (MXN/mes)
+                  <span class="tooltiptext">Ganancias estimadas de taller y venta de baterías</span>
+                </div>
+                <input type="number" id="roi2-servicios" placeholder="15000" class="roi-input">
+              </li>
+              <li>
+                <div class="tooltip">Ventas mensuales (unidades)
+                  <span class="tooltiptext">Motos vendidas por mes en promedio</span>
+                </div>
+                <input type="number" id="roi2-ventas" placeholder="5" class="roi-input">
+              </li>
+              <li>
+                <div class="tooltip">Costos fijos/mes (MXN)
+                  <span class="tooltiptext">Renta, salarios, técnicos y gastos</span>
+                </div>
+                <input type="number" id="roi2-fijos" placeholder="80000" class="roi-input">
+              </li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 style="font-size:15px;margin-bottom:8px">Resultados</h3>
+            <ul class="roi-results">
+              <li>
+                <div class="tooltip">Utilidad mensual
+                  <span class="tooltiptext">(Margen × Ventas) + Servicios - Costos fijos</span>
+                </div>
+                <span id="roi2-utilidad">—</span>
+              </li>
+              <li>
+                <div class="tooltip">Payback (meses)
+                  <span class="tooltiptext">Tiempo para recuperar la inversión inicial</span>
+                </div>
+                <span id="roi2-payback">—</span>
+              </li>
+              <li>
+                <div class="tooltip">ROI anual
+                  <span class="tooltiptext">(Utilidad anual / Inversión inicial) × 100</span>
+                </div>
+                <span id="roi2-anual">—</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p class="note" style="margin-top:12px">
+          <strong>Nota:</strong> Este modelo considera ingresos por taller desde el primer mes (optimista).
+        </p>
+      </div>
 
     </main>
 

@@ -50,58 +50,6 @@
         <div id="execReco" class="note"></div>
       </section>
 
-      <section class="card grid-12 print-center">
-        <h2>ROI y rentabilidad detallada</h2>
-        <p class="note" style="margin:6px 0 12px 0">
-          <strong>¿Qué es el ROI?</strong> El Retorno Sobre la Inversión compara los beneficios generados con la inversión necesaria.
-          <strong>¿Por qué importa?</strong> Permite evaluar viabilidad, estimar en cuánto tiempo se recupera la inversión (payback), priorizar zonas/canales y ajustar precios y pauta.
-          <strong>Cómo leerlo:</strong> ROI anual &gt; 0% indica rentabilidad; un payback menor implica recuperación más rápida; el punto de equilibrio muestra cuántas unidades/mes cubren los costos fijos.
-          <strong>Nota:</strong> Estos cálculos dependen de supuestos (precio, costos, volumen, inversión) que puedes editar a continuación.
-        </p>
-        <div class="grid-6">
-          <div class="note"><strong>Parámetros (editar):</strong></div>
-          <ul id="roi-params" class="muted">
-            <li>
-              Precio promedio de venta:
-              <input id="inp-precio" type="number" min="0" step="0.01" placeholder="35000" class="roi-input" />
-            </li>
-            <li>
-              Costo del producto (COGS):
-              <input id="inp-cogs" type="number" min="0" step="0.01" placeholder="26000" class="roi-input" />
-            </li>
-            <li>
-              Gasto de adquisición por venta (marketing/ventas):
-              <input id="inp-cac" type="number" min="0" step="0.01" placeholder="1500" class="roi-input" />
-            </li>
-            <li>
-              Volumen mensual estimado (unidades):
-              <input id="inp-volumen" type="number" min="0" step="1" placeholder="10" class="roi-input" />
-            </li>
-            <li>
-              Costos fijos mensuales:
-              <input id="inp-fijos" type="number" min="0" step="0.01" placeholder="30000" class="roi-input" />
-            </li>
-            <li>
-              Inversión inicial (adecuaciones, inventario, apertura):
-              <input id="inp-inversion" type="number" min="0" step="0.01" placeholder="300000" class="roi-input" />
-            </li>
-          </ul>
-        </div>
-        <div class="grid-6">
-          <div class="note"><strong>Resultados (automático):</strong></div>
-          <ul id="roi-results">
-            <li>Margen bruto por unidad: <span id="roi-margen-unit">—</span></li>
-            <li>Margen de contribución mensual: <span id="roi-contrib-mes">—</span></li>
-            <li>Punto de equilibrio (unidades/mes): <span id="roi-bep-units">—</span></li>
-            <li>Payback estimado: <span id="roi-payback">—</span></li>
-            <li>ROI anual estimado: <span id="roi-annual">—</span></li>
-          </ul>
-        </div>
-        <div class="grid-12" style="margin-top:12px">
-          <div class="note">Notas: Edite los parámetros para ver el impacto. Los cálculos se guardan en este dispositivo y pueden integrarse con <code>data-manager.js</code> o Firestore.</div>
-        </div>
-      </section>
-
       <section class="card">
         <h2>Tabla de ranking por zona</h2>
         <div class="legend muted"> 
