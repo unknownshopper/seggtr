@@ -588,6 +588,19 @@
       flex-direction: column;
       gap: 8px;
     }
+
+    /* Mejoras táctiles en móvil */
+    .select-control,
+    .range-inputs input,
+    .btn {
+      min-height: 44px;
+      font-size: 16px;
+    }
+
+    /* Botones de filtros a 100% ancho en móvil */
+    .filter-actions .btn {
+      flex: 1 1 100%;
+    }
   }
   
   /* ============================================

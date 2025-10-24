@@ -270,7 +270,8 @@ const AuthSystem = {
       'encuestadores.html',
       'observaciones.html',
       'inversion.html',
-      'justjuri.html'
+      'justjuri.html',
+      'dataset.html'
       
       
     ]);

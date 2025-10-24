@@ -234,6 +234,87 @@
     if (lu) lu.textContent = `Actualizado: ${new Date().toLocaleString()}`;
   }
 
+  // ===== ROI helpers =====
+  const ROI_STORE_KEY = 'inversion_roi_params_v1';
+  const money = (n)=>{
+    if (!Number.isFinite(n)) return '—';
+    try { return new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN', maximumFractionDigits:0 }).format(n); } catch(_) { return `$${Math.round(n)}`; }
+  };
+  const num = (v, def=0)=>{ const n = Number.parseFloat(v); return Number.isFinite(n)? n : def; };
+
+  function loadRoiParams(){
+    try { return JSON.parse(localStorage.getItem(ROI_STORE_KEY)||'{}'); } catch(_) { return {}; }
+  }
+  function saveRoiParams(p){
+    try { localStorage.setItem(ROI_STORE_KEY, JSON.stringify(p||{})); } catch(_) {}
+  }
+
+  function readInputs(){
+    const p = loadRoiParams();
+    const get = (id, fallback)=>{
+      const el = document.getElementById(id);
+      if (!el) return num(p[id], fallback);
+      const v = el.value?.trim();
+      return v===''? num(p[id], fallback) : num(v, fallback);
+    };
+    return {
+      'inp-precio': get('inp-precio', 35000),
+      'inp-cogs': get('inp-cogs', 26000),
+      'inp-cac': get('inp-cac', 1500),
+      'inp-volumen': get('inp-volumen', 10),
+      'inp-fijos': get('inp-fijos', 30000),
+      'inp-inversion': get('inp-inversion', 300000),
+    };
+  }
+
+  function writeInputs(p){
+    const set = (id, val)=>{ const el=document.getElementById(id); if (el && (el.value===''||el.value==null)) el.value = String(val); };
+    set('inp-precio', p['inp-precio']);
+    set('inp-cogs', p['inp-cogs']);
+    set('inp-cac', p['inp-cac']);
+    set('inp-volumen', p['inp-volumen']);
+    set('inp-fijos', p['inp-fijos']);
+    set('inp-inversion', p['inp-inversion']);
+  }
+
+  function calcAndRenderROI(){
+    const p = readInputs();
+    // persist current values
+    saveRoiParams(p);
+
+    const precio = p['inp-precio'];
+    const cogs = p['inp-cogs'];
+    const cac = p['inp-cac'];
+    const volumen = p['inp-volumen'];
+    const fijos = p['inp-fijos'];
+    const inversion = p['inp-inversion'];
+
+    const margenUnit = Math.max(0, precio - cogs - cac);
+    const contribMes = margenUnit * volumen - fijos;
+    const eps = 1e-6;
+    const bepUnits = margenUnit>eps ? (fijos / margenUnit) : Infinity;
+    const paybackMeses = contribMes>eps ? (inversion / contribMes) : Infinity;
+    const roiAnual = inversion>eps ? ((contribMes*12) / inversion) : NaN;
+
+    const setTxt = (id, txt)=>{ const el=document.getElementById(id); if (el) el.textContent = txt; };
+    setTxt('roi-margen-unit', money(margenUnit));
+    setTxt('roi-contrib-mes', money(contribMes));
+    setTxt('roi-bep-units', Number.isFinite(bepUnits)? bepUnits.toFixed(1)+' u/mes' : '—');
+    setTxt('roi-payback', Number.isFinite(paybackMeses)? paybackMeses.toFixed(1)+' meses' : '—');
+    setTxt('roi-annual', Number.isFinite(roiAnual)? (roiAnual*100).toFixed(0)+'%' : '—');
+  }
+
+  function bindRoiInputs(){
+    const ids = ['inp-precio','inp-cogs','inp-cac','inp-volumen','inp-fijos','inp-inversion'];
+    ids.forEach(id=>{
+      const el = document.getElementById(id);
+      if (!el) return;
+      const handler = ()=> calcAndRenderROI();
+      el.addEventListener('input', handler);
+      el.addEventListener('change', handler);
+    });
+  }
+
   async function init(){
     try {
       const {src, rows} = await loadData();
@@ -246,6 +327,11 @@
       renderQuick(state.zones);
       renderExecReco(state.zones);
       setTimeout(()=>renderChart(state.zones), 0);
+
+      // ROI: inicializar inputs desde storage, enlazar y calcular
+      writeInputs(readInputs());
+      bindRoiInputs();
+      calcAndRenderROI();
     } catch (e) {
       console.error('Init error (inversion):', e);
     }
