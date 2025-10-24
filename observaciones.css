@@ -127,8 +127,22 @@
 
 /* Print rules: keep simple */
 @media print{
+  @page { size: A4; margin: 15mm; }
+  @page :first { margin: 12mm; }
+
+  .no-print{ display: none !important; }
+
+  /* Evitar espacios y cortes raros en primeras secciones */
+  .hero{ margin-top: 0 !important; margin-bottom: 8mm !important; box-shadow: none !important; page-break-after: avoid; -webkit-region-break-after: avoid; }
+  .section-title{ break-after: avoid-page; page-break-after: avoid; }
+  .card{ page-break-inside: avoid; break-inside: avoid-page; box-shadow: none !important; }
+  .grid-2, .gallery-grid{ page-break-inside: avoid; break-inside: avoid; }
+
   .lightbox.hidden{ display:none }
   .lightbox[aria-hidden="true"]{ display:none !important; }
   .gallery-grid{ grid-template-columns: repeat(2, 1fr); }
   .gallery-item figcaption{ font-size:12px; }
+
+  /* Reaplicar márgenes internos para esta página en PDF */
+  .shell, .page { max-width: 100% !important; padding: 10mm !important; margin: 0 auto !important; }
 }
