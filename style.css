@@ -9,6 +9,14 @@ body{ margin:0; background:var(--bg); color:var(--ink); font:400 16px/1.6 "Inter
 .titles p{ margin:6px 0 0; color:var(--muted); font-size:14px }
 .meta{ color:var(--muted); font-size:13px; text-align:right }
 .section-title{ font:600 16px/1.3 "Inter",sans-serif; letter-spacing:.3px; text-transform:uppercase; color:var(--primary); margin:24px 0 12px }
+
+/* Banner de estado */
+.status-bar{ display:grid; grid-template-columns: 2fr 1fr auto; align-items:center; gap:12px; background:linear-gradient(180deg,#ffffff 0%, #f9fbff 100%); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--muted); font-size:14px; margin:8px 0 14px; box-shadow:0 4px 16px rgba(10,31,68,.06) }
+.status-bar > div{ display:flex; align-items:center; gap:6px; min-width:0 }
+.status-bar strong{ color:var(--ink); white-space:nowrap }
+.status-bar span{ display:inline-block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+@media (max-width:900px){ .status-bar{ grid-template-columns: 1.5fr 1fr auto } }
+@media (max-width:640px){ .status-bar{ grid-template-columns:1fr } .status-bar span{ white-space:normal } }
 /* Modo gafete individual - centrado */
 .encuestadores-grid.modo-gafete {
   display: flex;

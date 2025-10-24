@@ -269,7 +269,9 @@ const AuthSystem = {
       'competencia.html',
       'encuestadores.html',
       'observaciones.html',
-      'inversion.html'
+      'inversion.html',
+      'justjuri.html'
+      
       
     ]);
 

@@ -26,6 +26,13 @@
 
     <main>
       <h2 class="section-title">Accesos rápidos</h2>
+
+      <div id="status" class="status-bar" aria-live="polite">
+        <div><strong>Fecha de corte:</strong> <span id="cutoff">Cargando…</span></div>
+        <div><strong>Encuestas:</strong> <span id="count">–</span></div>
+        <div><strong>Versión:</strong> <span id="version">1.0.0</span></div>
+      </div>
+
       <div class="grid">
         <a class="cardlink" href="carta_propuesta_omomobility.html" target="_blank" rel="noopener">
           <div class="card">
@@ -103,23 +110,29 @@
           </div>
         </a>
 
-        <div class="center-pair">
-          <a class="cardlink" href="inversion.html">
-            <div class="card">
-              <span class="tag">Inversión</span>
-              <h3>Ranking de zonas</h3>
-              <p>Puntuación compuesta: intención, awareness, favorabilidad y muestra.</p>
-            </div>
-          </a>
-  
-          <a class="cardlink" href="observaciones.html">
-            <div class="card">
-              <span class="tag">Análisis</span>
-              <h3>Observaciones (Villahermosa)</h3>
-              <p>Evidencias, oportunidades, riesgos y plan por fases.</p>
-            </div>
-          </a>
-        </div>
+        <a class="cardlink" href="inversion.html">
+          <div class="card">
+            <span class="tag">Inversión</span>
+            <h3>Ranking de zonas</h3>
+            <p>Puntuación compuesta: intención, awareness, favorabilidad y muestra.</p>
+          </div>
+        </a>
+
+        <a class="cardlink" href="observaciones.html">
+          <div class="card">
+            <span class="tag">Análisis</span>
+            <h3>Observaciones (Villahermosa)</h3>
+            <p>Evidencias, oportunidades, riesgos y plan por fases.</p>
+          </div>
+        </a>
+
+        <a class="cardlink" href="justjuri.html">
+          <div class="card">
+            <span class="tag">Legal</span>
+            <h3>Justificación jurídica</h3>
+            <p>Base legal, confidencialidad, PI y conformidades del sistema.</p>
+          </div>
+        </a>
 
       </div>
     </main>
@@ -148,6 +161,65 @@
 </script>
 <script src="script.js"></script>
 
+  <script>
+  (async function(){
+    const fmt = new Intl.DateTimeFormat('es-MX',{dateStyle:'long', timeStyle:'short'});
+    const cutoffEl = document.getElementById('cutoff');
+    const countEl = document.getElementById('count');
+    const versionEl = document.getElementById('version');
 
+    async function loadVersion(){
+      try{
+        const res = await fetch('version.json', {cache:'no-store'});
+        if(res.ok){
+          const v = await res.json();
+          versionEl.textContent = v.version || '1.0.0';
+          return;
+        }
+      }catch(_){}
+      versionEl.textContent = '1.0.0';
+    }
+
+    async function loadFromFirestore(){
+      try{
+        if(!window.db) return false;
+        const col = window.db.collection('surveys');
+        const all = await col.get();
+        const total = all.size;
+        const capped = Math.min(total, 250);
+        countEl.textContent = String(capped);
+        const latest = await col.orderBy('_createdAt','desc').limit(1).get();
+        const ts = latest.empty ? null : latest.docs[0].get('_createdAt');
+        cutoffEl.textContent = ts ? fmt.format(new Date(ts)) : '—';
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    function loadFromLocal(){
+      try{
+        const arr = JSON.parse(localStorage.getItem('encuestas')||'[]');
+        const n = Array.isArray(arr)? arr.length : 0;
+        const capped = Math.min(n, 250);
+        countEl.textContent = String(capped);
+        if(n>0){
+          const last = arr.reduce((a,b)=> (new Date(a.ts||0) > new Date(b.ts||0) ? a : b), arr[0]);
+          cutoffEl.textContent = last?.ts ? fmt.format(new Date(last.ts)) : '—';
+        }else{
+          cutoffEl.textContent = '—';
+        }
+      }catch(_){
+        cutoffEl.textContent = '—';
+        countEl.textContent = '—';
+      }
+    }
+
+    await loadVersion();
+    const ok = await loadFromFirestore();
+    if(!ok) loadFromLocal();
+  })();
+  </script>
+ 
 </body>
 </html>
