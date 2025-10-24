@@ -2,7 +2,7 @@
   if (window.__inversion_init__) return; // singleton guard
   window.__inversion_init__ = true;
 
-  const state = { data: [], zones: [], chart: null };
+  const state = { data: [], zones: [], chart: null, quickChart: null };
 
   async function awaitFirebaseReady(timeoutMs=8000){
     if (window.firebaseReady) return true;
@@ -94,6 +94,17 @@
     }));
   }
 
+  function loadSecurityMap(){
+    try { return JSON.parse(localStorage.getItem('security_zone_scores')||'{}'); } catch(_) { return {}; }
+  }
+  function getSecurityScore(zone){
+    const map = loadSecurityMap();
+    const v = map[zone];
+    const n = Number.parseFloat(v);
+    if (Number.isFinite(n) && n>=0 && n<=1) return n;
+    return 0.5;
+  }
+
   function computeZones(data){
     const acc = {};
     for (const d of data){
@@ -114,10 +125,11 @@
       const sAware = a.n? a.aware/a.n : 0;
       const sFav = a.n? a.favGood/Math.max(1,(a.favGood+a.favNeutral+a.favBad)) : 0;
       const sSize = Math.min(a.n,50)/50;
-      let score = 0.5*sInt + 0.2*sAware + 0.2*sFav + 0.1*sSize;
+      const sSec = getSecurityScore(a.zona);
+      let score = 0.45*sInt + 0.18*sAware + 0.18*sFav + 0.07*sSize + 0.12*sSec;
       if (a.n<20) score *= 0.8;
       const usaPct = a.n? (a.usa/a.n) : 0;
-      return { zona:a.zona, n:a.n, avgInt, awarePct:sAware, favPct:sFav, usaPct, score };
+      return { zona:a.zona, n:a.n, avgInt, awarePct:sAware, favPct:sFav, usaPct, sec:sSec, score };
     }).sort((x,y)=> y.score - x.score);
     return res;
   }
@@ -155,25 +167,57 @@
         <td>${z.n}</td>
         <td>${fmtPct(z.awarePct)}</td>
         <td>${fmtPct(z.favPct)}</td>
+        <td>${fmtPct(z.sec)}</td>
         <td>${fmtPct(z.usaPct)}</td>
       `;
       tbody.appendChild(tr);
     });
   }
 
-  function renderQuick(zones){
-    const list = document.getElementById('quickList');
-    if (!list) return;
-    list.innerHTML = '';
-    zones.slice(0,3).forEach((z,i)=>{
-      const li=document.createElement('li');
-      const notes=[];
-      if (z.avgInt>=7) notes.push('intención alta'); else if (z.avgInt>=5) notes.push('intención media');
-      if (z.awarePct>=0.6) notes.push('awareness alto');
-      if (z.favPct>=0.6) notes.push('favorabilidad alta');
-      if (z.n<20) notes.push('muestra baja');
-      li.textContent = `${i+1}. ${z.zona} — score ${fmt1(z.score)} · intención ${fmt1(z.avgInt)} · n ${z.n} · ${notes.join(', ')}`;
-      list.appendChild(li);
+  function renderQuickChart(zones){
+    const canvas = document.getElementById('chartQuick');
+    if (!canvas || typeof Chart==='undefined') return;
+    // fixed size to avoid layout thrash
+    canvas.width = canvas.clientWidth || 600;
+    canvas.height = 320;
+
+    if (state.quickChart) { try { state.quickChart.destroy(); } catch(_){} state.quickChart=null; }
+    const top = zones.slice(0,3);
+    if (!top.length) return;
+    const maxN = Math.max(...zones.map(z=>z.n||0), 1);
+
+    const labels = ['Score','Intención','Awareness','Favorabilidad','Seguridad','n relativo'];
+    const colors = ['#1d4ed8', '#059669', '#9333ea'];
+    const datasets = top.map((z,idx)=>({
+      label: z.zona,
+      data: [
+        Number.parseFloat(fmt1(z.score)),
+        Math.max(0, Math.min(1, z.avgInt/10)),
+        z.awarePct,
+        z.favPct,
+        z.sec,
+        Math.max(0, Math.min(1, (z.n||0)/maxN))
+      ],
+      borderColor: colors[idx%colors.length],
+      backgroundColor: colors[idx%colors.length]+'33',
+      pointRadius: 3,
+      fill: true
+    }));
+
+    state.quickChart = new Chart(canvas, {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: false,
+        animation: false,
+        maintainAspectRatio: false,
+        indexAxis: 'x',
+        scales: {
+          y: { beginAtZero: true, min: 0, max: 1, ticks: { stepSize: 0.2 } },
+          x: { stacked: false }
+        },
+        plugins: { legend: { position: 'top' } }
+      }
     });
   }
 
@@ -324,9 +368,11 @@
       // slight defer to allow layout to settle
       renderKpis(state.zones);
       renderRows(state.zones);
-      renderQuick(state.zones);
       renderExecReco(state.zones);
-      setTimeout(()=>renderChart(state.zones), 0);
+      setTimeout(()=>{
+        renderChart(state.zones);
+        renderQuickChart(state.zones);
+      }, 0);
 
       // ROI: inicializar inputs desde storage, enlazar y calcular
       writeInputs(readInputs());
@@ -338,5 +384,8 @@
   }
 
   window.addEventListener('DOMContentLoaded', init, { once:true });
-  window.addEventListener('beforeunload', ()=>{ if (state.chart) { try{ state.chart.destroy(); }catch(_){} } });
+  window.addEventListener('beforeunload', ()=>{
+    if (state.chart) { try{ state.chart.destroy(); }catch(_){} }
+    if (state.quickChart) { try{ state.quickChart.destroy(); }catch(_){} }
+  });
 })();

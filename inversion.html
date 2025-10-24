@@ -36,13 +36,14 @@
         <h2>Top 5 zonas recomendadas</h2>
         <canvas id="chartTop"></canvas>
         <p class="note" style="margin-top:10px">
-          El ranking considera cuatro factores ponderados: 50% intención promedio (0–10), 20% awareness (conocimiento de marca), 20% favorabilidad (5–7 como favorable) y 10% tamaño de muestra. Se aplica una penalización del 20% a zonas con n < 20 para evitar sesgos por muestras pequeñas. Adicionalmente, usamos el <strong>tamaño de muestra (n)</strong> como un <em>proxy</em> de <strong>flujo de personas/exposición</strong> en la zona.
+          Estas son las <strong>zonas de Villahermosa donde conviene poner la agencia y el taller</strong>. Ahí se concentra buena parte de los <strong>clientes potenciales</strong>. Para armar el ranking mezclamos cuatro señales: <strong>intención de compra</strong> (50%), <strong>conocimiento de marca</strong> o awareness (20%), <strong>favorabilidad</strong> (20%) y <strong>tamaño de muestra</strong> (10%). Si en una zona hay <strong>menos de 20 encuestas</strong>, le bajamos puntos para evitar conclusiones débiles. También consideramos <strong>Seguridad</strong> (12%): zonas con menor incidencia suben ligeramente en el ranking. Usamos la <strong>cantidad de encuestas</strong> como referencia simple del <strong>flujo de gente</strong>. <strong>Score</strong> es un número de 0 a 1: entre más alto, mejor se combinan estas señales en la zona.
         </p>
       </section>
 
       <section class="card grid-6 print-center">
         <h2>Recomendación rápida</h2>
-        <ol id="quickList" class="muted"></ol>
+        <canvas id="chartQuick"></canvas>
+        <p class="note" style="margin-top:10px">Comparamos, de forma sencilla, las <strong>3 zonas sugeridas</strong>: <strong>intención de compra</strong>, <strong>conocimiento de marca</strong>, <strong>favorabilidad</strong> y <strong>tamaño de muestra (n)</strong>. n = encuestas válidas en la zona. <strong>Score</strong> es un número de 0 a 1: más alto = zona más conveniente.</p>
       </section>
 
       <section class="card grid-12 print-center">
@@ -50,10 +51,20 @@
         <div id="execReco" class="note"></div>
       </section>
 
+      <section class="card grid-6 print-center">
+        <h2>Evidencia de seguridad (prensa)</h2>
+        <div style="display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center">
+          <img src="./img/secres.png" alt="Notas periodísticas sobre inseguridad en Las Gaviotas, Villahermosa" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+          <p class="note" style="margin:0">
+            Diversas notas periodísticas 2024–2025 señalan a <strong>Las Gaviotas</strong> como una de las zonas con mayor incidencia de robos y asaltos. Aunque el <strong>Centro</strong> también presenta incidentes, la <strong>concentración</strong> y <strong>percepción</strong> de inseguridad es mayor en Gaviotas; por ello, la propuesta prioriza <strong>Centro</strong> como ubicación inicial.
+          </p>
+        </div>
+      </section>
+
       <section class="card">
         <h2>Tabla de ranking por zona</h2>
         <div class="legend muted"> 
-          <span>Score = 0.5×Intención + 0.2×Awareness + 0.2×Favorabilidad + 0.1×Tamaño muestra</span>
+          <span>Score = 0.45×Intención + 0.18×Awareness + 0.18×Favorabilidad + 0.07×Tamaño muestra + 0.12×Seguridad</span>
           <span>Penalización si n &lt; 20</span>
         </div>
         <table>
@@ -66,6 +77,7 @@
               <th>n</th>
               <th>Awareness</th>
               <th>Favorable</th>
+              <th>Seguridad</th>
               <th>% usa moto</th>
             </tr>
           </thead>
